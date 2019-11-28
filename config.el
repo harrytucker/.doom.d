@@ -8,3 +8,6 @@
 
 ;; Window Configuration
 (setq neo-window-fixed-size nil)
+
+;; Hooks
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
