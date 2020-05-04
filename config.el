@@ -12,3 +12,7 @@
 
 ;; Hooks
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+
+;; Rust Setup
+(setq lsp-rust-server 'rust-analyzer)   ;; need to be doubly explicit here
+(setq rustic-lsp-server 'rust-analyzer) ;; or it will use rls regardless
