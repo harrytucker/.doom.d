@@ -1,0 +1,39 @@
+#+TITLE: My Emacs Config
+#+AUTHOR: Harry Tucker
+
+* Contents
+** [[Visuals]]
+** [[Behaviour]]
+** [[Languages]]
+
+* Personal Info
+#+BEGIN_SRC elisp
+(setq user-full-name "Harry Tucker")
+#+END_SRC
+
+* Configuration
+** Visuals
+*** Doom Theme
+Fira Code and a standard dark theme leads to happiness.
+#+BEGIN_SRC elisp
+(setq doom-theme 'doom-dracula)
+(setq doom-font (font-spec :family "Fira Code" :size 14))
+#+END_SRC
+*** Editor Customisation
+Since we're using evil-mode, relative line numbers make some vim bindings easier to work out on the fly, so we'll set display-line-numbers-type.
+#+BEGIN_SRC elisp
+(setq display-line-numbers-type 'relative)
+#+END_SRC
+** Behaviour
+*** Editor
+It's rainbow brackets all the way down.
+#+BEGIN_SRC elisp
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+#+END_SRC
+** Languages
+*** Rust
+For the language server, I prefer rust-analyzer over RLS, but both variables need to be set or else emacs will go and use RLS regardless.
+#+BEGIN_SRC elisp
+(setq lsp-rust-server 'rust-analyzer)
+(setq rustic-lsp-server 'rust-analyzer)
+#+END_SRC
