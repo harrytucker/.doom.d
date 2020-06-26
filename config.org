@@ -5,6 +5,7 @@
 ** [[Visuals]]
 ** [[Behaviour]]
 ** [[Languages]]
+** [[Org-Mode]]
 
 * Personal Info
 #+BEGIN_SRC elisp
@@ -12,9 +13,39 @@
 #+END_SRC
 
 * Configuration
+** Org-Mode
+*** Setup
+Let's require the latex backend for org export so we can configure it.
+#+BEGIN_SRC elisp
+(require 'ox-latex)
+#+END_SRC
+*** Code Listings
+Let's use the *minted* and *color* packages to provide syntax highlighting for source code blocks when exporting. First I've set the default packages list for latex export using *org-latex-packages-alist*, then set *org-latex-listings* to use minted. We also need to configure *org-latex-pdf-process* to allow shell escapes in order to use pygments.
+#+BEGIN_SRC elisp
+(add-to-list 'org-latex-packages-alist '("" "minted"))
+(add-to-list 'org-latex-packages-alist '("" "color"))
+
+(setq org-latex-listings 'minted
+      org-latex-pdf-process
+      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+#+END_SRC
+
+
+Minted requires the the Pygment external library which can be installed through pip:
+#+BEGIN_SRC bash :tangle no
+sudo apt install python3-pip
+pip3 install pygments
+#+END_SRC
+*** Tables
+Booktabs is a LaTeX package that's useful for configuring the typesetting of tables, so we'll add this to our default package list for LaTeX export.
+#+BEGIN_SRC elisp
+(add-to-list 'org-latex-packages-alist '("" "booktabs"))
+#+END_SRC
 ** Visuals
 *** Doom Theme
-Fira Code and a standard dark theme leads to happiness.
+Fira Code and a standard dark theme leads to happiness. All a matter of preference of course ;)
 #+BEGIN_SRC elisp
 (setq doom-theme 'doom-dracula)
 (setq doom-font (font-spec :family "Fira Code" :size 14))
@@ -26,7 +57,7 @@ Since we're using evil-mode, relative line numbers make some vim bindings easier
 #+END_SRC
 ** Behaviour
 *** Editor
-It's rainbow brackets all the way down.
+Using colour coded brackets makes it much easier for me to parse code, so let's activate *rainbow-delimiters-mode*
 #+BEGIN_SRC elisp
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+END_SRC
