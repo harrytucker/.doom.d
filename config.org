@@ -61,6 +61,12 @@ Using colour coded brackets makes it much easier for me to parse code, so let's 
 #+BEGIN_SRC elisp
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+END_SRC
+*** Modeline
+This provides no functionality whatsoever, but I like having icons for the current major-mode in use, so let's activate that in *doom-modeline*.
+#+BEGIN_SRC elisp
+(setq doom-modeline-major-mode-icon t)
+(setq doom-modeline-major-mode-color-icon t)
+#+END_SRC
 ** Languages
 *** Rust
 For the language server, I prefer rust-analyzer over RLS, but both variables need to be set or else emacs will go and use RLS regardless.

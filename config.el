@@ -20,5 +20,8 @@
 
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
+(setq doom-modeline-major-mode-icon t)
+(setq doom-modeline-major-mode-color-icon t)
+
 (setq lsp-rust-server 'rust-analyzer)
 (setq rustic-lsp-server 'rust-analyzer)
