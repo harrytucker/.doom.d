@@ -18,10 +18,10 @@
 
 (setq display-line-numbers-type 'relative)
 
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-
 (setq doom-modeline-major-mode-icon t)
 (setq doom-modeline-major-mode-color-icon t)
+
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 
 (setq lsp-rust-server 'rust-analyzer)
 (setq rustic-lsp-server 'rust-analyzer)
