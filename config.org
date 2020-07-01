@@ -31,8 +31,6 @@ Let's use the *minted* and *color* packages to provide syntax highlighting for s
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 #+END_SRC
-
-
 Minted requires the the Pygment external library which can be installed through pip:
 #+BEGIN_SRC bash :tangle no
 sudo apt install python3-pip
@@ -49,6 +47,9 @@ Fira Code and a standard dark theme leads to happiness. All a matter of preferen
 #+BEGIN_SRC elisp
 (setq doom-theme 'doom-dracula)
 (setq doom-font (font-spec :family "Fira Code" :size 14))
+#+END_SRC
+#+BEGIN_SRC elisp
+(setq doom-themes-treemacs-theme "doom-colors")
 #+END_SRC
 *** Editor Customisation
 Since we're using evil-mode, relative line numbers make some vim bindings easier to work out on the fly, so we'll set display-line-numbers-type.

@@ -16,6 +16,8 @@
 (setq doom-theme 'doom-dracula)
 (setq doom-font (font-spec :family "Fira Code" :size 14))
 
+(setq doom-themes-treemacs-theme "doom-colors")
+
 (setq display-line-numbers-type 'relative)
 
 (setq doom-modeline-major-mode-icon t)
