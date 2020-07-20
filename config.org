@@ -6,7 +6,6 @@
 ** [[Behaviour]]
 ** [[Languages]]
 ** [[Org-Mode]]
-
 * Personal Info
 #+BEGIN_SRC elisp
 (setq user-full-name "Harry Tucker")
@@ -35,6 +34,11 @@ Minted requires the the Pygment external library which can be installed through 
 #+BEGIN_SRC bash :tangle no
 sudo apt install python3-pip
 pip3 install pygments
+#+END_SRC
+Pip executables may not be in your default PATH, on Ubuntu 20.04, Pygments was installed to =$HOME/.local/bin=, add it to your ZSH path using the following:
+#+BEGIN_SRC bash :tangle no
+echo "export PATH=$PATH:/home/user/.local/bin" >> ~/.zshenv #
+source ~/.zshenv
 #+END_SRC
 *** Tables
 Booktabs is a LaTeX package that's useful for configuring the typesetting of tables, so we'll add this to our default package list for LaTeX export.
