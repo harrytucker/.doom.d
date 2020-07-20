@@ -40,6 +40,7 @@ pip3 install pygments
 Booktabs is a LaTeX package that's useful for configuring the typesetting of tables, so we'll add this to our default package list for LaTeX export.
 #+BEGIN_SRC elisp
 (add-to-list 'org-latex-packages-alist '("" "booktabs"))
+(add-to-list 'org-latex-packages-alist '("" "tabularx"))
 #+END_SRC
 ** Visuals
 *** Doom Theme

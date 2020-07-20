@@ -12,6 +12,7 @@
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
 (add-to-list 'org-latex-packages-alist '("" "booktabs"))
+(add-to-list 'org-latex-packages-alist '("" "tabularx"))
 
 (setq doom-theme 'doom-dracula)
 (setq doom-font (font-spec :family "Fira Code" :size 14))
