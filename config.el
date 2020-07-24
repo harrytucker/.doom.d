@@ -24,10 +24,20 @@
         :desc "Fold buffer" "," #'TeX-fold-buffer
         :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
 
-(add-hook 'LaTeX-mode-hook (TeX-fold-mode))
+(add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
 (add-hook 'find-file-hook 'TeX-fold-buffer t)
 
-(add-hook 'LaTeX-mode-hook (orgtbl-mode))
+(add-hook 'LaTeX-mode-hook #'orgtbl-mode)
+
+(setq TeX-view-program-selection
+      '((output-pdf "PDF Tools")
+        (output-pdf "Zathura")
+        ((output-dvi has-no-display-manager) "dvi2tty")
+        ((output-dvi style-pstricks) "dvips and gv")
+        (output-dvi "xdvi")
+        (output-pdf "Evince")
+        (output-html "xdg-open")
+        (output-pdf "preview-pane")))
 
 (setq doom-theme 'doom-dracula)
 (setq doom-font (font-spec :family "Fira Code" :size 14))

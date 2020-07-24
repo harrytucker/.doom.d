@@ -62,12 +62,12 @@ Not a big fan of using C-c C-a to compile LaTeX so I've added a shortcut to loca
 ** Hooks
 Using the fold and unfold commands in the above keymap, you can make your LaTeX documents a bit easier to look at when editing. These two hooks enable TeX-fold-mode, and then fold all environments in an opened LaTeX buffer.
 #+BEGIN_SRC elisp
-(add-hook 'LaTeX-mode-hook (TeX-fold-mode))
+(add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
 (add-hook 'find-file-hook 'TeX-fold-buffer t)
 #+END_SRC
 Creating LaTeX tables can be a bit bulky, so let's enable orgtbl-mode. This lets us use org-mode's table facilities in AUCTex, which we can export using [[https://www.gnu.org/software/emacs/manual/html_node/org/A-LaTeX-example.html][radio tables!]]
 #+BEGIN_SRC elisp
-(add-hook 'LaTeX-mode-hook (orgtbl-mode))
+(add-hook 'LaTeX-mode-hook #'orgtbl-mode)
 #+END_SRC
 Using this you can create org-mode tables inside of a LaTeX buffer, and then export it wherever you wish using C-c C-c while editing the table. Here's an example:
 #+BEGIN_SRC latex :tangle no
@@ -84,6 +84,19 @@ Using this you can create org-mode tables inside of a LaTeX buffer, and then exp
 | March |   22 |     278 |    12.6 |
 ,#+TBLFM: $4=$3/$2;%.1f
 % $ example here is from the linked URL above this code snippet, take a look there for more info.
+#+END_SRC
+** PDF Tools
+I use pdf-tools for handling LaTeX. The default configuration means Zathura gets higher priority than pdf-tools. Let's put a stop to that:
+#+BEGIN_SRC elisp
+(setq TeX-view-program-selection
+      '((output-pdf "PDF Tools")
+        (output-pdf "Zathura")
+        ((output-dvi has-no-display-manager) "dvi2tty")
+        ((output-dvi style-pstricks) "dvips and gv")
+        (output-dvi "xdvi")
+        (output-pdf "Evince")
+        (output-html "xdg-open")
+        (output-pdf "preview-pane")))
 #+END_SRC
 * Visuals
 ** Doom Theme
