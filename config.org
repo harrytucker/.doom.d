@@ -4,6 +4,7 @@
 * Contents
 ** [[Org-Mode]]
 ** [[Visuals]]
+** [[LaTeX]]
 ** [[Behaviour]]
 ** [[Languages]]
 * Personal Info
@@ -44,6 +45,46 @@ Booktabs is a LaTeX package that's useful for configuring the typesetting of tab
 (add-to-list 'org-latex-packages-alist '("" "booktabs"))
 (add-to-list 'org-latex-packages-alist '("" "tabularx"))
 #+END_SRC
+* LaTeX
+** Custom Keybinds
+Not a big fan of using C-c C-a to compile LaTeX so I've added a shortcut to local leader:
+#+BEGIN_SRC elisp
+(map! (:when (featurep! :lang latex)
+       (:map LaTeX-mode-map
+        :localleader
+        :desc "Compile" "c" #'TeX-command-run-all
+        :desc "Insert environment" "e" #'LaTeX-environment
+        :desc "Insert section" "s" #'LaTeX-section
+        :desc "Format document" "f" #'LaTeX-fill-buffer
+        :desc "Fold buffer" "," #'TeX-fold-buffer
+        :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
+#+END_SRC
+** Hooks
+Using the fold and unfold commands in the above keymap, you can make your LaTeX documents a bit easier to look at when editing. These two hooks enable TeX-fold-mode, and then fold all environments in an opened LaTeX buffer.
+#+BEGIN_SRC elisp
+(add-hook 'LaTeX-mode-hook (TeX-fold-mode))
+(add-hook 'find-file-hook 'TeX-fold-buffer t)
+#+END_SRC
+Creating LaTeX tables can be a bit bulky, so let's enable orgtbl-mode. This lets us use org-mode's table facilities in AUCTex, which we can export using [[https://www.gnu.org/software/emacs/manual/html_node/org/A-LaTeX-example.html][radio tables!]]
+#+BEGIN_SRC elisp
+(add-hook 'LaTeX-mode-hook (orgtbl-mode))
+#+END_SRC
+Using this you can create org-mode tables inside of a LaTeX buffer, and then export it wherever you wish using C-c C-c while editing the table. Here's an example:
+#+BEGIN_SRC latex :tangle no
+\usepackage{comments}
+
+% BEGIN RECEIVE ORGTBL salesfigures
+% END RECEIVE ORGTBL salesfigures
+\begin{comment}
+,#+ORGTBL: SEND salesfigures orgtbl-to-latex :booktabs t
+| Month | Days | Nr sold | per day |
+|-------+------+---------+---------|
+| Jan   |   23 |      55 |     2.4 |
+| Feb   |   21 |      16 |     0.8 |
+| March |   22 |     278 |    12.6 |
+,#+TBLFM: $4=$3/$2;%.1f
+% $ example here is from the linked URL above this code snippet, take a look there for more info.
+#+END_SRC
 * Visuals
 ** Doom Theme
 Fira Code and a standard dark theme leads to happiness. All a matter of preference of course ;)
@@ -70,14 +111,6 @@ This provides no functionality whatsoever, but I like having icons for the curre
 Using colour coded brackets makes it much easier for me to parse code, so let's activate *rainbow-delimiters-mode*
 #+BEGIN_SRC elisp
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-#+END_SRC
-** Custom Keybinds
-Not a big fan of using C-c C-a to compile LaTeX so I've added a shortcut to local leader:
-#+BEGIN_SRC elisp
-(map! (:when (featurep! :lang latex)
-       (:map LaTeX-mode-map
-        :localleader
-        :desc "Compile LaTeX document" "c" #'TeX-command-run-all)))
 #+END_SRC
 * Languages
 ** Rust

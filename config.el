@@ -14,6 +14,21 @@
 (add-to-list 'org-latex-packages-alist '("" "booktabs"))
 (add-to-list 'org-latex-packages-alist '("" "tabularx"))
 
+(map! (:when (featurep! :lang latex)
+       (:map LaTeX-mode-map
+        :localleader
+        :desc "Compile" "c" #'TeX-command-run-all
+        :desc "Insert environment" "e" #'LaTeX-environment
+        :desc "Insert section" "s" #'LaTeX-section
+        :desc "Format document" "f" #'LaTeX-fill-buffer
+        :desc "Fold buffer" "," #'TeX-fold-buffer
+        :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
+
+(add-hook 'LaTeX-mode-hook (TeX-fold-mode))
+(add-hook 'find-file-hook 'TeX-fold-buffer t)
+
+(add-hook 'LaTeX-mode-hook (orgtbl-mode))
+
 (setq doom-theme 'doom-dracula)
 (setq doom-font (font-spec :family "Fira Code" :size 14))
 
@@ -25,11 +40,6 @@
 (setq doom-modeline-major-mode-color-icon t)
 
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-
-(map! (:when (featurep! :lang latex)
-       (:map LaTeX-mode-map
-        :localleader
-        :desc "Compile LaTeX document" "c" #'TeX-command-run-all)))
 
 (setq lsp-rust-server 'rust-analyzer)
 (setq rustic-lsp-server 'rust-analyzer)
