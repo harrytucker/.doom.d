@@ -31,8 +31,5 @@
         :localleader
         :desc "Compile LaTeX document" "c" #'TeX-command-run-all)))
 
-(if (getenv "WSL_DISTRO_NAME")
-    (setq projectile-indexing-method 'native))
-
 (setq lsp-rust-server 'rust-analyzer)
 (setq rustic-lsp-server 'rust-analyzer)

@@ -79,12 +79,6 @@ Not a big fan of using C-c C-a to compile LaTeX so I've added a shortcut to loca
         :localleader
         :desc "Compile LaTeX document" "c" #'TeX-command-run-all)))
 #+END_SRC
-** Windows Subsystem For Linux (WSL)
-If using Emacs on WSL, the alien and hybrid indexing methods for projectile will hang indefinitely when trying to cache the project files. Solution is to check if we're running WSL (via environment variable) and then setting the indexing method to native if not nil.
-#+BEGIN_SRC elisp
-(if (getenv "WSL_DISTRO_NAME")
-    (setq projectile-indexing-method 'native))
-#+END_SRC
 * Languages
 ** Rust
 For the language server, I prefer rust-analyzer over RLS, but both variables need to be set or else emacs will go and use RLS regardless.
