@@ -18,7 +18,7 @@ Let's require the latex backend for org export so we can configure it.
 (require 'ox-latex)
 #+END_SRC
 ** Code Listings
-Let's use the *minted* and *color* packages to provide syntax highlighting for source code blocks when exporting. First I've set the default packages list for latex export using *org-latex-packages-alist*, then set *org-latex-listings* to use minted. We also need to configure *org-latex-pdf-process* to allow shell escapes in order to use pygments.
+Let's use the =minted= and =color= packages to provide syntax highlighting for source code blocks when exporting. First I've set the default packages list for latex export using =org-latex-packages-alist=, then set =org-latex-listings= to use minted. We also need to configure =org-latex-pdf-process= to allow shell escapes in order to use pygments.
 #+BEGIN_SRC elisp
 (add-to-list 'org-latex-packages-alist '("" "minted"))
 (add-to-list 'org-latex-packages-alist '("" "color"))
@@ -62,6 +62,8 @@ Not a big fan of using C-c C-a to compile LaTeX so I've added a shortcut to loca
 ** Hooks
 Using the fold and unfold commands in the above keymap, you can make your LaTeX documents a bit easier to look at when editing. These two hooks enable TeX-fold-mode, and then fold all environments in an opened LaTeX buffer.
 #+BEGIN_SRC elisp
+(require 'tex-fold)
+
 (add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
 (add-hook 'find-file-hook 'TeX-fold-buffer t)
 #+END_SRC
@@ -71,6 +73,7 @@ Creating LaTeX tables can be a bit bulky, so let's enable orgtbl-mode. This lets
 #+END_SRC
 Using this you can create org-mode tables inside of a LaTeX buffer, and then export it wherever you wish using C-c C-c while editing the table. Here's an example:
 #+BEGIN_SRC latex :tangle no
+\begin{verbatim}
 \usepackage{comments}
 
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -83,7 +86,8 @@ Using this you can create org-mode tables inside of a LaTeX buffer, and then exp
 | Feb   |   21 |      16 |     0.8 |
 | March |   22 |     278 |    12.6 |
 ,#+TBLFM: $4=$3/$2;%.1f
-% $ example here is from the linked URL above this code snippet, take a look there for more info.
+\end{comment}
+\end{verbatim}
 #+END_SRC
 ** PDF Tools
 I use pdf-tools for handling LaTeX. The default configuration means Zathura gets higher priority than pdf-tools. Let's put a stop to that:
@@ -97,6 +101,24 @@ I use pdf-tools for handling LaTeX. The default configuration means Zathura gets
         (output-pdf "Evince")
         (output-html "xdg-open")
         (output-pdf "preview-pane")))
+#+END_SRC
+** Prose Linter
+A linter but for prose!, activating this on latex-mode, org-mode, and some others where I write prose.
+#+BEGIN_SRC elisp
+(flycheck-define-checker proselint
+  "A linter for prose."
+  :command ("proselint" source-inplace)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ": "
+            (id (one-or-more (not (any " "))))
+            (message) line-end))
+  :modes (org-mode markdown-mode latex-mode gfm-mode))
+
+(add-to-list 'flycheck-checkers 'proselint)
+#+END_SRC
+Don't forget to install the necessary python package, and that your PATH is configured.
+#+BEGIN_SRC bash :tangle no
+pip3 install proselint
 #+END_SRC
 * Visuals
 ** Doom Theme
@@ -114,14 +136,14 @@ Since we're using evil-mode, relative line numbers make some vim bindings easier
 (setq display-line-numbers-type 'relative)
 #+END_SRC
 ** Modeline
-This provides no functionality whatsoever, but I like having icons for the current major-mode in use, so let's activate that in *doom-modeline*.
+This provides no functionality whatsoever, but I like having icons for the current major-mode in use, so let's activate that in =doom-modeline=.
 #+BEGIN_SRC elisp
 (setq doom-modeline-major-mode-icon t)
 (setq doom-modeline-major-mode-color-icon t)
 #+END_SRC
 * Behaviour
 ** Editor
-Using colour coded brackets makes it much easier for me to parse code, so let's activate *rainbow-delimiters-mode*
+Using colour coded brackets makes it much easier for me to parse code, so let's activate =rainbow-delimiters-mode=
 #+BEGIN_SRC elisp
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+END_SRC

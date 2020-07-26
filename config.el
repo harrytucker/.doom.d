@@ -24,6 +24,8 @@
         :desc "Fold buffer" "," #'TeX-fold-buffer
         :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
 
+(require 'tex-fold)
+
 (add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
 (add-hook 'find-file-hook 'TeX-fold-buffer t)
 
@@ -38,6 +40,17 @@
         (output-pdf "Evince")
         (output-html "xdg-open")
         (output-pdf "preview-pane")))
+
+(flycheck-define-checker proselint
+  "A linter for prose."
+  :command ("proselint" source-inplace)
+  :error-patterns
+  ((warning line-start (file-name) ":" line ":" column ": "
+            (id (one-or-more (not (any " "))))
+            (message) line-end))
+  :modes (org-mode markdown-mode latex-mode gfm-mode))
+
+(add-to-list 'flycheck-checkers 'proselint)
 
 (setq doom-theme 'doom-dracula)
 (setq doom-font (font-spec :family "Fira Code" :size 14))
