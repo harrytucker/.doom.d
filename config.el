@@ -1,5 +1,10 @@
 (setq user-full-name "Harry Tucker")
 
+(use-package! kubernetes-evil)
+(use-package! kubel-evil)
+
+(setq tramp-methods ())
+
 (require 'ox-latex)
 
 (add-to-list 'org-latex-packages-alist '("" "minted"))

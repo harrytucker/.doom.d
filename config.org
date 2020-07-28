@@ -11,6 +11,16 @@
 #+BEGIN_SRC elisp
 (setq user-full-name "Harry Tucker")
 #+END_SRC
+* Kubernetes
+Both Kubernetes and Kubel modes provide some nice functionality, kubel is especially useful for allowing TRAMP access into pods when I need a shell.
+#+BEGIN_SRC elisp
+(use-package! kubernetes-evil)
+(use-package! kubel-evil)
+#+END_SRC
+Kubel reads =tramp-methods= when trying to open a shell session. This is nil at first, so let's set it as an empty list to allow TRAMP to run without having to do anything manually:
+#+BEGIN_SRC elisp
+(setq tramp-methods ())
+#+END_SRC
 * Org-Mode
 ** Setup
 Let's require the latex backend for org export so we can configure it.
