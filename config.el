@@ -53,12 +53,12 @@
   ((warning line-start (file-name) ":" line ":" column ": "
             (id (one-or-more (not (any " "))))
             (message) line-end))
-  :modes (org-mode markdown-mode latex-mode gfm-mode))
+  :modes (markdown-mode latex-mode gfm-mode))
 
 (add-to-list 'flycheck-checkers 'proselint)
 
 (setq doom-theme 'doom-dracula)
-(setq doom-font (font-spec :family "Fira Code" :size 14))
+(setq doom-font (font-spec :family "JetBrains Mono" :size 14))
 
 (setq doom-themes-treemacs-theme "doom-colors")
 
