@@ -11,12 +11,13 @@
 (add-to-list 'org-latex-packages-alist '("" "minted"))
 (add-to-list 'org-latex-packages-alist '("" "color"))
 
-(setq org-latex-listings 'minted
-      org-latex-pdf-process
-      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+(setq org-latex-listings 'minted org-latex-pdf-process
+      '("pdflatex -shell-escape -interaction nonstopmode
+      -output-directory %o %f"
         "bibtex %b"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+        "pdflatex -shell-escape -interaction nonstopmode
+        -output-directory %o %f"))
 
 (add-to-list 'org-latex-packages-alist '("" "booktabs"))
 (add-to-list 'org-latex-packages-alist '("" "tabularx"))
@@ -38,8 +39,7 @@
 
 (add-hook 'LaTeX-mode-hook #'orgtbl-mode)
 
-(setq TeX-view-program-selection
-      '((output-pdf "PDF Tools")
+(setq TeX-view-program-selection '((output-pdf "PDF Tools")
         (output-pdf "Zathura")
         ((output-dvi has-no-display-manager) "dvi2tty")
         ((output-dvi style-pstricks) "dvips and gv")
