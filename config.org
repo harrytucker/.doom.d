@@ -23,9 +23,10 @@ Kubel reads =tramp-methods= when trying to open a shell session. This is nil at 
 #+END_SRC
 * Org-Mode
 ** Setup
-Let's require the latex backend for org export so we can configure it.
+Require ox-latex and ox-bibtex for configuring items here and allowing citations in org-mode
 #+BEGIN_SRC elisp
 (require 'ox-latex)
+(require 'ox-bibtex)
 #+END_SRC
 ** Code Listings
 Let's use the =minted= and =color= packages to provide syntax highlighting for source code blocks when exporting. First I've set the default packages list for latex export using =org-latex-packages-alist=, then set =org-latex-listings= to use minted. We also need to configure =org-latex-pdf-process= to allow shell escapes in order to use pygments.
@@ -36,6 +37,7 @@ Let's use the =minted= and =color= packages to provide syntax highlighting for s
 (setq org-latex-listings 'minted
       org-latex-pdf-process
       '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "bibtex %b"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 #+END_SRC
