@@ -43,12 +43,10 @@ escapes in order to use pygments.
 (add-to-list 'org-latex-packages-alist '("" "color"))
 
 (setq org-latex-listings 'minted org-latex-pdf-process
-      '("pdflatex -shell-escape -interaction nonstopmode
-      -output-directory %o %f"
+      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "bibtex %b"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode
-        -output-directory %o %f"))
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 #+END_SRC
 Minted requires the the Pygment external library which can be installed through
 pip:
@@ -151,13 +149,36 @@ configured.
 #+BEGIN_SRC bash :tangle no
 pip3 install proselint
 #+END_SRC
+** TeXcount
+#+BEGIN_SRC elisp
+(defun texcount ()
+  (interactive)
+  (let*
+    ( (this-file (buffer-file-name))
+      (enc-str (symbol-name buffer-file-coding-system))
+      (enc-opt
+        (cond
+          ((string-match "utf-8" enc-str) "-utf8")
+          ((string-match "latin" enc-str) "-latin1")
+          ("-encoding=guess")
+      ) )
+      (word-count
+        (with-output-to-string
+          (with-current-buffer standard-output
+            (call-process "texcount" nil t nil "-0" enc-opt this-file)
+    ) ) ) )
+    (message word-count)
+) )
+(add-hook 'LaTeX-mode-hook (lambda () (define-key LaTeX-mode-map "\C-cw" 'texcount)))
+(add-hook 'latex-mode-hook (lambda () (define-key latex-mode-map "\C-cw" 'texcount)))
+#+END_SRC
 * Visuals
 ** Doom Theme
 Fira Code and a standard dark theme leads to happiness. All a matter of
 preference of course ;)
 #+BEGIN_SRC elisp
 (setq doom-theme 'doom-dracula)
-(setq doom-font (font-spec :family "JetBrains Mono" :size 14))
+(setq doom-font (font-spec :family "Fira Code" :size 14))
 #+END_SRC
 #+BEGIN_SRC elisp
 (setq doom-themes-treemacs-theme "doom-colors")
@@ -181,6 +202,12 @@ Using colour coded brackets makes it much easier for me to parse code, so let's
 activate =rainbow-delimiters-mode=
 #+BEGIN_SRC elisp
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+#+END_SRC
+** SQL Mode
+PostgreSQL is my main database, so let's set the default SQL dialect:
+#+BEGIN_SRC elisp
+(require 'sql)
+(sql-set-product 'postgres)
 #+END_SRC
 * Languages
 ** Rust

@@ -12,12 +12,10 @@
 (add-to-list 'org-latex-packages-alist '("" "color"))
 
 (setq org-latex-listings 'minted org-latex-pdf-process
-      '("pdflatex -shell-escape -interaction nonstopmode
-      -output-directory %o %f"
+      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "bibtex %b"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode
-        -output-directory %o %f"))
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
 (add-to-list 'org-latex-packages-alist '("" "booktabs"))
 (add-to-list 'org-latex-packages-alist '("" "tabularx"))
@@ -59,8 +57,29 @@
 
 (add-to-list 'flycheck-checkers 'proselint)
 
+(defun texcount ()
+  (interactive)
+  (let*
+    ( (this-file (buffer-file-name))
+      (enc-str (symbol-name buffer-file-coding-system))
+      (enc-opt
+        (cond
+          ((string-match "utf-8" enc-str) "-utf8")
+          ((string-match "latin" enc-str) "-latin1")
+          ("-encoding=guess")
+      ) )
+      (word-count
+        (with-output-to-string
+          (with-current-buffer standard-output
+            (call-process "texcount" nil t nil "-0" enc-opt this-file)
+    ) ) ) )
+    (message word-count)
+) )
+(add-hook 'LaTeX-mode-hook (lambda () (define-key LaTeX-mode-map "\C-cw" 'texcount)))
+(add-hook 'latex-mode-hook (lambda () (define-key latex-mode-map "\C-cw" 'texcount)))
+
 (setq doom-theme 'doom-dracula)
-(setq doom-font (font-spec :family "JetBrains Mono" :size 14))
+(setq doom-font (font-spec :family "Fira Code" :size 14))
 
 (setq doom-themes-treemacs-theme "doom-colors")
 
@@ -70,6 +89,9 @@
 (setq doom-modeline-major-mode-color-icon t)
 
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+
+(require 'sql)
+(sql-set-product 'postgres)
 
 (setq lsp-rust-server 'rust-analyzer)
 (setq rustic-lsp-server 'rust-analyzer)
