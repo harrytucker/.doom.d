@@ -66,6 +66,13 @@ tables, so we'll add this to our default package list for LaTeX export.
 (add-to-list 'org-latex-packages-alist '("" "tabularx"))
 #+END_SRC
 * LaTeX
+** Section Fontification
+I like having section fonts larger to more easily read the document structure.
+In the hooks section, I've added a call to a function to update the sectioning
+faces, or else the section font size will not be updated.
+#+begin_src elisp
+(setq font-latex-fontify-sectioning 1.3)
+#+end_src
 ** Custom Keybinds
 Not a big fan of using C-c C-a to compile LaTeX so I've added a shortcut to
 local leader:
@@ -88,7 +95,8 @@ TeX-fold-mode, and then fold all environments in an opened LaTeX buffer.
 (require 'tex-fold)
 
 (add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
-(add-hook 'find-file-hook 'TeX-fold-buffer t)
+(add-hook 'after-find-file 'TeX-fold-buffer t)
+(add-hook 'LaTeX-mode-hook 'font-latex-update-sectioning-faces)
 #+END_SRC
 Creating LaTeX tables can be a bit bulky, so let's enable orgtbl-mode. This lets
 us use org-mode's table facilities in AUCTex, which we can export using [[https://www.gnu.org/software/emacs/manual/html_node/org/A-LaTeX-example.html][radio
@@ -217,3 +225,9 @@ need to be set or else emacs will go and use RLS regardless.
 (setq lsp-rust-server 'rust-analyzer)
 (setq rustic-lsp-server 'rust-analyzer)
 #+END_SRC
+I use a fair few procedural macros and rust-analyzer won't be happy without
+enabling the following config options to enable proc macro expansion.
+#+begin_src elisp
+(setq lsp-rust-analyzer-proc-macro-enable t)
+(setq lsp-rust-analyzer-cargo-load-out-dirs-from-chec:wk t)
+#+end_src

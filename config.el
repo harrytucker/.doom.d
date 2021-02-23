@@ -20,6 +20,8 @@
 (add-to-list 'org-latex-packages-alist '("" "booktabs"))
 (add-to-list 'org-latex-packages-alist '("" "tabularx"))
 
+(setq font-latex-fontify-sectioning 1.3)
+
 (map! (:when (featurep! :lang latex)
        (:map LaTeX-mode-map
         :localleader
@@ -33,7 +35,8 @@
 (require 'tex-fold)
 
 (add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
-(add-hook 'find-file-hook 'TeX-fold-buffer t)
+(add-hook 'after-find-file 'TeX-fold-buffer t)
+(add-hook 'LaTeX-mode-hook 'font-latex-update-sectioning-faces)
 
 (add-hook 'LaTeX-mode-hook #'orgtbl-mode)
 
@@ -95,3 +98,6 @@
 
 (setq lsp-rust-server 'rust-analyzer)
 (setq rustic-lsp-server 'rust-analyzer)
+
+(setq lsp-rust-analyzer-proc-macro-enable t)
+(setq lsp-rust-analyzer-cargo-load-out-dirs-from-chec:wk t)
