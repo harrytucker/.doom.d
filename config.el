@@ -1,28 +1,50 @@
-(setq user-full-name "Harry Tucker")
+(setq user-full-name "Harry Tucker" ; personal info
+      user-mail-address "tucker.harry@outlook.com")
 
-(use-package! kubernetes-evil)
-(use-package! kubel-evil)
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode) ; rainbow brackets!
 
-(setq tramp-methods ())
+(setq doom-theme 'doom-dracula                  ; set doom theme
+      doom-themes-treemacs-theme "doom-colors"  ; set treemacs theme
+      doom-font (font-spec                      ; set font family
+                 :family "JetBrains Mono"
+                 :size 14))
 
-(require 'ox-latex)
+(setq display-line-numbers-type 'relative)
+
+(setq doom-modeline-major-mode-icon t        ; enable modeline major-mode icon
+      doom-modeline-major-mode-color-icon t) ; use coloured icons
+
+(require 'sql)
+(sql-set-product 'postgres) ; use postgres dialect for sql
+
+(setq lsp-rust-server 'rust-analyzer) ; set language server
+
+(setq lsp-rust-analyzer-proc-macro-enable t        ; enable proc macros
+      lsp-rust-analyzer-cargo-run-build-scripts t) ; enable build scripts
+
+(add-hook 'python-mode-hook 'python-docstring-mode) ; load python-docstring-mode
+                                                    ; when opening a python
+                                                    ; buffer
+
+(require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
 
-(add-to-list 'org-latex-packages-alist '("" "minted"))
-(add-to-list 'org-latex-packages-alist '("" "color"))
+(add-to-list 'org-latex-packages-alist '("" "minted")) ; include in org-latex
+(add-to-list 'org-latex-packages-alist '("" "color"))  ; export
 
-(setq org-latex-listings 'minted org-latex-pdf-process
+(setq org-latex-listings 'minted org-latex-pdf-process ; enable shell-escapes
+                                                       ; for minted
       '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "bibtex %b"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
-(add-to-list 'org-latex-packages-alist '("" "booktabs"))
-(add-to-list 'org-latex-packages-alist '("" "tabularx"))
+(add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
+(add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
 
-(setq font-latex-fontify-sectioning 1.3)
+(setq font-latex-fontify-sectioning 1.3) ; increase section font scaling
 
-(map! (:when (featurep! :lang latex)
+(map! (:when (featurep! :lang latex) ; custom keymap using local leader
        (:map LaTeX-mode-map
         :localleader
         :desc "Compile" "c" #'TeX-command-run-all
@@ -32,16 +54,17 @@
         :desc "Fold buffer" "," #'TeX-fold-buffer
         :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
 
-(require 'tex-fold)
+(require 'tex-fold) ; required for config
 
-(add-hook 'LaTeX-mode-hook #'TeX-fold-mode)
-(add-hook 'after-find-file 'TeX-fold-buffer t)
-(add-hook 'LaTeX-mode-hook 'font-latex-update-sectioning-faces)
+(add-hook 'LaTeX-mode-hook #'TeX-fold-mode)     ; enable TeX-fold-mode
+(add-hook 'after-find-file 'TeX-fold-buffer t)  ; auto-fold sections on load
+(add-hook 'LaTeX-mode-hook 'font-latex-update-sectioning-faces) ; update section
+                                                                ; font sizes
 
-(add-hook 'LaTeX-mode-hook #'orgtbl-mode)
+(add-hook 'LaTeX-mode-hook #'orgtbl-mode) ; enable orgtbl mode for LaTeX
 
-(setq TeX-view-program-selection '((output-pdf "PDF Tools")
-        (output-pdf "Zathura")
+(setq TeX-view-program-selection '((output-pdf "PDF Tools") ; pdf tool
+        (output-pdf "Zathura")                              ; preferences
         ((output-dvi has-no-display-manager) "dvi2tty")
         ((output-dvi style-pstricks) "dvips and gv")
         (output-dvi "xdvi")
@@ -49,55 +72,5 @@
         (output-html "xdg-open")
         (output-pdf "preview-pane")))
 
-(flycheck-define-checker proselint
-  "A linter for prose."
-  :command ("proselint" source-inplace)
-  :error-patterns
-  ((warning line-start (file-name) ":" line ":" column ": "
-            (id (one-or-more (not (any " "))))
-            (message) line-end))
-  :modes (markdown-mode latex-mode gfm-mode))
-
-(add-to-list 'flycheck-checkers 'proselint)
-
-(defun texcount ()
-  (interactive)
-  (let*
-    ( (this-file (buffer-file-name))
-      (enc-str (symbol-name buffer-file-coding-system))
-      (enc-opt
-        (cond
-          ((string-match "utf-8" enc-str) "-utf8")
-          ((string-match "latin" enc-str) "-latin1")
-          ("-encoding=guess")
-      ) )
-      (word-count
-        (with-output-to-string
-          (with-current-buffer standard-output
-            (call-process "texcount" nil t nil "-0" enc-opt this-file)
-    ) ) ) )
-    (message word-count)
-) )
-(add-hook 'LaTeX-mode-hook (lambda () (define-key LaTeX-mode-map "\C-cw" 'texcount)))
-(add-hook 'latex-mode-hook (lambda () (define-key latex-mode-map "\C-cw" 'texcount)))
-
-(setq doom-theme 'doom-dracula)
-(setq doom-font (font-spec :family "Fira Code" :size 14))
-
-(setq doom-themes-treemacs-theme "doom-colors")
-
-(setq display-line-numbers-type 'relative)
-
-(setq doom-modeline-major-mode-icon t)
-(setq doom-modeline-major-mode-color-icon t)
-
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-
-(require 'sql)
-(sql-set-product 'postgres)
-
-(setq lsp-rust-server 'rust-analyzer)
-(setq rustic-lsp-server 'rust-analyzer)
-
-(setq lsp-rust-analyzer-proc-macro-enable t)
-(setq lsp-rust-analyzer-cargo-load-out-dirs-from-chec:wk t)
+(setq pdf-view-use-scaling t          ; MacOS specific workarounds
+      pdf-view-use-imagemagick nil)

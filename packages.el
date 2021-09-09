@@ -6,9 +6,6 @@
 ;; (package! another-package :recipe (:host github :repo "username/repo"))
 ;; (package! builtin-package :disable t)
 
-;; kubernetes porcelain
-(package! kubernetes)
-(package! kubernetes-evil)
-
-(package! kubel)
-(package! kubel-evil)
+;; Python
+(package! python-docstring) ; provides syntax highlighting and fill-paragraph
+                            ; functionality for python-mode
