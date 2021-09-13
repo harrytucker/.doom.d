@@ -14,6 +14,8 @@
 (setq doom-modeline-major-mode-icon t        ; enable modeline major-mode icon
       doom-modeline-major-mode-color-icon t) ; use coloured icons
 
+(evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
+
 (require 'sql)
 (sql-set-product 'postgres) ; use postgres dialect for sql
 

@@ -48,6 +48,13 @@ displays the current major-mode in use.
 (setq doom-modeline-major-mode-icon t        ; enable modeline major-mode icon
       doom-modeline-major-mode-color-icon t) ; use coloured icons
 #+END_SRC
+**** Evil
+I can use =undo-tree= as a linear undo system if need be, but enabling it also
+gives me access to some niceties and I don't need to rely on Git stashes in
+order to retain code I'm not sure about.
+#+begin_src elisp
+(evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
+#+end_src
 ** Programming
 I only really use PostgreSQL when it comes to relational databases, so rather
 than set this everytime, I've set it as the default SQL dialect.
