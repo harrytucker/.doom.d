@@ -56,6 +56,7 @@ order to retain code I'm not sure about.
 (evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
 #+end_src
 ** Programming
+*** Database
 I only really use PostgreSQL when it comes to relational databases, so rather
 than set this everytime, I've set it as the default SQL dialect.
 #+BEGIN_SRC elisp
