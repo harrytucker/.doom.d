@@ -9,8 +9,6 @@
                  :family "JetBrains Mono"
                  :size 14))
 
-(setq display-line-numbers-type 'relative)
-
 (setq doom-modeline-major-mode-icon t        ; enable modeline major-mode icon
       doom-modeline-major-mode-color-icon t) ; use coloured icons
 
@@ -19,14 +17,16 @@
 (require 'sql)
 (sql-set-product 'postgres) ; use postgres dialect for sql
 
-(setq lsp-rust-server 'rust-analyzer) ; set language server
+(use-package! rustic
+  :defer
+  :config
+  (setq lsp-rust-server 'rust-analyzer
+        lsp-rust-analyzer-proc-macro-enable t
+        lsp-rust-analyzer-cargo-run-build-scripts t))
 
-(setq lsp-rust-analyzer-proc-macro-enable t        ; enable proc macros
-      lsp-rust-analyzer-cargo-run-build-scripts t) ; enable build scripts
-
-(add-hook 'python-mode-hook 'python-docstring-mode) ; load python-docstring-mode
-                                                    ; when opening a python
-                                                    ; buffer
+(use-package! python-docstring
+  :defer
+  :hook (python-mode . python-docstring-mode))
 
 (require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
@@ -56,14 +56,9 @@
         :desc "Fold buffer" "," #'TeX-fold-buffer
         :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
 
-(require 'tex-fold) ; required for config
-
-(add-hook 'LaTeX-mode-hook #'TeX-fold-mode)     ; enable TeX-fold-mode
-(add-hook 'after-find-file 'TeX-fold-buffer t)  ; auto-fold sections on load
-(add-hook 'LaTeX-mode-hook 'font-latex-update-sectioning-faces) ; update section
-                                                                ; font sizes
-
-(add-hook 'LaTeX-mode-hook #'orgtbl-mode) ; enable orgtbl mode for LaTeX
+(add-hook! 'LaTeX-mode-hook
+           #'TeX-fold-mode      ; enable folding of tex commands
+           #'orgtbl-mode)       ; enable embedded org-mode tables
 
 (setq TeX-view-program-selection '((output-pdf "PDF Tools") ; pdf tool
         (output-pdf "Zathura")                              ; preferences

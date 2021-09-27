@@ -36,11 +36,6 @@ Treemacs uses a colour scheme based on the Atom text editor, so I set this to
                  :family "JetBrains Mono"
                  :size 14))
 #+END_SRC
-**** Editor Customisation
-Relative line numbers can be useful for Evil mode, so these are enabled.
-#+BEGIN_SRC elisp
-(setq display-line-numbers-type 'relative)
-#+END_SRC
 **** Modeline
 This provides no functionality whatsoever, but I like having an icon that
 displays the current major-mode in use.
@@ -69,10 +64,12 @@ rust-analyzer is official language server going forward. I've set rust-analyzer
 as my language server choice and enabled procedural macro expansion and build
 script support.
 #+BEGIN_SRC elisp
-(setq lsp-rust-server 'rust-analyzer) ; set language server
-
-(setq lsp-rust-analyzer-proc-macro-enable t        ; enable proc macros
-      lsp-rust-analyzer-cargo-run-build-scripts t) ; enable build scripts
+(use-package! rustic
+  :defer
+  :config
+  (setq lsp-rust-server 'rust-analyzer
+        lsp-rust-analyzer-proc-macro-enable t
+        lsp-rust-analyzer-cargo-run-build-scripts t))
 #+end_src
 *** Python
 I like using hard line wraps to keep my Python comments tidy, so let's use a
@@ -80,9 +77,9 @@ hook to enable =python-docstring-mode= for any Python buffers. This minor mode
 lets me use =fill-paragraph= while keeping everything Pythonic, and enables syntax
 highlighting in docstrings.
 #+begin_src elisp
-(add-hook 'python-mode-hook 'python-docstring-mode) ; load python-docstring-mode
-                                                    ; when opening a python
-                                                    ; buffer
+(use-package! python-docstring
+  :defer
+  :hook (python-mode . python-docstring-mode))
 #+end_src
 ** Writing
 *** Org-Mode
@@ -154,22 +151,13 @@ Using the fold and unfold commands in the above keymap, you can make your LaTeX
 documents a bit easier to look at when editing. These two hooks enable
 TeX-fold-mode, and then fold all environments in an opened LaTeX buffer.
 #+BEGIN_SRC elisp
-(require 'tex-fold) ; required for config
-
-(add-hook 'LaTeX-mode-hook #'TeX-fold-mode)     ; enable TeX-fold-mode
-(add-hook 'after-find-file 'TeX-fold-buffer t)  ; auto-fold sections on load
-(add-hook 'LaTeX-mode-hook 'font-latex-update-sectioning-faces) ; update section
-                                                                ; font sizes
+(add-hook! 'LaTeX-mode-hook
+           #'TeX-fold-mode      ; enable folding of tex commands
+           #'orgtbl-mode)       ; enable embedded org-mode tables
 #+END_SRC
-Creating LaTeX tables can be a bit bulky, so let's enable orgtbl-mode. This lets
-us use org-mode's table facilities in AUCTex, which we can export using [[https://www.gnu.org/software/emacs/manual/html_node/org/A-LaTeX-example.html][radio
-tables!]]
-#+BEGIN_SRC elisp
-(add-hook 'LaTeX-mode-hook #'orgtbl-mode) ; enable orgtbl mode for LaTeX
-#+END_SRC
-Using this you can create org-mode tables inside of a LaTeX buffer, and then
-export it wherever you wish using C-c C-c while editing the table. Here's an
-example:
+I also enable =orgtbl-mode=, using this means you can create org-mode tables
+inside of a LaTeX buffer, and then export it wherever you wish using C-c C-c
+while editing the table. Here's an example:
 #+BEGIN_SRC latex :tangle no
 \begin{verbatim}
 \usepackage{comments}
@@ -200,6 +188,17 @@ and include some other programs as backups just in case.
         (output-html "xdg-open")
         (output-pdf "preview-pane")))
 #+END_SRC
+* Extra Packages
+I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
+These are imported using Doom's =package!= macro.
+#+begin_src elisp :tangle packages.el
+;; -*- no-byte-compile: t; -*-
+;;; .doom.d/packages.el
+
+;; Python
+(package! python-docstring) ; provides syntax highlighting and fill-paragraph
+                            ; functionality
+#+end_src
 * Workarounds
 ** MacOS & PDF Tools
 I have found that PDF Tools often really screws up the display resolution when
