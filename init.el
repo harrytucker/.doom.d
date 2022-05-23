@@ -89,7 +89,7 @@
         +docsets)        ; ...or in Dash docsets locally
        lsp
        ;;macos             ; MacOS-specific commands
-       (magit +forge)      ; a git porcelain for Emacs
+       magit               ; a git porcelain for Emacs
        make                ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
        pdf               ; pdf enhancements
@@ -125,7 +125,9 @@
        (javascript +lsp)        ; all(hope(abandon(ye(who(enter(here))))))
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
-       (latex +lsp)             ; writing papers in Emacs has never been so fun
+       ;; (latex
+       ;;  +lsp
+       ;;  +fold)             ; writing papers in Emacs has never been so fun
        ;;lean                   ; for folks with too much to prove
        ;;ledger            ; an accounting system in Emacs
        ;;lua               ; one-based indices? one-based indices

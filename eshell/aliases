@@ -1,0 +1,2 @@
+alias antlr java -jar ~/bins/antlr $*
+alias ll ls -l $*

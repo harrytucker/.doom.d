@@ -90,103 +90,12 @@ in org-mode.
 (require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
 #+END_SRC
-**** Code Listings
-Let's use the =minted= and =color= packages to provide syntax highlighting for
-source code blocks when exporting. First I've set the default packages list for
-latex export using =org-latex-packages-alist=, then set =org-latex-listings= to
-use minted. We also need to configure =org-latex-pdf-process= to allow shell
-escapes in order to use pygments.
-#+BEGIN_SRC elisp
-(add-to-list 'org-latex-packages-alist '("" "minted")) ; include in org-latex
-(add-to-list 'org-latex-packages-alist '("" "color"))  ; export
-
-(setq org-latex-listings 'minted org-latex-pdf-process ; enable shell-escapes
-                                                       ; for minted
-      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "bibtex %b"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
-#+END_SRC
-Minted requires the the Pygment external library which can be installed through
-pip:
-#+BEGIN_SRC bash :tangle no
-sudo apt install python3-pip pip3 install pygments
-#+END_SRC
-Pip executables may not be in your default PATH, on Ubuntu 20.04, Pygments was
-installed to =$HOME/.local/bin=, add it to your ZSH path using the following:
-#+BEGIN_SRC bash :tangle no
-echo "export PATH=$PATH:/home/user/.local/bin" >> ~/.zshenv # source ~/.zshenv
-#+END_SRC
 **** Tables
 Booktabs is a LaTeX package that's useful for configuring the typesetting of
 tables, so we'll add this to our default package list for LaTeX export.
 #+BEGIN_SRC elisp
 (add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
-#+END_SRC
-*** LaTeX
-**** Section Fontification
-I like having section fonts larger to more easily read the document structure.
-In the hooks section, I've added a call to a function to update the sectioning
-faces, or else the section font size will not be updated.
-#+begin_src elisp
-(setq font-latex-fontify-sectioning 1.3) ; increase section font scaling
-#+end_src
-**** Custom Keybinds
-Not a big fan of using C-c C-a to compile LaTeX so I've added a shortcut to my
-local leader key.
-#+BEGIN_SRC elisp
-(map! (:when (featurep! :lang latex) ; custom keymap using local leader
-       (:map LaTeX-mode-map
-        :localleader
-        :desc "Compile" "c" #'TeX-command-run-all
-        :desc "Insert environment" "e" #'LaTeX-environment
-        :desc "Insert section" "s" #'LaTeX-section
-        :desc "Format document" "f" #'LaTeX-fill-buffer
-        :desc "Fold buffer" "," #'TeX-fold-buffer
-        :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
-#+END_SRC
-**** Hooks
-Using the fold and unfold commands in the above keymap, you can make your LaTeX
-documents a bit easier to look at when editing. These two hooks enable
-TeX-fold-mode, and then fold all environments in an opened LaTeX buffer.
-#+BEGIN_SRC elisp
-(add-hook! 'LaTeX-mode-hook
-           #'TeX-fold-mode      ; enable folding of tex commands
-           #'orgtbl-mode)       ; enable embedded org-mode tables
-#+END_SRC
-I also enable =orgtbl-mode=, using this means you can create org-mode tables
-inside of a LaTeX buffer, and then export it wherever you wish using C-c C-c
-while editing the table. Here's an example:
-#+BEGIN_SRC latex :tangle no
-\begin{verbatim}
-\usepackage{comments}
-
-% BEGIN RECEIVE ORGTBL salesfigures
-% END RECEIVE ORGTBL salesfigures
-\begin{comment}
-,#+ORGTBL: SEND salesfigures orgtbl-to-latex :booktabs t
-| Month | Days | Nr sold | per day |
-|-------+------+---------+---------|
-| Jan   |   23 |      55 |     2.4 |
-| Feb   |   21 |      16 |     0.8 |
-| March |   22 |     278 |    12.6 |
-,#+TBLFM: $4=$3/$2;%.1f
-\end{comment}
-\end{verbatim}
-#+END_SRC
-**** PDF Tools
-PDF Tools is my preferred tool for PDFs, so I set this as the highest priority,
-and include some other programs as backups just in case.
-#+BEGIN_SRC elisp
-(setq TeX-view-program-selection '((output-pdf "PDF Tools") ; pdf tool
-        (output-pdf "Zathura")                              ; preferences
-        ((output-dvi has-no-display-manager) "dvi2tty")
-        ((output-dvi style-pstricks) "dvips and gv")
-        (output-dvi "xdvi")
-        (output-pdf "Evince")
-        (output-html "xdg-open")
-        (output-pdf "preview-pane")))
 #+END_SRC
 * Extra Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.

@@ -31,43 +31,8 @@
 (require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
 
-(add-to-list 'org-latex-packages-alist '("" "minted")) ; include in org-latex
-(add-to-list 'org-latex-packages-alist '("" "color"))  ; export
-
-(setq org-latex-listings 'minted org-latex-pdf-process ; enable shell-escapes
-                                                       ; for minted
-      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "bibtex %b"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
-
 (add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
-
-(setq font-latex-fontify-sectioning 1.3) ; increase section font scaling
-
-(map! (:when (featurep! :lang latex) ; custom keymap using local leader
-       (:map LaTeX-mode-map
-        :localleader
-        :desc "Compile" "c" #'TeX-command-run-all
-        :desc "Insert environment" "e" #'LaTeX-environment
-        :desc "Insert section" "s" #'LaTeX-section
-        :desc "Format document" "f" #'LaTeX-fill-buffer
-        :desc "Fold buffer" "," #'TeX-fold-buffer
-        :desc "Unfold buffer" "." #'TeX-fold-clearout-buffer)))
-
-(add-hook! 'LaTeX-mode-hook
-           #'TeX-fold-mode      ; enable folding of tex commands
-           #'orgtbl-mode)       ; enable embedded org-mode tables
-
-(setq TeX-view-program-selection '((output-pdf "PDF Tools") ; pdf tool
-        (output-pdf "Zathura")                              ; preferences
-        ((output-dvi has-no-display-manager) "dvi2tty")
-        ((output-dvi style-pstricks) "dvips and gv")
-        (output-dvi "xdvi")
-        (output-pdf "Evince")
-        (output-html "xdg-open")
-        (output-pdf "preview-pane")))
 
 (setq pdf-view-use-scaling t          ; MacOS specific workarounds
       pdf-view-use-imagemagick nil)
