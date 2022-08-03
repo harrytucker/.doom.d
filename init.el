@@ -76,29 +76,29 @@
        (:if IS-MAC macos)  ; improve compatibility with macOS
 
        :lang
-       data              ; config/data formats
-       emacs-lisp        ; drown in parentheses
        (go +lsp)         ; the hipster dialect
+       (rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       (python +lsp)     ; beautiful is better than ugly
+       (javascript +lsp) ; all(hope(abandon(ye(who(enter(here))))))
+       (zig +lsp)        ; C, but simpler
        (java             ; the poster child for carpal tunnel syndrome
         +meghanada)
-       (javascript +lsp) ; all(hope(abandon(ye(who(enter(here))))))
-       markdown          ; writing docs for people to ignore
-       nim               ; python + lisp at the speed of c
        (org              ; organize your plain life in plain text
-        +pretty
+        +pretty          ; add unicode section icons
         +dragndrop       ; drag & drop files/images into org buffers
         +hugo            ; use Emacs for hugo blogging
         +pandoc          ; export-with-pandoc support
         +pomodoro        ; be fruitful with the tomato technique
         +present)        ; using org-mode for presentations
-       (python +lsp)     ; beautiful is better than ugly
+       emacs-lisp        ; drown in parentheses
+       data              ; config/data formats
+       markdown          ; writing docs for people to ignore
+       nim               ; python + lisp at the speed of c
        rest              ; Emacs as a REST client
-       (rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        sh                ; she sells {ba,z,fi}sh shells on the C xor
        web               ; the tubes
        json              ; no trailing commas for you
        yaml              ; JSON, but readable
-       (zig +lsp)        ; C, but simpler
 
        :email
        ;;(mu4e +org +gmail)
