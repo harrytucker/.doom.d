@@ -50,6 +50,12 @@ order to retain code I'm not sure about.
 #+begin_src elisp
 (evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
 #+end_src
+**** Frames
+Rather than manually maximising the default frame each time I launch Emacs, I
+can do this automatically.
+#+begin_src elisp
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+#+end_src
 ** Programming
 *** Database
 I only really use PostgreSQL when it comes to relational databases, so rather
@@ -64,12 +70,9 @@ rust-analyzer is official language server going forward. I've set rust-analyzer
 as my language server choice and enabled procedural macro expansion and build
 script support.
 #+BEGIN_SRC elisp
-(use-package! rustic
-  :defer
-  :config
-  (setq lsp-rust-server 'rust-analyzer
-        lsp-rust-analyzer-proc-macro-enable t
-        lsp-rust-analyzer-cargo-run-build-scripts t))
+(setq lsp-rust-server 'rust-analyzer
+      lsp-rust-analyzer-proc-macro-enable t
+      lsp-rust-analyzer-cargo-run-build-scripts t)
 #+end_src
 *** Python
 I like using hard line wraps to keep my Python comments tidy, so let's use a
@@ -77,9 +80,7 @@ hook to enable =python-docstring-mode= for any Python buffers. This minor mode
 lets me use =fill-paragraph= while keeping everything Pythonic, and enables syntax
 highlighting in docstrings.
 #+begin_src elisp
-(use-package! python-docstring
-  :defer
-  :hook (python-mode . python-docstring-mode))
+(add-hook 'python-mode-hook #'python-docstring-mode)
 #+end_src
 ** Writing
 *** Org-Mode
@@ -97,6 +98,14 @@ tables, so we'll add this to our default package list for LaTeX export.
 (add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
 #+END_SRC
+**** Hard-Wrap at 80 Characters
+When using =org-mode= for notes, I end up filling every paragraph to hard-wrap
+the text to 80 characters per-line. I wanted this to behave like Magit's commit
+message window mode and automatically hard-wrap the text. Turns out
+=auto-fill-mode= can do this for you.
+#+begin_src elisp
+(add-hook 'org-mode-hook #'auto-fill-mode)
+#+end_src
 * Extra Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
 These are imported using Doom's =package!= macro.
@@ -107,6 +116,9 @@ These are imported using Doom's =package!= macro.
 ;; Python
 (package! python-docstring) ; provides syntax highlighting and fill-paragraph
                             ; functionality
+
+;; gRPC
+(package! protobuf-mode) ; work with .proto files
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools

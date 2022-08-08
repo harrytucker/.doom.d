@@ -14,25 +14,24 @@
 
 (evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
 
+(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+
 (require 'sql)
 (sql-set-product 'postgres) ; use postgres dialect for sql
 
-(use-package! rustic
-  :defer
-  :config
-  (setq lsp-rust-server 'rust-analyzer
-        lsp-rust-analyzer-proc-macro-enable t
-        lsp-rust-analyzer-cargo-run-build-scripts t))
+(setq lsp-rust-server 'rust-analyzer
+      lsp-rust-analyzer-proc-macro-enable t
+      lsp-rust-analyzer-cargo-run-build-scripts t)
 
-(use-package! python-docstring
-  :defer
-  :hook (python-mode . python-docstring-mode))
+(add-hook 'python-mode-hook #'python-docstring-mode)
 
 (require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
 
 (add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
+
+(add-hook 'org-mode-hook #'auto-fill-mode)
 
 (setq pdf-view-use-scaling t          ; MacOS specific workarounds
       pdf-view-use-imagemagick nil)
