@@ -14,7 +14,8 @@
 
 (evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
 
-(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+; vcxsrv on windows has issues with this, so only enable on MacOS
+(if IS-MAC (add-to-list 'default-frame-alist '(fullscreen . fullboth)))
 
 (require 'sql)
 (sql-set-product 'postgres) ; use postgres dialect for sql

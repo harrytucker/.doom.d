@@ -52,9 +52,12 @@ order to retain code I'm not sure about.
 #+end_src
 **** Frames
 Rather than manually maximising the default frame each time I launch Emacs, I
-can do this automatically.
+can do this automatically. The =IS-MAC= variable is populated by Doom Emacs in
+this case, but this would be possible to handle by checking the =system-type=
+variable which is part of the default Emacs install.
 #+begin_src elisp
-(add-to-list 'default-frame-alist '(fullscreen . fullboth))
+; vcxsrv on windows has issues with this, so only enable on MacOS
+(if IS-MAC (add-to-list 'default-frame-alist '(fullscreen . fullboth)))
 #+end_src
 ** Programming
 *** Database
@@ -103,6 +106,10 @@ When using =org-mode= for notes, I end up filling every paragraph to hard-wrap
 the text to 80 characters per-line. I wanted this to behave like Magit's commit
 message window mode and automatically hard-wrap the text. Turns out
 =auto-fill-mode= can do this for you.
+
+You can also use =refill-mode= for this purpose but the automatic refilling of
+existing paragraphs causes issues with code blocks and everything falls apart.
+That works fine on text-only buffers though.
 #+begin_src elisp
 (add-hook 'org-mode-hook #'auto-fill-mode)
 #+end_src
