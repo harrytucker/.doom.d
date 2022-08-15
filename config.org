@@ -60,13 +60,27 @@ variable which is part of the default Emacs install.
 (if IS-MAC (add-to-list 'default-frame-alist '(fullscreen . fullboth)))
 #+end_src
 ** Programming
-*** Database
+*** Databases
 I only really use PostgreSQL when it comes to relational databases, so rather
 than set this everytime, I've set it as the default SQL dialect.
 #+BEGIN_SRC elisp
 (require 'sql)
 (sql-set-product 'postgres) ; use postgres dialect for sql
 #+END_SRC
+*** Protobuffers
+By default, =protobuf-mode= indents to a width of 2 spaces. I generally use 4,
+so I define a style that uses =c-basic-offset= to fix this. Importantly, due to
+Doom Emacs' integration with =format-all-mode=, a `.clang-format` file may be
+needed to prevent clang-format from overriding this upon saving a file.
+#+begin_src elisp
+(defconst protobuf-style
+  '((c-basic-offset . 4)
+    (indent-tabs-mode . nil)))
+
+(add-hook 'protobuf-mode-hook
+          (lambda () (c-add-style "protobuf-style"
+                                  protobuf-style t)))
+#+end_src
 *** Rust
 RLS has been deprecated as the primary language server for Rust and
 rust-analyzer is official language server going forward. I've set rust-analyzer
@@ -77,6 +91,18 @@ script support.
       lsp-rust-analyzer-proc-macro-enable t
       lsp-rust-analyzer-cargo-run-build-scripts t)
 #+end_src
+
+Debuggers are nice, sure would be cool to use those in Rust as well.
+#+begin_src elisp
+(require 'dap-mode)
+(dap-register-debug-template "Rust::GDB Run Configuration"
+                             (list :type "gdb"
+                                   :request "launch"
+                                   :name "GDB::Run"
+                                   :gdbpath "rust-gdb"
+                                   :target nil
+                                   :cwd nil))
+#+end_src
 *** Python
 I like using hard line wraps to keep my Python comments tidy, so let's use a
 hook to enable =python-docstring-mode= for any Python buffers. This minor mode
@@ -84,6 +110,44 @@ lets me use =fill-paragraph= while keeping everything Pythonic, and enables synt
 highlighting in docstrings.
 #+begin_src elisp
 (add-hook 'python-mode-hook #'python-docstring-mode)
+#+end_src
+*** Debugging
+Doom Emacs can install =dap-mode= and the additional relevant modes for Python
+and Go support. However, some of the stuff around it doesn't appear to be set-up
+upon enabling the module in =init.el=. This configures a bunch of keybinds to
+enable easier use of =dap-mode= once a session has been started without having
+to =M-x= every single command.
+#+begin_src elisp
+(map! :map dap-mode-map
+      :leader
+      :prefix ("d" . "dap")
+      ;; basics
+      :desc "dap next"          "n" #'dap-next
+      :desc "dap step in"       "i" #'dap-step-in
+      :desc "dap step out"      "o" #'dap-step-out
+      :desc "dap continue"      "c" #'dap-continue
+      :desc "dap hydra"         "h" #'dap-hydra
+      :desc "dap debug restart" "r" #'dap-debug-restart
+      :desc "dap debug"         "s" #'dap-debug
+
+      ;; debug
+      :prefix ("dd" . "Debug")
+      :desc "dap debug recent"  "r" #'dap-debug-recent
+      :desc "dap debug last"    "l" #'dap-debug-last
+
+      ;; eval
+      :prefix ("de" . "Eval")
+      :desc "eval"                "e" #'dap-eval
+      :desc "eval region"         "r" #'dap-eval-region
+      :desc "eval thing at point" "s" #'dap-eval-thing-at-point
+      :desc "add expression"      "a" #'dap-ui-expressions-add
+      :desc "remove expression"   "d" #'dap-ui-expressions-remove
+
+      :prefix ("db" . "Breakpoint")
+      :desc "dap breakpoint toggle"      "b" #'dap-breakpoint-toggle
+      :desc "dap breakpoint condition"   "c" #'dap-breakpoint-condition
+      :desc "dap breakpoint hit count"   "h" #'dap-breakpoint-hit-condition
+      :desc "dap breakpoint log message" "l" #'dap-breakpoint-log-message)
 #+end_src
 ** Writing
 *** Org-Mode

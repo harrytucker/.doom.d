@@ -60,20 +60,20 @@
        syntax            ; tasing you for every semicolon you forget
 
        :tools
-       (eval +overlay)  ; run code, run (also, repls)
-       (lookup          ; helps you navigate your code and documentation
-        +docsets)       ; ...or in Dash docsets locally
-       debugger         ; FIXME stepping through code, to help you add bugs
-       docker           ; thar she blows
-       lsp              ; integrate with *every* language
-       magit            ; a git porcelain for Emacs
-       make             ; run make tasks from Emacs
-       pdf              ; pdf enhancements
-       rgb              ; creating color strings
-       upload           ; map local to remote projects via ssh/ftp
+       (eval +overlay)   ; run code, run (also, repls)
+       (lookup           ; helps you navigate your code and documentation
+        +docsets)        ; ...or in Dash docsets locally
+       (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
+       docker            ; thar she blows
+       lsp               ; integrate with *every* language
+       magit             ; a git porcelain for Emacs
+       make              ; run make tasks from Emacs
+       pdf               ; pdf enhancements
+       rgb               ; creating color strings
+       upload            ; map local to remote projects via ssh/ftp
 
        :os
-       (:if IS-MAC macos)  ; improve compatibility with macOS
+       (if IS-MAC macos) ; improve compatibility with macOS
 
        :lang
        (go +lsp)         ; the hipster dialect
@@ -106,12 +106,12 @@
        ;;(wanderlust +gmail)
 
        :app
-       ;;calendar
+       calendar
        ;;emms
-       ;;everywhere        ; *leave* Emacs!? You must be joking
-       ;;irc               ; how neckbeards socialize
-       ;;(rss +org)        ; emacs as an RSS reader
-       ;;twitter           ; twitter client https://twitter.com/vnought
+       ;;everywhere      ; *leave* Emacs!? You must be joking
+       ;;irc             ; how neckbeards socialize
+       ;;(rss +org)      ; emacs as an RSS reader
+       ;;twitter         ; twitter client https://twitter.com/vnought
 
        :config
        literate
