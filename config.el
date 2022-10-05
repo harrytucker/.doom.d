@@ -83,6 +83,7 @@
 (add-hook 'org-mode-hook #'auto-fill-mode)
 
 (setq org-tree-slide-skip-outline-level 2)
+(setq org-hide-emphasis-markers t)
 (org-tree-slide-presentation-profile)
 
 (setq pdf-view-use-scaling t          ; MacOS specific workarounds

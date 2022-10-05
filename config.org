@@ -186,6 +186,7 @@ I tried adding a hook for toggling a light theme and line numbers when beginning
 a presentation, but that ended up being more trouble than it's worth for now.
 #+begin_src elisp
 (setq org-tree-slide-skip-outline-level 2)
+(setq org-hide-emphasis-markers t)
 (org-tree-slide-presentation-profile)
 #+end_src
 
