@@ -78,7 +78,11 @@
        :lang
        (go +lsp)         ; the hipster dialect
        (rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
-       (python +lsp)     ; beautiful is better than ugly
+       (python
+        +pyright
+        +pyenv
+        +poetry
+        +lsp)            ; beautiful is better than ugly
        (javascript +lsp) ; all(hope(abandon(ye(who(enter(here))))))
        (zig +lsp)        ; C, but simpler
        (java             ; the poster child for carpal tunnel syndrome
