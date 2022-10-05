@@ -14,7 +14,7 @@
 
 (evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
 
-; vcxsrv on windows has issues with this, so only enable on MacOS
+;; vcxsrv on windows has issues with this, so only enable on MacOS
 (if IS-MAC (add-to-list 'default-frame-alist '(fullscreen . fullboth)))
 
 (require 'sql)
@@ -81,6 +81,9 @@
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
 
 (add-hook 'org-mode-hook #'auto-fill-mode)
+
+(setq org-tree-slide-skip-outline-level 2)
+(org-tree-slide-presentation-profile)
 
 (setq pdf-view-use-scaling t          ; MacOS specific workarounds
       pdf-view-use-imagemagick nil)

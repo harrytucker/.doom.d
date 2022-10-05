@@ -56,7 +56,7 @@ can do this automatically. The =IS-MAC= variable is populated by Doom Emacs in
 this case, but this would be possible to handle by checking the =system-type=
 variable which is part of the default Emacs install.
 #+begin_src elisp
-; vcxsrv on windows has issues with this, so only enable on MacOS
+;; vcxsrv on windows has issues with this, so only enable on MacOS
 (if IS-MAC (add-to-list 'default-frame-alist '(fullscreen . fullboth)))
 #+end_src
 ** Programming
@@ -176,6 +176,49 @@ existing paragraphs causes issues with code blocks and everything falls apart.
 That works fine on text-only buffers though.
 #+begin_src elisp
 (add-hook 'org-mode-hook #'auto-fill-mode)
+#+end_src
+**** Org-Tree-Slide
+Using =org-mode= for presentations, let's prevent headings below the immediate
+top level from being used as slides, and default to the presentation profile for
+=org-tree-slide=.
+
+I tried adding a hook for toggling a light theme and line numbers when beginning
+a presentation, but that ended up being more trouble than it's worth for now.
+#+begin_src elisp
+(setq org-tree-slide-skip-outline-level 2)
+(org-tree-slide-presentation-profile)
+#+end_src
+
+Currently there's a breaking change in Org 9.6, that at least on MacOS, results
+in =org-tree-slide= falling over when the file contains a source code block.
+It's possible to workaround this by setting =org-fold-core-style= to
+='overlays=. However, using [[https://github.com/takaxp/org-tree-slide/issues/54#issuecomment-1185772944][takaxp's snippet]] you can simply add the correct
+=SPEC= argument for Doom Emacs' hook functions.
+#+begin_src elisp :tangle no
+;;
+;;; Hooks
+
+;;;###autoload
+(defun +org-present-hide-blocks-h ()
+  "Hide org #+ constructs."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^[[:space:]]*\\(#\\+\\)\\(\\(?:BEGIN\\|END\\|ATTR\\)[^[:space:]]+\\).*" nil t)
+      (org-fold-region (match-beginning 1)
+                       (match-end 0)
+                       org-tree-slide-mode
+                       'block))))
+
+;;;###autoload
+(defun +org-present-hide-leading-stars-h ()
+  "Hide leading stars in headings."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^\\(\\*+\\)" nil t)
+      (org-fold-region (match-beginning 1)
+                       (match-end 1)
+                       org-tree-slide-mode
+                       'headline))))
 #+end_src
 * Extra Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
