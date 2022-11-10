@@ -93,6 +93,7 @@
         +hugo            ; use Emacs for hugo blogging
         +pandoc          ; export-with-pandoc support
         +pomodoro        ; be fruitful with the tomato technique
+        +roam2           ; enable org-roam v2
         +present)        ; using org-mode for presentations
        emacs-lisp        ; drown in parentheses
        data              ; config/data formats

@@ -7,3 +7,7 @@
 
 ;; gRPC
 (package! protobuf-mode) ; work with .proto files
+
+;; Kubernetes
+(package! kubernetes)
+(package! kubernetes-evil)

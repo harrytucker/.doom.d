@@ -1,5 +1,10 @@
-#+TITLE: Harry's Doom Emacs Config
-#+AUTHOR: Harry Tucker
+#+title: Harry's Doom Emacs Config
+#+author: Harry Tucker
+
+# HTML and LaTeX export --------------------------------------------------------
+#+setupfile: org-themes/src/white_clean/white_clean.theme
+#+latex_class: mimore
+# ------------------------------------------------------------------------------
 
 * About
 This is my personal Emacs 27 config that I use for my work and personal stuff.
@@ -15,34 +20,34 @@ You may notice that I have enabled Doom's Java module, this is primarily so I
 have =groovy-mode= available for when I need to edit Jenkinsfiles and the like.
 * Configuration
 ** Personal Information
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (setq user-full-name "Harry Tucker" ; personal info
       user-mail-address "tucker.harry@outlook.com")
 #+END_SRC
 ** General
 I like using rainbow brackets, so I've enabled these for all programming modes.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode) ; rainbow brackets!
-#+END_SRC
+#+end_src
 *** Visuals
 **** Doom Themes
 Dracula is my theme of choice, and JetBrains Mono my favourite font. By default,
 Treemacs uses a colour scheme based on the Atom text editor, so I set this to
 =doom-colors= match the rest of the editor.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (setq doom-theme 'doom-dracula                  ; set doom theme
       doom-themes-treemacs-theme "doom-colors"  ; set treemacs theme
       doom-font (font-spec                      ; set font family
                  :family "JetBrains Mono"
                  :size 14))
-#+END_SRC
+#+end_src
 **** Modeline
 This provides no functionality whatsoever, but I like having an icon that
 displays the current major-mode in use.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (setq doom-modeline-major-mode-icon t        ; enable modeline major-mode icon
       doom-modeline-major-mode-color-icon t) ; use coloured icons
-#+END_SRC
+#+end_src
 **** Evil
 I can use =undo-tree= as a linear undo system if need be, but enabling it also
 gives me access to some niceties and I don't need to rely on Git stashes in
@@ -63,10 +68,10 @@ variable which is part of the default Emacs install.
 *** Databases
 I only really use PostgreSQL when it comes to relational databases, so rather
 than set this everytime, I've set it as the default SQL dialect.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (require 'sql)
 (sql-set-product 'postgres) ; use postgres dialect for sql
-#+END_SRC
+#+end_src
 *** Protobuffers
 By default, =protobuf-mode= indents to a width of 2 spaces. I generally use 4,
 so I define a style that uses =c-basic-offset= to fix this. Importantly, due to
@@ -86,7 +91,7 @@ RLS has been deprecated as the primary language server for Rust and
 rust-analyzer is official language server going forward. I've set rust-analyzer
 as my language server choice and enabled procedural macro expansion and build
 script support.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (setq lsp-rust-server 'rust-analyzer
       lsp-rust-analyzer-proc-macro-enable t
       lsp-rust-analyzer-cargo-run-build-scripts t)
@@ -110,6 +115,27 @@ lets me use =fill-paragraph= while keeping everything Pythonic, and enables synt
 highlighting in docstrings.
 #+begin_src elisp
 (add-hook 'python-mode-hook #'python-docstring-mode)
+#+end_src
+*** Go
+Out of the box, =go-mode= provides everything I need, but visualising coverage
+using the =go-coverage= command is kind of lacklustre. This is kind of a bad hack
+job but my Elisp isn't great. After loading in the =+go--run-tests= function, I've
+defined my own function for running it, then automatically calling =go-coverage=
+against the generated output, then binding that to a shortcut underneath the
+local leader key.
+#+begin_src elisp
+(autoload #'go-mode "+go--run-tests")
+
+;; be aware that this will leave a coverprofile laying around
+(defun go-cover-buffer ()
+  (interactive)
+  (+go--run-tests "-coverprofile cover.out")
+  (go-coverage "cover.out"))
+
+(map! :map go-mode-map
+      :localleader
+      :prefix "t" ; t for tests
+      :desc "view coverage" "c" #'go-cover-buffer)
 #+end_src
 *** Debugging
 Doom Emacs can install =dap-mode= and the additional relevant modes for Python
@@ -154,18 +180,26 @@ to =M-x= every single command.
 **** Setup
 Require ox-latex and ox-bibtex for configuring items here and allowing citations
 in org-mode.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
-#+END_SRC
+#+end_src
 **** Tables
 Booktabs is a LaTeX package that's useful for configuring the typesetting of
 tables, so we'll add this to our default package list for LaTeX export.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
-#+END_SRC
-**** Hard-Wrap at 80 Characters
+#+end_src
+**** Syntax Highlighting
+#+begin_src elisp
+(add-to-list 'org-latex-packages-alist '("" "listings"))
+(add-to-list 'org-latex-packages-alist '("" "color"))
+(add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
+
+(setq org-latex-src-block-backend 'minted)
+#+end_src
+**** Hard Wrap at 80 Characters
 When using =org-mode= for notes, I end up filling every paragraph to hard-wrap
 the text to 80 characters per-line. I wanted this to behave like Magit's commit
 message window mode and automatically hard-wrap the text. Turns out
@@ -221,6 +255,43 @@ It's possible to workaround this by setting =org-fold-core-style= to
                        org-tree-slide-mode
                        'headline))))
 #+end_src
+**** Org LaTeX Export
+Enable =mimore.cls= for exporting LaTeX reports in a nicer looking format than the
+default template.
+#+begin_src elisp
+(add-to-list 'org-latex-classes
+             '("mimore"
+               "\\documentclass{mimore}
+\[NO-DEFAULT-PACKAGES\]
+\[PACKAGES\]
+\[EXTRA\]"
+               ("\\section{%s}" . "\\section\*{%s}")
+               ("\\subsection{%s}" . "\\subsection\*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
+               ("\\paragraph{%s}" . "\\paragraph\*{%s}")
+               ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
+#+end_src
+**** PDF Tools
+Opening a =preview= window isn't as nice as opening =pdf-tools= within Emacs
+instead.
+#+begin_src elisp
+(add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
+#+end_src
+** Tooling
+*** Kubernetes
+Define autoloads for commands from =kubernetes=, and enable =evil-mode= bindings for
+use with the overview window.
+#+begin_src elisp
+(use-package! kubernetes
+  :commands (kubernetes-overview))
+
+(use-package! kubernetes-evil
+  :after kubernetes)
+
+(map! :leader
+      (:prefix "o"
+       :desc "Kubernetes" "k" #'kubernetes-overview))
+#+end_src
 * Extra Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
 These are imported using Doom's =package!= macro.
@@ -234,6 +305,10 @@ These are imported using Doom's =package!= macro.
 
 ;; gRPC
 (package! protobuf-mode) ; work with .proto files
+
+;; Kubernetes
+(package! kubernetes)
+(package! kubernetes-evil)
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools

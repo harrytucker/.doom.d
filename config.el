@@ -43,6 +43,19 @@
 
 (add-hook 'python-mode-hook #'python-docstring-mode)
 
+(autoload #'go-mode "+go--run-tests")
+
+;; be aware that this will leave a coverprofile laying around
+(defun go-cover-buffer ()
+  (interactive)
+  (+go--run-tests "-coverprofile cover.out")
+  (go-coverage "cover.out"))
+
+(map! :map go-mode-map
+      :localleader
+      :prefix "t" ; t for tests
+      :desc "view coverage" "c" #'go-cover-buffer)
+
 (map! :map dap-mode-map
       :leader
       :prefix ("d" . "dap")
@@ -80,11 +93,41 @@
 (add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
 
+(add-to-list 'org-latex-packages-alist '("" "listings"))
+(add-to-list 'org-latex-packages-alist '("" "color"))
+(add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
+
+(setq org-latex-src-block-backend 'minted)
+
 (add-hook 'org-mode-hook #'auto-fill-mode)
 
 (setq org-tree-slide-skip-outline-level 2)
 (setq org-hide-emphasis-markers t)
 (org-tree-slide-presentation-profile)
+
+(add-to-list 'org-latex-classes
+             '("mimore"
+               "\\documentclass{mimore}
+\[NO-DEFAULT-PACKAGES\]
+\[PACKAGES\]
+\[EXTRA\]"
+               ("\\section{%s}" . "\\section\*{%s}")
+               ("\\subsection{%s}" . "\\subsection\*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
+               ("\\paragraph{%s}" . "\\paragraph\*{%s}")
+               ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
+
+(add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
+
+(use-package! kubernetes
+  :commands (kubernetes-overview))
+
+(use-package! kubernetes-evil
+  :after kubernetes)
+
+(map! :leader
+      (:prefix "o"
+       :desc "Kubernetes" "k" #'kubernetes-overview))
 
 (setq pdf-view-use-scaling t          ; MacOS specific workarounds
       pdf-view-use-imagemagick nil)
