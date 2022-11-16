@@ -123,7 +123,7 @@ job but my Elisp isn't great. After loading in the =+go--run-tests= function, I'
 defined my own function for running it, then automatically calling =go-coverage=
 against the generated output, then binding that to a shortcut underneath the
 local leader key.
-#+begin_src elisp
+#+begin_src elisp :tangle no
 (autoload #'go-mode "+go--run-tests")
 
 ;; be aware that this will leave a coverprofile laying around
@@ -277,6 +277,32 @@ instead.
 #+begin_src elisp
 (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
 #+end_src
+**** Org Roam
+I sometimes link to external resources from the web, and the URLs that populate
+the =org-roam-graph= take up a lot of space. So, let's remove them from the graph:
+#+begin_src elisp
+ (setq org-roam-graph-link-hidden-types
+       '("file"
+         "http"
+         "https"))
+#+end_src
+**** Web/Graph View
+Enables a web server that can be used to interact with =org-roam= notes
+graphically.
+#+begin_src elisp
+(use-package! websocket
+    :after org-roam)
+
+(use-package! org-roam-ui
+    :after org-roam ;; or :after org
+    ;; :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
+
+#+end_src
 ** Tooling
 *** Kubernetes
 Define autoloads for commands from =kubernetes=, and enable =evil-mode= bindings for
@@ -309,6 +335,10 @@ These are imported using Doom's =package!= macro.
 ;; Kubernetes
 (package! kubernetes)
 (package! kubernetes-evil)
+
+;; Org
+(unpin! org-roam) ; use latest version of org-roam
+(package! org-roam-ui) ; enable org-roam-ui server
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools

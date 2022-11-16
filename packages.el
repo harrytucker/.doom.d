@@ -11,3 +11,7 @@
 ;; Kubernetes
 (package! kubernetes)
 (package! kubernetes-evil)
+
+;; Org
+(unpin! org-roam) ; use latest version of org-roam
+(package! org-roam-ui) ; enable org-roam-ui server

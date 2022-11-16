@@ -71,22 +71,34 @@
        pdf               ; pdf enhancements
        rgb               ; creating color strings
        upload            ; map local to remote projects via ssh/ftp
+       tree-sitter
 
        :os
        (if IS-MAC macos) ; improve compatibility with macOS
 
        :lang
-       (go +lsp)         ; the hipster dialect
+       (go               ; the hipster dialect
+        +lsp
+        +tree-sitter)
        (rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
-       (python
+       (python           ; beautiful is better than ugly
         +pyright
         +pyenv
         +poetry
-        +lsp)            ; beautiful is better than ugly
-       (javascript +lsp) ; all(hope(abandon(ye(who(enter(here))))))
-       (zig +lsp)        ; C, but simpler
+        +lsp
+        +tree-sitter)
+       (javascript       ; all(hope(abandon(ye(who(enter(here))))))
+        +lsp             ; enable lsp support
+        +tree-sitter)    ; better syntax highlighting
+       (web              ; the tubes
+        +lsp
+        +tree-sitter)
+       (zig              ; C, but simpler
+        +lsp
+        +tree-sitter)
        (java             ; the poster child for carpal tunnel syndrome
-        +meghanada)
+        +meghanada
+        +tree-sitter)
        (org              ; organize your plain life in plain text
         +pretty          ; add unicode section icons
         +dragndrop       ; drag & drop files/images into org buffers
@@ -95,15 +107,16 @@
         +pomodoro        ; be fruitful with the tomato technique
         +roam2           ; enable org-roam v2
         +present)        ; using org-mode for presentations
+       (json
+        +tree-sitter)    ; no trailing commas for you
+       (sh               ; she sells {ba,z,fi}sh shells on the C xor
+        +tree-sitter)
+       (yaml +lsp)       ; JSON, but readable
        emacs-lisp        ; drown in parentheses
        data              ; config/data formats
        markdown          ; writing docs for people to ignore
        nim               ; python + lisp at the speed of c
        rest              ; Emacs as a REST client
-       sh                ; she sells {ba,z,fi}sh shells on the C xor
-       web               ; the tubes
-       json              ; no trailing commas for you
-       yaml              ; JSON, but readable
 
        :email
        ;;(mu4e +org +gmail)

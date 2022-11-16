@@ -43,19 +43,6 @@
 
 (add-hook 'python-mode-hook #'python-docstring-mode)
 
-(autoload #'go-mode "+go--run-tests")
-
-;; be aware that this will leave a coverprofile laying around
-(defun go-cover-buffer ()
-  (interactive)
-  (+go--run-tests "-coverprofile cover.out")
-  (go-coverage "cover.out"))
-
-(map! :map go-mode-map
-      :localleader
-      :prefix "t" ; t for tests
-      :desc "view coverage" "c" #'go-cover-buffer)
-
 (map! :map dap-mode-map
       :leader
       :prefix ("d" . "dap")
@@ -118,6 +105,23 @@
                ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
 
 (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
+
+(setq org-roam-graph-link-hidden-types
+      '("file"
+        "http"
+        "https"))
+
+(use-package! websocket
+    :after org-roam)
+
+(use-package! org-roam-ui
+    :after org-roam ;; or :after org
+    ;; :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
 
 (use-package! kubernetes
   :commands (kubernetes-overview))
