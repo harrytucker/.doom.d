@@ -74,7 +74,7 @@
        tree-sitter
 
        :os
-       (if IS-MAC macos) ; improve compatibility with macOS
+       (:if IS-MAC macos) ; improve compatibility with macOS
 
        :lang
        (go               ; the hipster dialect
