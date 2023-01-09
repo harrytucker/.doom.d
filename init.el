@@ -100,7 +100,6 @@
         +meghanada
         +tree-sitter)
        (org              ; organize your plain life in plain text
-        +pretty          ; add unicode section icons
         +dragndrop       ; drag & drop files/images into org buffers
         +hugo            ; use Emacs for hugo blogging
         +pandoc          ; export-with-pandoc support

@@ -15,3 +15,7 @@
 ;; Org
 (unpin! org-roam) ; use latest version of org-roam
 (package! org-roam-ui) ; enable org-roam-ui server
+(package! org-modern) ; nicer fontification than doom's +pretty
+
+;; Themes
+(package! autothemer)

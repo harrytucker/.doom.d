@@ -9,6 +9,8 @@
                  :family "JetBrains Mono"
                  :size 14))
 
+(setq fancy-splash-image (concat doom-user-dir "images/power-splash.png"))
+
 (setq doom-modeline-major-mode-icon t        ; enable modeline major-mode icon
       doom-modeline-major-mode-color-icon t) ; use coloured icons
 
@@ -76,6 +78,17 @@
 
 (require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
+
+(setq org-modern-label-border 0.3)
+(global-org-modern-mode)
+
+(custom-set-faces!
+  '(org-level-1
+    :height 1.2
+    :inherit outline-1)
+  '(org-level-2
+    :height 1.1
+    :inherit outline-2))
 
 (add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
 (add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
