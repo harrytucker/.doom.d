@@ -19,71 +19,107 @@ with:
 You may notice that I have enabled Doom's Java module, this is primarily so I
 have =groovy-mode= available for when I need to edit Jenkinsfiles and the like.
 * Configuration
-** Personal Information
+** User Identification
 #+begin_src elisp
-(setq user-full-name "Harry Tucker" ; personal info
+;; Emacs User Identification
+(setq user-full-name "Harry Tucker"
       user-mail-address "tucker.harry@outlook.com")
 #+END_SRC
 ** General
-I like using rainbow brackets, so I've enabled these for all programming modes.
-#+begin_src elisp
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode) ; rainbow brackets!
-#+end_src
 *** Visuals
-**** Doom Themes
+**** Theme & Font
 Dracula is my theme of choice, and JetBrains Mono my favourite font. By default,
 Treemacs uses a colour scheme based on the Atom text editor, so I set this to
 =doom-colors= match the rest of the editor.
 #+begin_src elisp
-(setq doom-theme 'doom-dracula                  ; set doom theme
-      doom-themes-treemacs-theme "doom-colors"  ; set treemacs theme
-      doom-font (font-spec                      ; set font family
+;; Set themes for Doom and Treemacs, and select the JetBrains Mono font
+(setq doom-theme 'doom-dracula
+      doom-themes-treemacs-theme "doom-colors"
+      doom-font (font-spec
                  :family "JetBrains Mono"
+                 :weight 'bold
                  :size 14))
 #+end_src
 **** Splash Image
 #+begin_src elisp
+;; Constructs splash image path by concatenating the configured Doom config
+;; directory with the image path.
+;;
+;; This assumes you've pulled this from Git to get the images for my config.
 (setq fancy-splash-image (concat doom-user-dir "images/power-splash.png"))
 #+end_src
 **** Modeline
 This provides no functionality whatsoever, but I like having an icon that
 displays the current major-mode in use.
 #+begin_src elisp
-(setq doom-modeline-major-mode-icon t        ; enable modeline major-mode icon
-      doom-modeline-major-mode-color-icon t) ; use coloured icons
+;; Enables modeline icons with colour support
+(setq doom-modeline-major-mode-icon t
+      doom-modeline-major-mode-color-icon t)
+#+end_src
+**** Editor
+Normally this is the first thing I set up for any given text editor. Pairing
+delimiters by colour makes a lot of sense, and I find it makes code easier to
+parse, so I've set this up globally across all programming modes.
+#+begin_src elisp
+;; Highlights delimiter pairs with varying colours
+(add-hook! 'prog-mode-hook #'rainbow-delimiters-mode)
 #+end_src
 **** Evil
-I can use =undo-tree= as a linear undo system if need be, but enabling it also
-gives me access to some niceties and I don't need to rely on Git stashes in
-order to retain code I'm not sure about.
+I can use =undo-tree= as a linear system most of the time, which is what ends up
+happening. In other cases, =undo-tree= basically provides a free stash of previous
+code changes if I've been experimenting with some code, so is a nice escape
+hatch to have, so I've enabled it as my undo system.
 #+begin_src elisp
-(evil-set-undo-system 'undo-tree) ; tree-based undo and redo functionality
+;; Allows undoing and redoing as a tree of changes, instead of being limited to
+;; linear changes
+(evil-set-undo-system 'undo-tree)
 #+end_src
 **** Frames
-Rather than manually maximising the default frame each time I launch Emacs, I
-can do this automatically. The =IS-MAC= variable is populated by Doom Emacs in
-this case, but this would be possible to handle by checking the =system-type=
-variable which is part of the default Emacs install.
+This snippet automatically maximises the Emacs frame on startup. Enabled on
+MacOS only as WSL2doesn't play nicely with this. The =IS-MAC= variable is
+populated by Doom Emacs in this case, but this would be possible to handle by
+checking the =system-type= variable which is part of the default Emacs install.
 #+begin_src elisp
-;; vcxsrv on windows has issues with this, so only enable on MacOS
-(if IS-MAC (add-to-list 'default-frame-alist '(fullscreen . fullboth)))
+;; If running on a Mac, automatically fullscreen on launch
+(if IS-MAC (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
+#+end_src
+**** Eshell
+Doom Emacs disables =eshell= from indicating colour support by default in order to
+avoid running into issues with applications using it as an indicator of a fully
+functional terminal emulator. I'm fine with working around that when it comes
+up, since I can add to =eshell-visual-commands= when needed, so I've re-enabled
+colour support.
+#+begin_src elisp
+;; Provides configuration for working with 'eshell', a shell within Emacs
+(use-package! eshell
+  :defer
+  :config
+  ;; Sets the $TERM environment variable to indicate colour support
+  (setq eshell-term-name "xterm-256-color"))
 #+end_src
 ** Programming
 *** Databases
-I only really use PostgreSQL when it comes to relational databases, so rather
-than set this everytime, I've set it as the default SQL dialect.
+I only really use PostgreSQL in my day-to-day, so I set it as my default SQL
+product dialect.
 #+begin_src elisp
+;; Provides configuration for working with SQL within Emacs
 (use-package! sql
   :defer
   :config
   (sql-set-product 'postgres))
 #+end_src
-*** Javascript
-Auto fix Javascript lint errors when possible.
+*** Javascript/Typescript
+I don't write a lot of Javascript or Typescript, so I haven't invested a lot of
+time building a proper configuration for those modes. In what experience I have
+had, running code actions through =SPC-c-a= doesn't work as well as the language
+servers for Go or Rust, so I've enabled auto fixes to run on save to avoid
+running eslint through a shell or fixing those lint failures by hand.
 #+begin_src elisp
+;; Provides configuration for using 'eslint' with Emacs
 (use-package! lsp-eslint
   :defer
   :config
+  ;; Automatically fix trivial lint failures
   (setq lsp-eslint-auto-fix-on-save t))
 #+end_src
 *** Rust
@@ -92,26 +128,15 @@ rust-analyzer is official language server going forward. I've set rust-analyzer
 as my language server choice and enabled procedural macro expansion and build
 script support.
 #+begin_src elisp
+;; Provides configuration for working with the Rust programming language
 (use-package! rustic
   :defer
   :config
+  ;; Use 'rust-analyser', and enable options that allow further completion
+  ;; support for crates that rely on macros and build scripts
   (setq lsp-rust-server 'rust-analyzer
         lsp-rust-analyzer-proc-macro-enable t
         lsp-rust-analyzer-cargo-run-build-scripts t))
-#+end_src
-
-Debuggers are nice, sure would be cool to use those in Rust as well.
-#+begin_src elisp
-(use-package! dap-mode
-  :defer
-  :config
-  (dap-register-debug-template "Rust::GDB Run Configuration"
-                               (list :type "gdb"
-                                     :request "launch"
-                                     :name "GDB::Run"
-                                     :gdbpath "rust-gdb"
-                                     :target nil
-                                     :cwd nil)))
 #+end_src
 *** Python
 I like using hard line wraps to keep my Python comments tidy, so let's use a
@@ -119,6 +144,7 @@ hook to enable =python-docstring-mode= for any Python buffers. This minor mode
 lets me use =fill-paragraph= while keeping everything Pythonic, and enables syntax
 highlighting in docstrings.
 #+begin_src elisp
+;; Provides better Emacs support for Python docstrings
 (use-package! python-docstring-mode
   :hook python-mode)
 #+end_src
@@ -130,18 +156,23 @@ defined my own function for running it, then automatically calling =go-coverage=
 against the generated output, then binding that to a shortcut underneath the
 local leader key.
 #+begin_src elisp :tangle no
-(autoload #'go-mode "+go--run-tests")
-
-;; be aware that this will leave a coverprofile laying around
-(defun go-cover-buffer ()
-  (interactive)
-  (+go--run-tests "-coverprofile cover.out")
-  (go-coverage "cover.out"))
-
-(map! :map go-mode-map
-      :localleader
-      :prefix "t" ; t for tests
-      :desc "view coverage" "c" #'go-cover-buffer)
+;; Provides configuration for working with the Go programming language
+(use-package! go-mode
+  :defer
+  :config
+  ;; Runs Go tests, and generate a coverage profile to 'cover.out'
+  ;;
+  ;; Note: this function does not currently clean up the produced coverage profile
+  ;; once you're done.
+  (defun go-cover-buffer ()
+    (interactive)
+    (+go--run-tests "-coverprofile cover.out")
+    (go-coverage "cover.out"))
+  ;; Make 'go-cover-buffer' available through the local leader key map
+  (map! :map go-mode-map
+        :localleader
+        :prefix "t" ; t for tests
+        :desc "view coverage" "c" #'go-cover-buffer))
 #+end_src
 *** Debugging
 Doom Emacs can install =dap-mode= and the additional relevant modes for Python
@@ -150,54 +181,71 @@ upon enabling the module in =init.el=. This configures a bunch of keybinds to
 enable easier use of =dap-mode= once a session has been started without having
 to =M-x= every single command.
 #+begin_src elisp
-(map! :map dap-mode-map
-      :leader
-      :prefix ("d" . "dap")
-      ;; basics
-      :desc "dap next"          "n" #'dap-next
-      :desc "dap step in"       "i" #'dap-step-in
-      :desc "dap step out"      "o" #'dap-step-out
-      :desc "dap continue"      "c" #'dap-continue
-      :desc "dap hydra"         "h" #'dap-hydra
-      :desc "dap debug restart" "r" #'dap-debug-restart
-      :desc "dap debug"         "s" #'dap-debug
+;; Provides configuration for using the Debug Adapter Protocol from Emacs
+(use-package! dap-mode
+  :defer
+  :init
+  ;; Provides key map for interacting with 'dap-mode' for debugging supported
+  ;; languages
+  (map! :map dap-mode-map
+        :leader
+        :prefix ("d" . "dap")
+        ;; basics
+        :desc "dap next"          "n" #'dap-next
+        :desc "dap step in"       "i" #'dap-step-in
+        :desc "dap step out"      "o" #'dap-step-out
+        :desc "dap continue"      "c" #'dap-continue
+        :desc "dap hydra"         "h" #'dap-hydra
+        :desc "dap debug restart" "r" #'dap-debug-restart
+        :desc "dap debug"         "s" #'dap-debug
 
-      ;; debug
-      :prefix ("dd" . "Debug")
-      :desc "dap debug recent"  "r" #'dap-debug-recent
-      :desc "dap debug last"    "l" #'dap-debug-last
+        ;; debug
+        :prefix ("dd" . "Debug")
+        :desc "dap debug recent"  "r" #'dap-debug-recent
+        :desc "dap debug last"    "l" #'dap-debug-last
 
-      ;; eval
-      :prefix ("de" . "Eval")
-      :desc "eval"                "e" #'dap-eval
-      :desc "eval region"         "r" #'dap-eval-region
-      :desc "eval thing at point" "s" #'dap-eval-thing-at-point
-      :desc "add expression"      "a" #'dap-ui-expressions-add
-      :desc "remove expression"   "d" #'dap-ui-expressions-remove
+        ;; eval
+        :prefix ("de" . "Eval")
+        :desc "eval"                "e" #'dap-eval
+        :desc "eval region"         "r" #'dap-eval-region
+        :desc "eval thing at point" "s" #'dap-eval-thing-at-point
+        :desc "add expression"      "a" #'dap-ui-expressions-add
+        :desc "remove expression"   "d" #'dap-ui-expressions-remove
 
-      :prefix ("db" . "Breakpoint")
-      :desc "dap breakpoint toggle"      "b" #'dap-breakpoint-toggle
-      :desc "dap breakpoint condition"   "c" #'dap-breakpoint-condition
-      :desc "dap breakpoint hit count"   "h" #'dap-breakpoint-hit-condition
-      :desc "dap breakpoint log message" "l" #'dap-breakpoint-log-message)
+        ;; breakpoints
+        :prefix ("db" . "Breakpoint")
+        :desc "dap breakpoint toggle"      "b" #'dap-breakpoint-toggle
+        :desc "dap breakpoint condition"   "c" #'dap-breakpoint-condition
+        :desc "dap breakpoint hit count"   "h" #'dap-breakpoint-hit-condition
+        :desc "dap breakpoint log message" "l" #'dap-breakpoint-log-message)
+  :config
+  ;; Rust template for DAP debugging
+  (dap-register-debug-template "Rust::GDB Run Configuration"
+                               (list :type "gdb"
+                                     :request "launch"
+                                     :name "GDB::Run"
+                                     :gdbpath "rust-gdb"
+                                     :target nil
+                                     :cwd nil)))
 #+end_src
 ** Writing
 *** Org-Mode
-**** Setup
-Require ox-latex and ox-bibtex for configuring items here and allowing citations
-in org-mode.
-#+begin_src elisp
-(require 'ox-latex)   ; required for config
-(require 'ox-bibtex)
-#+end_src
 **** Org Modern
 Using =org-modern=, I can style =org-mode= buffers in a nicer fashion. I've also
 increased the font height for the top two heading levels to make org documents
 look less flat.
 #+begin_src elisp
+;; Provides configuration for working with 'org-mode'
 (use-package! org
   :defer
   :config
+  ;; Hide emphasis markers that wrap text (i.e. bold, italics)
+  (setq org-hide-emphasis-markers t)
+  ;; Wrap text at 80 characters for better Git diffs and readability
+  (add-hook! 'org-mode-hook #'auto-fill-mode)
+  ;; Use 'pdf-tools' as the default viewer for exported Org documents
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
+  ;; Enlarge top and second level heading fonts
   (custom-set-faces!
     '(org-level-1
       :height 1.2
@@ -206,15 +254,18 @@ look less flat.
       :height 1.1
       :inherit outline-2)))
 
+;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
 (use-package! org-modern
   :after org
   :config
+  ;; Disable table formatting and star hiding, increase label border
   (setq org-modern-table nil
         org-modern-hide-stars nil
         org-modern-label-border 0.3)
+  ;; Enable org-modern globally
   (global-org-modern-mode))
 #+end_src
-**** Tables
+**** Exporting
 Booktabs is a LaTeX package that's useful for configuring the typesetting of
 tables, so we'll add this to our default package list for LaTeX export.
 
@@ -225,11 +276,15 @@ message window mode and automatically hard-wrap the text. Turns out
 
 You can also use =refill-mode= for this purpose but the automatic refilling of
 existing paragraphs causes issues with code blocks and everything falls apart.
-That works fine on text-only buffers though.
+That works fine on =text-mode= buffers though.
 #+begin_src elisp
+;; Provides configuration for generating LaTeX using 'org-mode'
 (use-package! org
   :defer
   :config
+  ;; Enable export support for LaTeX and BibTeX formats
+  (require 'ox-latex)
+  (require 'ox-bibtex)
   ;; Better syntax highlighting in exported LaTeX
   (setq org-latex-src-block-backend 'minted)
   ;; Enable additional packages for exported LaTeX, takes the form:
@@ -238,65 +293,7 @@ That works fine on text-only buffers though.
                                    ("" "tabularx")
                                    ("" "color")
                                    ("newfloat" "minted")))
-  ;; Wrap text at 80 characters for better Git diffs and readability
-  (add-hook! 'org-mode-hook #'auto-fill-mode))
-#+end_src
-**** Org-Tree-Slide
-Using =org-mode= for presentations, let's prevent headings below the immediate
-top level from being used as slides, and default to the presentation profile for
-=org-tree-slide=.
-
-I tried adding a hook for toggling a light theme and line numbers when beginning
-a presentation, but that ended up being more trouble than it's worth for now.
-#+begin_src elisp
-(use-package! org-tree-slide
-  :after org
-  :config
-  ;; Hide formatting characters, use top-level headings as slides
-  (setq org-hide-emphasis-markers t
-        org-tree-slide-skip-outline-level 2)
-  ;; Use the fancy presentation profile, shiny animations!
-  (org-tree-slide-presentation-profile))
-#+end_src
-
-Currently there's a breaking change in Org 9.6, that at least on MacOS, results
-in =org-tree-slide= falling over when the file contains a source code block.
-It's possible to workaround this by setting =org-fold-core-style= to
-='overlays=. However, using [[https://github.com/takaxp/org-tree-slide/issues/54#issuecomment-1185772944][takaxp's snippet]] you can simply add the correct
-=SPEC= argument for Doom Emacs' hook functions.
-#+begin_src elisp :tangle no
-;;
-;;; Hooks
-
-;;;###autoload
-(defun +org-present-hide-blocks-h ()
-  "Hide org #+ constructs."
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward "^[[:space:]]*\\(#\\+\\)\\(\\(?:BEGIN\\|END\\|ATTR\\)[^[:space:]]+\\).*" nil t)
-      (org-fold-region (match-beginning 1)
-                       (match-end 0)
-                       org-tree-slide-mode
-                       'block))))
-
-;;;###autoload
-(defun +org-present-hide-leading-stars-h ()
-  "Hide leading stars in headings."
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward "^\\(\\*+\\)" nil t)
-      (org-fold-region (match-beginning 1)
-                       (match-end 1)
-                       org-tree-slide-mode
-                       'headline))))
-#+end_src
-**** Org LaTeX Export
-Enable =mimore.cls= for exporting LaTeX reports in a nicer looking format than the
-default template.
-#+begin_src elisp
-(use-package! org
-  :defer
-  :config
+  ;; Define 'mimore' LaTeX document class for use in exports
   (add-to-list 'org-latex-classes
                '("mimore"
                  "\\documentclass{mimore}\n[NO-DEFAULT-PACKAGES\]\n[PACKAGES\]\n[EXTRA\]"
@@ -306,14 +303,22 @@ default template.
                  ("\\paragraph{%s}" . "\\paragraph\*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph\*{%s}"))))
 #+end_src
-**** PDF Tools
-Opening a =preview= window isn't as nice as opening =pdf-tools= within Emacs
-instead.
+**** Org-Tree-Slide
+Using =org-mode= for presentations, let's prevent headings below the immediate
+top level from being used as slides, and default to the presentation profile for
+=org-tree-slide=.
+
+I tried adding a hook for toggling a light theme and line numbers when beginning
+a presentation, but that ended up being more trouble than it's worth for now.
 #+begin_src elisp
-(use-package! org
-  :defer
+;; Provides support for presenting directly from 'org-mode' buffers
+(use-package! org-tree-slide
+  :after org
   :config
-  (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools)))
+  ;; Hide formatting characters, use top-level headings as slides
+  (setq org-tree-slide-skip-outline-level 2)
+  ;; Use the fancy presentation profile, shiny animations!
+  (org-tree-slide-presentation-profile))
 #+end_src
 **** Org Roam & UI
 I use =org-roam= for note taking and building up a knowledge graph. The built
@@ -321,6 +326,7 @@ in-graph is nice for quick stuff, but external links end up making it very
 messy, so I've disabled my most common link types from showing: files and web
 links.
 #+begin_src elisp
+;; Provides configuration for 'org-roam', an Emacs knowledge graph
 (use-package! org-roam
   :defer
   :config
@@ -336,9 +342,11 @@ enabled starting it automatically on launching org-roam just yet as I want to
 use roam more before I go that far. Most of the config here just follows the
 recommendations from [[https://github.com/org-roam/org-roam-ui][org-roam-ui's README]].
 #+begin_src elisp
+;; Provides 'websocket', a dependency of 'org-roam-ui'
 (use-package! websocket
   :after org-roam)
 
+;; Provides 'org-roam-ui' a web frontend for 'org-roam'
 (use-package! org-roam-ui
   :after org-roam
   :config
@@ -358,12 +366,14 @@ This module is currently experimental, both for me to use and for the author to
 write at the moment. I need to think of an Evil keymap for this, but for now
 I've just mapped the dispatch menu to =SPC-k=.
 #+begin_src elisp
+;; Provides configuration for interacting with Kubernetes clusters from within
+;; Emacs
 (use-package! kele
+  :init
+  (map! :leader
+        :desc "Kubernetes" "k" #'kele-dispatch)
   :config
   (kele-mode 1))
-
-(map! :leader
-      :desc "Kubernetes" "k" #'kele-dispatch)
 #+end_src
 * Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
