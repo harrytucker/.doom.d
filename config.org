@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------
 
 * About
-This is my personal Emacs 28 config that I use for my work and personal stuff.
+This is my personal Emacs config that I use for my work and personal stuff.
 This config is pretty small, and primarily makes small changes to things that
 bother me, as Doom Emacs is pretty nice for me out of the box. I primarily work
 with:
@@ -18,6 +18,21 @@ with:
 + Kubernetes
 You may notice that I have enabled Doom's Java module, this is primarily so I
 have =groovy-mode= available for when I need to edit Jenkinsfiles and the like.
+** Build Information
+#+begin_src elisp :exports output :tangle no :eval t
+(emacs-version)
+#+end_src
+
+#+RESULTS:
+: GNU Emacs 28.1 (build 1, x86_64-pc-linux-gnu, GTK+ Version 3.24.20, cairo version 1.16.0)
+:  of 2022-05-31
+
+#+begin_src elisp :exports output :tangle no :eval t
+system-configuration-options
+#+end_src
+
+#+RESULTS:
+: --build=x86_64-linux-gnu --prefix=/usr '--includedir=${prefix}/include' '--mandir=${prefix}/share/man' '--infodir=${prefix}/share/info' --sysconfdir=/etc --localstatedir=/var --disable-silent-rules '--libdir=${prefix}/lib/x86_64-linux-gnu' '--libexecdir=${prefix}/lib/x86_64-linux-gnu' --disable-maintainer-mode --disable-dependency-tracking --prefix=/usr --sharedstatedir=/var/lib --libexecdir=/usr/lib --localstatedir=/var/lib --infodir=/usr/share/info --mandir=/usr/share/man --enable-locallisppath=/etc/emacs:/usr/local/share/emacs/28.1/site-lisp:/usr/local/share/emacs/site-lisp:/usr/share/emacs/28.1/site-lisp:/usr/share/emacs/site-lisp --program-suffix=28 --with-modules --with-file-notification=inotify --with-mailutils --with-harfbuzz --with-json --with-zlib --with-native-compilation 'CFLAGS=-g -O2 -fdebug-prefix-map=/build/emacs28-jmphgn/emacs28-28.1~1.git5a223c7f2e=. -fstack-protector-strong -Wformat -Werror=format-security -no-pie' 'CPPFLAGS=-Wdate-time -D_FORTIFY_SOURCE=2' 'LDFLAGS=-Wl,-Bsymbolic-functions -Wl,-z,relro -no-pie'
 * Configuration
 ** User Identification
 #+begin_src elisp
