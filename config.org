@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------
 
 * About
-This is my personal Emacs 27 config that I use for my work and personal stuff.
+This is my personal Emacs 28 config that I use for my work and personal stuff.
 This config is pretty small, and primarily makes small changes to things that
 bother me, as Doom Emacs is pretty nice for me out of the box. I primarily work
 with:
@@ -73,22 +73,18 @@ variable which is part of the default Emacs install.
 I only really use PostgreSQL when it comes to relational databases, so rather
 than set this everytime, I've set it as the default SQL dialect.
 #+begin_src elisp
-(require 'sql)
-(sql-set-product 'postgres) ; use postgres dialect for sql
+(use-package! sql
+  :defer
+  :config
+  (sql-set-product 'postgres))
 #+end_src
-*** Protobuffers
-By default, =protobuf-mode= indents to a width of 2 spaces. I generally use 4,
-so I define a style that uses =c-basic-offset= to fix this. Importantly, due to
-Doom Emacs' integration with =format-all-mode=, a `.clang-format` file may be
-needed to prevent clang-format from overriding this upon saving a file.
+*** Javascript
+Auto fix Javascript lint errors when possible.
 #+begin_src elisp
-(defconst protobuf-style
-  '((c-basic-offset . 4)
-    (indent-tabs-mode . nil)))
-
-(add-hook 'protobuf-mode-hook
-          (lambda () (c-add-style "protobuf-style"
-                                  protobuf-style t)))
+(use-package! lsp-eslint
+  :defer
+  :config
+  (setq lsp-eslint-auto-fix-on-save t))
 #+end_src
 *** Rust
 RLS has been deprecated as the primary language server for Rust and
@@ -96,21 +92,26 @@ rust-analyzer is official language server going forward. I've set rust-analyzer
 as my language server choice and enabled procedural macro expansion and build
 script support.
 #+begin_src elisp
-(setq lsp-rust-server 'rust-analyzer
-      lsp-rust-analyzer-proc-macro-enable t
-      lsp-rust-analyzer-cargo-run-build-scripts t)
+(use-package! rustic
+  :defer
+  :config
+  (setq lsp-rust-server 'rust-analyzer
+        lsp-rust-analyzer-proc-macro-enable t
+        lsp-rust-analyzer-cargo-run-build-scripts t))
 #+end_src
 
 Debuggers are nice, sure would be cool to use those in Rust as well.
 #+begin_src elisp
-(require 'dap-mode)
-(dap-register-debug-template "Rust::GDB Run Configuration"
-                             (list :type "gdb"
-                                   :request "launch"
-                                   :name "GDB::Run"
-                                   :gdbpath "rust-gdb"
-                                   :target nil
-                                   :cwd nil))
+(use-package! dap-mode
+  :defer
+  :config
+  (dap-register-debug-template "Rust::GDB Run Configuration"
+                               (list :type "gdb"
+                                     :request "launch"
+                                     :name "GDB::Run"
+                                     :gdbpath "rust-gdb"
+                                     :target nil
+                                     :cwd nil)))
 #+end_src
 *** Python
 I like using hard line wraps to keep my Python comments tidy, so let's use a
@@ -118,7 +119,8 @@ hook to enable =python-docstring-mode= for any Python buffers. This minor mode
 lets me use =fill-paragraph= while keeping everything Pythonic, and enables syntax
 highlighting in docstrings.
 #+begin_src elisp
-(add-hook 'python-mode-hook #'python-docstring-mode)
+(use-package! python-docstring-mode
+  :hook python-mode)
 #+end_src
 *** Go
 Out of the box, =go-mode= provides everything I need, but visualising coverage
@@ -193,34 +195,30 @@ Using =org-modern=, I can style =org-mode= buffers in a nicer fashion. I've also
 increased the font height for the top two heading levels to make org documents
 look less flat.
 #+begin_src elisp
-(setq org-modern-label-border 0.3)
-(global-org-modern-mode)
+(use-package! org
+  :defer
+  :config
+  (custom-set-faces!
+    '(org-level-1
+      :height 1.2
+      :inherit outline-1)
+    '(org-level-2
+      :height 1.1
+      :inherit outline-2)))
 
-(custom-set-faces!
-  '(org-level-1
-    :height 1.2
-    :inherit outline-1)
-  '(org-level-2
-    :height 1.1
-    :inherit outline-2))
+(use-package! org-modern
+  :after org
+  :config
+  (setq org-modern-table nil
+        org-modern-hide-stars nil
+        org-modern-label-border 0.3)
+  (global-org-modern-mode))
 #+end_src
 **** Tables
 Booktabs is a LaTeX package that's useful for configuring the typesetting of
 tables, so we'll add this to our default package list for LaTeX export.
-#+begin_src elisp
-(add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
-(add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
-#+end_src
-**** Syntax Highlighting
-#+begin_src elisp
-(add-to-list 'org-latex-packages-alist '("" "listings"))
-(add-to-list 'org-latex-packages-alist '("" "color"))
-(add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
 
-(setq org-latex-src-block-backend 'minted)
-#+end_src
-**** Hard Wrap at 80 Characters
-When using =org-mode= for notes, I end up filling every paragraph to hard-wrap
+When using =org-mode= for notes, I end up filling every paragraph to hard wrap
 the text to 80 characters per-line. I wanted this to behave like Magit's commit
 message window mode and automatically hard-wrap the text. Turns out
 =auto-fill-mode= can do this for you.
@@ -229,7 +227,19 @@ You can also use =refill-mode= for this purpose but the automatic refilling of
 existing paragraphs causes issues with code blocks and everything falls apart.
 That works fine on text-only buffers though.
 #+begin_src elisp
-(add-hook 'org-mode-hook #'auto-fill-mode)
+(use-package! org
+  :defer
+  :config
+  ;; Better syntax highlighting in exported LaTeX
+  (setq org-latex-src-block-backend 'minted)
+  ;; Enable additional packages for exported LaTeX, takes the form:
+  ;;    ("options" "package" SNIPPET-FLAG COMPILERS)
+  (setq org-latex-packages-alist '(("" "booktabs")
+                                   ("" "tabularx")
+                                   ("" "color")
+                                   ("newfloat" "minted")))
+  ;; Wrap text at 80 characters for better Git diffs and readability
+  (add-hook! 'org-mode-hook #'auto-fill-mode))
 #+end_src
 **** Org-Tree-Slide
 Using =org-mode= for presentations, let's prevent headings below the immediate
@@ -239,9 +249,14 @@ top level from being used as slides, and default to the presentation profile for
 I tried adding a hook for toggling a light theme and line numbers when beginning
 a presentation, but that ended up being more trouble than it's worth for now.
 #+begin_src elisp
-(setq org-tree-slide-skip-outline-level 2)
-(setq org-hide-emphasis-markers t)
-(org-tree-slide-presentation-profile)
+(use-package! org-tree-slide
+  :after org
+  :config
+  ;; Hide formatting characters, use top-level headings as slides
+  (setq org-hide-emphasis-markers t
+        org-tree-slide-skip-outline-level 2)
+  ;; Use the fancy presentation profile, shiny animations!
+  (org-tree-slide-presentation-profile))
 #+end_src
 
 Currently there's a breaking change in Org 9.6, that at least on MacOS, results
@@ -279,71 +294,97 @@ It's possible to workaround this by setting =org-fold-core-style= to
 Enable =mimore.cls= for exporting LaTeX reports in a nicer looking format than the
 default template.
 #+begin_src elisp
-(add-to-list 'org-latex-classes
-             '("mimore"
-               "\\documentclass{mimore}
-\[NO-DEFAULT-PACKAGES\]
-\[PACKAGES\]
-\[EXTRA\]"
-               ("\\section{%s}" . "\\section\*{%s}")
-               ("\\subsection{%s}" . "\\subsection\*{%s}")
-               ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
-               ("\\paragraph{%s}" . "\\paragraph\*{%s}")
-               ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
+(use-package! org
+  :defer
+  :config
+  (add-to-list 'org-latex-classes
+               '("mimore"
+                 "\\documentclass{mimore}\n[NO-DEFAULT-PACKAGES\]\n[PACKAGES\]\n[EXTRA\]"
+                 ("\\section{%s}" . "\\section\*{%s}")
+                 ("\\subsection{%s}" . "\\subsection\*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph\*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph\*{%s}"))))
 #+end_src
 **** PDF Tools
 Opening a =preview= window isn't as nice as opening =pdf-tools= within Emacs
 instead.
 #+begin_src elisp
-(add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
+(use-package! org
+  :defer
+  :config
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools)))
 #+end_src
-**** Org Roam
-I sometimes link to external resources from the web, and the URLs that populate
-the =org-roam-graph= take up a lot of space. So, let's remove them from the graph:
+**** Org Roam & UI
+I use =org-roam= for note taking and building up a knowledge graph. The built
+in-graph is nice for quick stuff, but external links end up making it very
+messy, so I've disabled my most common link types from showing: files and web
+links.
 #+begin_src elisp
- (setq org-roam-graph-link-hidden-types
-       '("file"
-         "http"
-         "https"))
+(use-package! org-roam
+  :defer
+  :config
+  ;; Hide common link types from org-roam graph
+  (setq org-roam-graph-link-hidden-types
+        '("file"
+          "http"
+          "https")))
 #+end_src
-**** Web/Graph View
-Enables a web server that can be used to interact with =org-roam= notes
-graphically.
+
+For more in-depth browsing of the graph, =org-roam-ui= is pretty good. I haven't
+enabled starting it automatically on launching org-roam just yet as I want to
+use roam more before I go that far. Most of the config here just follows the
+recommendations from [[https://github.com/org-roam/org-roam-ui][org-roam-ui's README]].
 #+begin_src elisp
 (use-package! websocket
-    :after org-roam)
+  :after org-roam)
 
 (use-package! org-roam-ui
-    :after org-roam ;; or :after org
-    ;; :hook (after-init . org-roam-ui-mode)
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
-
+  :after org-roam
+  :config
+  ;; Sync UI theme with Emacs, follow current the buffer, update on save, and
+  ;; open browser on start
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 #+end_src
 ** Tooling
 *** Kubernetes
 Define autoloads for commands from =kubernetes=, and enable =evil-mode= bindings for
 use with the overview window.
-#+begin_src elisp
-(use-package! kubernetes
-  :commands (kubernetes-overview))
 
-(use-package! kubernetes-evil
-  :after kubernetes)
+This module is currently experimental, both for me to use and for the author to
+write at the moment. I need to think of an Evil keymap for this, but for now
+I've just mapped the dispatch menu to =SPC-k=.
+#+begin_src elisp
+(use-package! kele
+  :config
+  (kele-mode 1))
 
 (map! :leader
-      (:prefix "o"
-       :desc "Kubernetes" "k" #'kubernetes-overview))
+      :desc "Kubernetes" "k" #'kele-dispatch)
 #+end_src
-* Extra Packages
+* Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
 These are imported using Doom's =package!= macro.
 #+begin_src elisp :tangle packages.el
 ;; -*- no-byte-compile: t; -*-
 ;;; .doom.d/packages.el
+
+;; Doom Emacs
+;;
+;; Some magit dependencies are expecting functions defined in Emacs 29, and
+;; breaking, so pinning these packages as per:
+;; https://emacs.stackexchange.com/questions/75827/doom-emacs-error-running-hook-global-git-commit-mode-because-void-variable
+(package! transient
+  :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440"
+  :recipe (:host github :repo "magit/transient"))
+
+(package! with-editor
+  :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab"
+  :recipe (:host github :repo "magit/with-editor"))
+
 
 ;; Python
 (package! python-docstring) ; provides syntax highlighting and fill-paragraph
@@ -353,16 +394,15 @@ These are imported using Doom's =package!= macro.
 (package! protobuf-mode) ; work with .proto files
 
 ;; Kubernetes
-(package! kubernetes)
-(package! kubernetes-evil)
+(package! kele)
 
 ;; Org
 (unpin! org-roam) ; use latest version of org-roam
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! org-modern) ; nicer fontification than doom's +pretty
 
-;; Themes
-(package! autothemer)
+;; Benchmark init times
+(package! benchmark-init)
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools

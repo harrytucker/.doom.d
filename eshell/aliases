@@ -1,3 +1,4 @@
 alias k kubectl $*
 alias antlr java -jar ~/bins/antlr $*
 alias ll ls -l $*
+alias la ls -la $*

@@ -19,31 +19,36 @@
 ;; vcxsrv on windows has issues with this, so only enable on MacOS
 (if IS-MAC (add-to-list 'default-frame-alist '(fullscreen . fullboth)))
 
-(require 'sql)
-(sql-set-product 'postgres) ; use postgres dialect for sql
+(use-package! sql
+  :defer
+  :config
+  (sql-set-product 'postgres))
 
-(defconst protobuf-style
-  '((c-basic-offset . 4)
-    (indent-tabs-mode . nil)))
+(use-package! lsp-eslint
+  :defer
+  :config
+  (setq lsp-eslint-auto-fix-on-save t))
 
-(add-hook 'protobuf-mode-hook
-          (lambda () (c-add-style "protobuf-style"
-                                  protobuf-style t)))
+(use-package! rustic
+  :defer
+  :config
+  (setq lsp-rust-server 'rust-analyzer
+        lsp-rust-analyzer-proc-macro-enable t
+        lsp-rust-analyzer-cargo-run-build-scripts t))
 
-(setq lsp-rust-server 'rust-analyzer
-      lsp-rust-analyzer-proc-macro-enable t
-      lsp-rust-analyzer-cargo-run-build-scripts t)
+(use-package! dap-mode
+  :defer
+  :config
+  (dap-register-debug-template "Rust::GDB Run Configuration"
+                               (list :type "gdb"
+                                     :request "launch"
+                                     :name "GDB::Run"
+                                     :gdbpath "rust-gdb"
+                                     :target nil
+                                     :cwd nil)))
 
-(require 'dap-mode)
-(dap-register-debug-template "Rust::GDB Run Configuration"
-                             (list :type "gdb"
-                                   :request "launch"
-                                   :name "GDB::Run"
-                                   :gdbpath "rust-gdb"
-                                   :target nil
-                                   :cwd nil))
-
-(add-hook 'python-mode-hook #'python-docstring-mode)
+(use-package! python-docstring-mode
+  :hook python-mode)
 
 (map! :map dap-mode-map
       :leader
@@ -79,72 +84,93 @@
 (require 'ox-latex)   ; required for config
 (require 'ox-bibtex)
 
-(setq org-modern-label-border 0.3)
-(global-org-modern-mode)
+(use-package! org
+  :defer
+  :config
+  (custom-set-faces!
+    '(org-level-1
+      :height 1.2
+      :inherit outline-1)
+    '(org-level-2
+      :height 1.1
+      :inherit outline-2)))
 
-(custom-set-faces!
-  '(org-level-1
-    :height 1.2
-    :inherit outline-1)
-  '(org-level-2
-    :height 1.1
-    :inherit outline-2))
+(use-package! org-modern
+  :after org
+  :config
+  (setq org-modern-table nil
+        org-modern-hide-stars nil
+        org-modern-label-border 0.3)
+  (global-org-modern-mode))
 
-(add-to-list 'org-latex-packages-alist '("" "booktabs")) ; include in org-latex
-(add-to-list 'org-latex-packages-alist '("" "tabularx")) ; export
+(use-package! org
+  :defer
+  :config
+  ;; Better syntax highlighting in exported LaTeX
+  (setq org-latex-src-block-backend 'minted)
+  ;; Enable additional packages for exported LaTeX, takes the form:
+  ;;    ("options" "package" SNIPPET-FLAG COMPILERS)
+  (setq org-latex-packages-alist '(("" "booktabs")
+                                   ("" "tabularx")
+                                   ("" "color")
+                                   ("newfloat" "minted")))
+  ;; Wrap text at 80 characters for better Git diffs and readability
+  (add-hook! 'org-mode-hook #'auto-fill-mode))
 
-(add-to-list 'org-latex-packages-alist '("" "listings"))
-(add-to-list 'org-latex-packages-alist '("" "color"))
-(add-to-list 'org-latex-packages-alist '("newfloat" "minted"))
+(use-package! org-tree-slide
+  :after org
+  :config
+  ;; Hide formatting characters, use top-level headings as slides
+  (setq org-hide-emphasis-markers t
+        org-tree-slide-skip-outline-level 2)
+  ;; Use the fancy presentation profile, shiny animations!
+  (org-tree-slide-presentation-profile))
 
-(setq org-latex-src-block-backend 'minted)
+(use-package! org
+  :defer
+  :config
+  (add-to-list 'org-latex-classes
+               '("mimore"
+                 "\\documentclass{mimore}\n[NO-DEFAULT-PACKAGES\]\n[PACKAGES\]\n[EXTRA\]"
+                 ("\\section{%s}" . "\\section\*{%s}")
+                 ("\\subsection{%s}" . "\\subsection\*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph\*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph\*{%s}"))))
 
-(add-hook 'org-mode-hook #'auto-fill-mode)
+(use-package! org
+  :defer
+  :config
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools)))
 
-(setq org-tree-slide-skip-outline-level 2)
-(setq org-hide-emphasis-markers t)
-(org-tree-slide-presentation-profile)
-
-(add-to-list 'org-latex-classes
-             '("mimore"
-               "\\documentclass{mimore}
-\[NO-DEFAULT-PACKAGES\]
-\[PACKAGES\]
-\[EXTRA\]"
-               ("\\section{%s}" . "\\section\*{%s}")
-               ("\\subsection{%s}" . "\\subsection\*{%s}")
-               ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
-               ("\\paragraph{%s}" . "\\paragraph\*{%s}")
-               ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
-
-(add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
-
-(setq org-roam-graph-link-hidden-types
-      '("file"
-        "http"
-        "https"))
+(use-package! org-roam
+  :defer
+  :config
+  ;; Hide common link types from org-roam graph
+  (setq org-roam-graph-link-hidden-types
+        '("file"
+          "http"
+          "https")))
 
 (use-package! websocket
-    :after org-roam)
+  :after org-roam)
 
 (use-package! org-roam-ui
-    :after org-roam ;; or :after org
-    ;; :hook (after-init . org-roam-ui-mode)
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
+  :after org-roam
+  :config
+  ;; Sync UI theme with Emacs, follow current the buffer, update on save, and
+  ;; open browser on start
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
-(use-package! kubernetes
-  :commands (kubernetes-overview))
-
-(use-package! kubernetes-evil
-  :after kubernetes)
+(use-package! kele
+  :config
+  (kele-mode 1))
 
 (map! :leader
-      (:prefix "o"
-       :desc "Kubernetes" "k" #'kubernetes-overview))
+      :desc "Kubernetes" "k" #'kele-dispatch)
 
 (setq pdf-view-use-scaling t          ; MacOS specific workarounds
       pdf-view-use-imagemagick nil)

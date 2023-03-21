@@ -1,6 +1,3 @@
 [submodule "org-themes"]
 	path = org-themes
 	url = https://gitlab.com/OlMon/org-themes.git
-[submodule "themes"]
-	path = themes
-	url = git@github.com:catppuccin/emacs.git

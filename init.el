@@ -99,6 +99,7 @@
        (java             ; the poster child for carpal tunnel syndrome
         +meghanada
         +tree-sitter)
+       (haskell +lsp)    ; a language that's lazier than I am
        (org              ; organize your plain life in plain text
         +dragndrop       ; drag & drop files/images into org buffers
         +hugo            ; use Emacs for hugo blogging
@@ -113,7 +114,7 @@
        (yaml +lsp)       ; JSON, but readable
        emacs-lisp        ; drown in parentheses
        data              ; config/data formats
-       markdown          ; writing docs for people to ignore
+       (markdown +grip)  ; writing docs for people to ignore
        nim               ; python + lisp at the speed of c
        rest              ; Emacs as a REST client
 
