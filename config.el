@@ -204,10 +204,12 @@
 ;; Emacs
 (use-package! kele
   :init
+  ;; Provide key map to access 'kele' from leader key
   (map! :leader
         :desc "Kubernetes" "k" #'kele-dispatch)
-  :config
-  (kele-mode 1))
+  ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
+  ;; resources
+  (kele-mode))
 
 ;; Disable PDF image scaling and imagemagick
 (setq pdf-view-use-scaling t

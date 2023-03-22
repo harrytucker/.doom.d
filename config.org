@@ -385,10 +385,12 @@ I've just mapped the dispatch menu to =SPC-k=.
 ;; Emacs
 (use-package! kele
   :init
+  ;; Provide key map to access 'kele' from leader key
   (map! :leader
         :desc "Kubernetes" "k" #'kele-dispatch)
-  :config
-  (kele-mode 1))
+  ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
+  ;; resources
+  (kele-mode))
 #+end_src
 * Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
