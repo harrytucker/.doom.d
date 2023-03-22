@@ -209,5 +209,6 @@
   :config
   (kele-mode 1))
 
-(setq pdf-view-use-scaling t          ; MacOS specific workarounds
+;; Disable PDF image scaling and imagemagick
+(setq pdf-view-use-scaling t
       pdf-view-use-imagemagick nil)

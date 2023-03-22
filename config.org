@@ -425,9 +425,6 @@ These are imported using Doom's =package!= macro.
 (unpin! org-roam) ; use latest version of org-roam
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! org-modern) ; nicer fontification than doom's +pretty
-
-;; Benchmark init times
-(package! benchmark-init)
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools
@@ -435,6 +432,7 @@ I have found that PDF Tools often really screws up the display resolution when
 running on MacOS for reasons I don't entirely understand. The following snippet
 may or may not fix it, but I'm including it anyway.
 #+begin_src elisp
-(setq pdf-view-use-scaling t          ; MacOS specific workarounds
+;; Disable PDF image scaling and imagemagick
+(setq pdf-view-use-scaling t
       pdf-view-use-imagemagick nil)
 #+end_src
