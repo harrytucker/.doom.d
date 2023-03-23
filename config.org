@@ -7,17 +7,26 @@
 # ------------------------------------------------------------------------------
 
 * About
-This is my personal Emacs config that I use for my work and personal stuff.
-This config is pretty small, and primarily makes small changes to things that
-bother me, as Doom Emacs is pretty nice for me out of the box. I primarily work
-with:
-+ Go
-+ Python
-+ Rust
-+ Docker
-+ Kubernetes
-You may notice that I have enabled Doom's Java module, this is primarily so I
-have =groovy-mode= available for when I need to edit Jenkinsfiles and the like.
+I've made multiple attempts in the past at using Emacs as my primary text
+editor, and didn't have much luck. About three years ago I found out about Doom
+Emacs and forced myself to use it for two weeks, initially starting with
+probably the most basic possible configuration, just setting up the theme:
+#+begin_src elisp :tangle no
+;;; .doom.d/config.el -*- lexical-binding: t; -*-
+
+;; Place your private configuration here
+
+;; Set emacs theme
+(setq doom-theme 'doom-dracula)
+#+end_src
+
+Once I figured out how to use =magit=, I've stuck with Emacs since then. It's
+progressively taken over more and more of the tasks I do at work and on personal
+projects. This literate config has grown since then to encompass a bunch of
+different tasks, and is available on Git so I can use the same editor across
+different machines. At time of writing, I've overhauled the configuration to
+consolidate a bunch of disparate lisp into something that's hopefully more
+coherent, and is more useful for me and others.
 ** Build Information
 #+begin_src elisp :exports output :tangle no :eval t
 (emacs-version)
@@ -244,20 +253,28 @@ to =M-x= every single command.
                                      :cwd nil)))
 #+end_src
 ** Writing
-*** Org-Mode
-**** Org Modern
-Using =org-modern=, I can style =org-mode= buffers in a nicer fashion. I've also
-increased the font height for the top two heading levels to make org documents
-look less flat.
+*** Org Mode
+Org Mode is probably the most popular markdown format for Emacs users, and has a
+bunch of functionality and plugins available for use with it. For example, you
+can use it to provide literate programming functionality, such as how this
+document is set up to tangle into a final =config.el= setup that Emacs actually
+ingests.
+
+For writing in Org, I've configured a few things:
++ Hiding in-line text markup
++ Automatically hard wrapping text at 80 characters
++ Using =pdf-tools= for viewing PDF output
++ Increasing the font size of the first and second heading levels
++ Some opinionated LaTeX config
 #+begin_src elisp
 ;; Provides configuration for working with 'org-mode'
 (use-package! org
-  :defer
+  ;; Wrap text at 80 characters for better Git diffs and readability
+  :hook (org-mode . auto-fill-mode)
   :config
   ;; Hide emphasis markers that wrap text (i.e. bold, italics)
   (setq org-hide-emphasis-markers t)
-  ;; Wrap text at 80 characters for better Git diffs and readability
-  (add-hook! 'org-mode-hook #'auto-fill-mode)
+
   ;; Use 'pdf-tools' as the default viewer for exported Org documents
   (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
   ;; Enlarge top and second level heading fonts
@@ -267,36 +284,7 @@ look less flat.
       :inherit outline-1)
     '(org-level-2
       :height 1.1
-      :inherit outline-2)))
-
-;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
-(use-package! org-modern
-  :after org
-  :config
-  ;; Disable table formatting and star hiding, increase label border
-  (setq org-modern-table nil
-        org-modern-hide-stars nil
-        org-modern-label-border 0.3)
-  ;; Enable org-modern globally
-  (global-org-modern-mode))
-#+end_src
-**** Exporting
-Booktabs is a LaTeX package that's useful for configuring the typesetting of
-tables, so we'll add this to our default package list for LaTeX export.
-
-When using =org-mode= for notes, I end up filling every paragraph to hard wrap
-the text to 80 characters per-line. I wanted this to behave like Magit's commit
-message window mode and automatically hard-wrap the text. Turns out
-=auto-fill-mode= can do this for you.
-
-You can also use =refill-mode= for this purpose but the automatic refilling of
-existing paragraphs causes issues with code blocks and everything falls apart.
-That works fine on =text-mode= buffers though.
-#+begin_src elisp
-;; Provides configuration for generating LaTeX using 'org-mode'
-(use-package! org
-  :defer
-  :config
+      :inherit outline-2))
   ;; Enable export support for LaTeX and BibTeX formats
   (require 'ox-latex)
   (require 'ox-bibtex)
@@ -317,14 +305,30 @@ That works fine on =text-mode= buffers though.
                  ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
                  ("\\paragraph{%s}" . "\\paragraph\*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph\*{%s}"))))
+
+
+;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
+(use-package! org-modern
+  :after org
+  :config
+  ;; Disable table formatting and star hiding, increase label border
+  (setq org-modern-table nil
+        org-modern-hide-stars nil
+        org-modern-label-border 0.3)
+  ;; Enable org-modern globally
+  (global-org-modern-mode))
 #+end_src
 **** Org-Tree-Slide
-Using =org-mode= for presentations, let's prevent headings below the immediate
-top level from being used as slides, and default to the presentation profile for
-=org-tree-slide=.
+If LaTeX beamer presentations aren't your thing, or you want to use literate
+programming to run code in live presentations; it's possible to hold
+presentations directly from Org Mode itself.
 
-I tried adding a hook for toggling a light theme and line numbers when beginning
-a presentation, but that ended up being more trouble than it's worth for now.
+I use the =org-tree-slide= package for this, which requires some basic
+configuration. For my use case, I tell =org-tree-slide= to skip all headings above
+the top level for slide generation, which effectively means I just treat top
+level headings as slides. At time of writing, there are three different default
+profiles available, so I've enabled the fancy one with all the animation bells
+and whistles.
 #+begin_src elisp
 ;; Provides support for presenting directly from 'org-mode' buffers
 (use-package! org-tree-slide
@@ -336,14 +340,13 @@ a presentation, but that ended up being more trouble than it's worth for now.
   (org-tree-slide-presentation-profile))
 #+end_src
 **** Org Roam & UI
-I use =org-roam= for note taking and building up a knowledge graph. The built
-in-graph is nice for quick stuff, but external links end up making it very
-messy, so I've disabled my most common link types from showing: files and web
-links.
+Org Roam can be used to extend Org Mode to become a personal wiki of sorts. I am
+still trying to incorporate it more into my workflow, so the configuration here
+is relatively sparse.
 #+begin_src elisp
 ;; Provides configuration for 'org-roam', an Emacs knowledge graph
 (use-package! org-roam
-  :defer
+  :after org
   :config
   ;; Hide common link types from org-roam graph
   (setq org-roam-graph-link-hidden-types
@@ -352,7 +355,7 @@ links.
           "https")))
 #+end_src
 
-For more in-depth browsing of the graph, =org-roam-ui= is pretty good. I haven't
+For inspecting a large Org Roam database, =org-roam-ui= is pretty good. I haven't
 enabled starting it automatically on launching org-roam just yet as I want to
 use roam more before I go that far. Most of the config here just follows the
 recommendations from [[https://github.com/org-roam/org-roam-ui][org-roam-ui's README]].
@@ -430,11 +433,14 @@ These are imported using Doom's =package!= macro.
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools
-I have found that PDF Tools often really screws up the display resolution when
-running on MacOS for reasons I don't entirely understand. The following snippet
-may or may not fix it, but I'm including it anyway.
+When using HiDPI displays, =pdf-tools= needs to scale the output image in order to
+display something that's readable in an Emacs buffer. As of =pdf-tools= v1.1.0,
+this is enabled by default, but Doom Emacs currently pins an older version, so I
+need to set this variable within my config.
 #+begin_src elisp
-;; Disable PDF image scaling and imagemagick
-(setq pdf-view-use-scaling t
-      pdf-view-use-imagemagick nil)
+;; Enable scaling for HiDPI displays
+(use-package! pdf-tools
+  :defer
+  :config
+  (setq pdf-view-use-scaling t))
 #+end_src

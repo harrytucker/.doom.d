@@ -113,12 +113,12 @@
 
 ;; Provides configuration for working with 'org-mode'
 (use-package! org
-  :defer
+  ;; Wrap text at 80 characters for better Git diffs and readability
+  :hook (org-mode . auto-fill-mode)
   :config
   ;; Hide emphasis markers that wrap text (i.e. bold, italics)
   (setq org-hide-emphasis-markers t)
-  ;; Wrap text at 80 characters for better Git diffs and readability
-  (add-hook! 'org-mode-hook #'auto-fill-mode)
+
   ;; Use 'pdf-tools' as the default viewer for exported Org documents
   (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
   ;; Enlarge top and second level heading fonts
@@ -128,23 +128,7 @@
       :inherit outline-1)
     '(org-level-2
       :height 1.1
-      :inherit outline-2)))
-
-;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
-(use-package! org-modern
-  :after org
-  :config
-  ;; Disable table formatting and star hiding, increase label border
-  (setq org-modern-table nil
-        org-modern-hide-stars nil
-        org-modern-label-border 0.3)
-  ;; Enable org-modern globally
-  (global-org-modern-mode))
-
-;; Provides configuration for generating LaTeX using 'org-mode'
-(use-package! org
-  :defer
-  :config
+      :inherit outline-2))
   ;; Enable export support for LaTeX and BibTeX formats
   (require 'ox-latex)
   (require 'ox-bibtex)
@@ -166,6 +150,18 @@
                  ("\\paragraph{%s}" . "\\paragraph\*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph\*{%s}"))))
 
+
+;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
+(use-package! org-modern
+  :after org
+  :config
+  ;; Disable table formatting and star hiding, increase label border
+  (setq org-modern-table nil
+        org-modern-hide-stars nil
+        org-modern-label-border 0.3)
+  ;; Enable org-modern globally
+  (global-org-modern-mode))
+
 ;; Provides support for presenting directly from 'org-mode' buffers
 (use-package! org-tree-slide
   :after org
@@ -177,7 +173,7 @@
 
 ;; Provides configuration for 'org-roam', an Emacs knowledge graph
 (use-package! org-roam
-  :defer
+  :after org
   :config
   ;; Hide common link types from org-roam graph
   (setq org-roam-graph-link-hidden-types
@@ -211,6 +207,8 @@
   ;; resources
   (kele-mode))
 
-;; Disable PDF image scaling and imagemagick
-(setq pdf-view-use-scaling t
-      pdf-view-use-imagemagick nil)
+;; Enable scaling for HiDPI displays
+(use-package! pdf-tools
+  :defer
+  :config
+  (setq pdf-view-use-scaling t))
