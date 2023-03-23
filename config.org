@@ -70,7 +70,7 @@ Treemacs uses a colour scheme based on the Atom text editor, so I set this to
 ;; directory with the image path.
 ;;
 ;; This assumes you've pulled this from Git to get the images for my config.
-(setq fancy-splash-image (concat doom-user-dir "images/power-splash.png"))
+(setq fancy-splash-image (concat doom-user-dir "images/spaghetti.png"))
 #+end_src
 **** Modeline
 This provides no functionality whatsoever, but I like having an icon that

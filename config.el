@@ -14,7 +14,7 @@
 ;; directory with the image path.
 ;;
 ;; This assumes you've pulled this from Git to get the images for my config.
-(setq fancy-splash-image (concat doom-user-dir "images/power-splash.png"))
+(setq fancy-splash-image (concat doom-user-dir "images/spaghetti.png"))
 
 ;; Enables modeline icons with colour support
 (setq doom-modeline-major-mode-icon t
