@@ -10,11 +10,20 @@
                  :weight 'bold
                  :size 14))
 
-;; Constructs splash image path by concatenating the configured Doom config
-;; directory with the image path.
-;;
-;; This assumes you've pulled this from Git to get the images for my config.
-(setq fancy-splash-image (concat doom-user-dir "images/spaghetti.png"))
+(defun random-element-of-list (items)
+  "Return a random element from a given list"
+  (let* ((size (length items))
+         (index (random size)))
+    (nth index items)))
+
+(defun splash-images ()
+  "Return a list of available splash images"
+  (let*
+      ((splash-directory (concat doom-user-dir "images/")))
+    (directory-files splash-directory 'full (rx ".png" eos))))
+
+;; Sets the splash image to a random PNG file from the splash image directory
+(setq fancy-splash-image (random-element-of-list (splash-images)))
 
 ;; Enables modeline icons with colour support
 (setq doom-modeline-major-mode-icon t
