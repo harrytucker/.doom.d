@@ -159,13 +159,12 @@
   (require 'ox-latex)
   (require 'ox-bibtex)
   ;; Better syntax highlighting in exported LaTeX
-  (setq org-latex-src-block-backend 'minted)
+  (setq org-latex-src-block-backend 'engraved)
   ;; Enable additional packages for exported LaTeX, takes the form:
   ;;    ("options" "package" SNIPPET-FLAG COMPILERS)
   (setq org-latex-packages-alist '(("" "booktabs")
                                    ("" "tabularx")
-                                   ("" "color")
-                                   ("newfloat" "minted")))
+                                   ("" "color")))
   ;; Define 'mimore' LaTeX document class for use in exports
   (add-to-list 'org-latex-classes
                '("mimore"

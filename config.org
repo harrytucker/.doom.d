@@ -320,13 +320,12 @@ For writing in Org, I've configured a few things:
   (require 'ox-latex)
   (require 'ox-bibtex)
   ;; Better syntax highlighting in exported LaTeX
-  (setq org-latex-src-block-backend 'minted)
+  (setq org-latex-src-block-backend 'engraved)
   ;; Enable additional packages for exported LaTeX, takes the form:
   ;;    ("options" "package" SNIPPET-FLAG COMPILERS)
   (setq org-latex-packages-alist '(("" "booktabs")
                                    ("" "tabularx")
-                                   ("" "color")
-                                   ("newfloat" "minted")))
+                                   ("" "color")))
   ;; Define 'mimore' LaTeX document class for use in exports
   (add-to-list 'org-latex-classes
                '("mimore"
@@ -468,6 +467,7 @@ These are imported using Doom's =package!= macro.
 (unpin! org-roam) ; use latest version of org-roam
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! org-modern) ; nicer fontification than doom's +pretty
+(package! engrave-faces) ; comprehensive latex code output
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools
