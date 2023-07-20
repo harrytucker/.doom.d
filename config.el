@@ -1,3 +1,7 @@
+"GNU Emacs 28.2 (build 1, x86_64-apple-darwin21.5.0, Carbon Version 165 AppKit 2113.5)\n of 2023-02-06"
+
+"--enable-locallisppath=/usr/local/share/emacs/site-lisp --infodir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/info --mandir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/man --prefix=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-mac --enable-mac-app=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-gnutls --with-modules --with-native-compilation 'CFLAGS=-I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include' 'LDFLAGS=-L/usr/local/lib/gcc/12 -I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include'"
+
 ;; Emacs User Identification
 (setq user-full-name "Harry Tucker"
       user-mail-address "tucker.harry@outlook.com")
