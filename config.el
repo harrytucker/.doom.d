@@ -225,6 +225,10 @@
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
 
+(map! :leader
+      :prefix ("o" . "open")
+      :desc "Open calendar" "c" #'cfw:open-org-calendar)
+
 ;; Provides configuration for interacting with Kubernetes clusters from within
 ;; Emacs
 (use-package! kele

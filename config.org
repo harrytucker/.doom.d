@@ -409,6 +409,17 @@ recommendations from [[https://github.com/org-roam/org-roam-ui][org-roam-ui's RE
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
 #+end_src
+**** Calendar
+I really like having a full calendar view in addition to the view provided by
+=org-agenda=, which can be provided by =calfw=. By default, Doom's =calendar= module
+installs the package, but doesn't provide a key binding so you can define your
+own calendar function. For now, I'm just using the calendar from my =org-agenda=,
+so I just need to map that function to a key.
+#+begin_src elisp
+(map! :leader
+      :prefix ("o" . "open")
+      :desc "Open calendar" "c" #'cfw:open-org-calendar)
+#+end_src
 ** Tooling
 *** Kubernetes
 Define autoloads for commands from =kubernetes=, and enable =evil-mode= bindings for
