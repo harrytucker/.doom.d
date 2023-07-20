@@ -14,6 +14,8 @@
   :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab"
   :recipe (:host github :repo "magit/with-editor"))
 
+;; Behaviour Driven Development (BDD)
+(package! feature-mode)
 
 ;; Python
 (package! python-docstring) ; provides syntax highlighting and fill-paragraph
@@ -24,6 +26,7 @@
 
 ;; Kubernetes
 (package! kele)
+(package! jsonnet-mode)
 
 ;; Org
 (unpin! org-roam) ; use latest version of org-roam

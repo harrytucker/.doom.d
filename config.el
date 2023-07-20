@@ -11,13 +11,13 @@
                  :size 14))
 
 (defun random-element-of-list (items)
-  "Return a random element from a given list"
+  "Return a random element from a given list."
   (let* ((size (length items))
          (index (random size)))
     (nth index items)))
 
 (defun splash-images ()
-  "Return a list of available splash images"
+  "Return a list of available splash images."
   (let*
       ((splash-directory (concat doom-user-dir "images/")))
     (directory-files splash-directory 'full (rx ".png" eos))))
@@ -32,6 +32,9 @@
 ;; Highlights delimiter pairs with varying colours
 (add-hook! 'prog-mode-hook #'rainbow-delimiters-mode)
 
+;; Lower the delay for displaying potential key chords
+(setq which-key-idle-delay 0.2)
+
 ;; Allows undoing and redoing as a tree of changes, instead of being limited to
 ;; linear changes
 (evil-set-undo-system 'undo-tree)
@@ -45,6 +48,12 @@
   :config
   ;; Sets the $TERM environment variable to indicate colour support
   (setq eshell-term-name "xterm-256-color"))
+
+(use-package! projectile
+  :defer
+  :config
+  ;; When looking for Go project files, I don't care about vendored dependencies
+  (add-to-list 'projectile-globally-ignored-directories "*vendor"))
 
 ;; Provides configuration for working with SQL within Emacs
 (use-package! sql
@@ -128,6 +137,10 @@
   ;; Hide emphasis markers that wrap text (i.e. bold, italics)
   (setq org-hide-emphasis-markers t)
 
+  ;; Record timestamps on task completion for org-agenda usage
+  (setq org-log-done 'time)
+  (setq org-agenda-start-with-log-mode t)
+
   ;; Use 'pdf-tools' as the default viewer for exported Org documents
   (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
   ;; Enlarge top and second level heading fonts
@@ -138,6 +151,10 @@
     '(org-level-2
       :height 1.1
       :inherit outline-2))
+  ;; Collect agenda from Org and Org Roam
+  (setq org-agenda-files '("~/org"
+                           "~/org/roam"
+                           "~/org/roam/daily"))
   ;; Enable export support for LaTeX and BibTeX formats
   (require 'ox-latex)
   (require 'ox-bibtex)
@@ -152,12 +169,13 @@
   ;; Define 'mimore' LaTeX document class for use in exports
   (add-to-list 'org-latex-classes
                '("mimore"
-                 "\\documentclass{mimore}\n[NO-DEFAULT-PACKAGES\]\n[PACKAGES\]\n[EXTRA\]"
+                 "\\documentclass{mimore}\n\[NO-DEFAULT-PACKAGES\]\n\[PACKAGES\]\n\[EXTRA\]"
                  ("\\section{%s}" . "\\section\*{%s}")
                  ("\\subsection{%s}" . "\\subsection\*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
                  ("\\paragraph{%s}" . "\\paragraph\*{%s}")
-                 ("\\subparagraph{%s}" . "\\subparagraph\*{%s}"))))
+                 ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
+  (setq org-latex-default-class "mimore"))
 
 
 ;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
@@ -170,6 +188,9 @@
         org-modern-label-border 0.3)
   ;; Enable org-modern globally
   (global-org-modern-mode))
+
+;; I'd love to avoid having to use texlive but I can't get Tectonic to work currently
+;; (setq org-latex-pdf-process '("tectonic -X compile %f -Z shell-escape --outdir %o"))
 
 ;; Provides support for presenting directly from 'org-mode' buffers
 (use-package! org-tree-slide

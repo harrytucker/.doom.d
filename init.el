@@ -80,7 +80,9 @@
        (go               ; the hipster dialect
         +lsp
         +tree-sitter)
-       (rust +lsp)       ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       (rust             ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+        +lsp
+        +tree-sitter)
        (python           ; beautiful is better than ugly
         +pyright
         +pyenv
@@ -99,7 +101,9 @@
        (java             ; the poster child for carpal tunnel syndrome
         +meghanada
         +tree-sitter)
-       (haskell +lsp)    ; a language that's lazier than I am
+       (haskell          ; a language that's lazier than I am
+        +lsp
+        +tree-sitter)
        (org              ; organize your plain life in plain text
         +dragndrop       ; drag & drop files/images into org buffers
         +hugo            ; use Emacs for hugo blogging
@@ -111,12 +115,14 @@
         +tree-sitter)    ; no trailing commas for you
        (sh               ; she sells {ba,z,fi}sh shells on the C xor
         +tree-sitter)
-       (yaml +lsp)       ; JSON, but readable
+       (yaml             ; JSON, but readable
+        +lsp
+        +tree-sitter)
        emacs-lisp        ; drown in parentheses
        data              ; config/data formats
        (markdown +grip)  ; writing docs for people to ignore
        nim               ; python + lisp at the speed of c
-       rest              ; Emacs as a REST client
+       (rest +jq)              ; Emacs as a REST client
 
        :email
        ;;(mu4e +org +gmail)
