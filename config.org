@@ -352,8 +352,11 @@ For writing in Org, I've configured a few things:
   ;; Enable org-modern globally
   (global-org-modern-mode))
 
-;; I'd love to avoid having to use texlive but I can't get Tectonic to work currently
-;; (setq org-latex-pdf-process '("tectonic -X compile %f -Z shell-escape --outdir %o"))
+;; Tectonic is a self-contained LaTeX engine, and downloads dependencies on the
+;; fly, so I can avoid using a massive install of texlive-full.
+;;
+;; It also handles re-runs automatically for tools like Bibtex.
+(setq org-latex-pdf-process '("tectonic --outdir=%o %f"))
 #+end_src
 **** Org-Tree-Slide
 If LaTeX beamer presentations aren't your thing, or you want to use literate

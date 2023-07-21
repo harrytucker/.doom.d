@@ -192,8 +192,11 @@
   ;; Enable org-modern globally
   (global-org-modern-mode))
 
-;; I'd love to avoid having to use texlive but I can't get Tectonic to work currently
-;; (setq org-latex-pdf-process '("tectonic -X compile %f -Z shell-escape --outdir %o"))
+;; Tectonic is a self-contained LaTeX engine, and downloads dependencies on the
+;; fly, so I can avoid using a massive install of texlive-full.
+;;
+;; It also handles re-runs automatically for tools like Bibtex.
+(setq org-latex-pdf-process '("tectonic --outdir=%o %f"))
 
 ;; Provides support for presenting directly from 'org-mode' buffers
 (use-package! org-tree-slide
