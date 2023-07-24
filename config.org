@@ -356,7 +356,8 @@ For writing in Org, I've configured a few things:
 ;; fly, so I can avoid using a massive install of texlive-full.
 ;;
 ;; It also handles re-runs automatically for tools like Bibtex.
-(setq org-latex-pdf-process '("tectonic --outdir=%o %f"))
+(setq org-latex-pdf-process
+      `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir)))
 #+end_src
 **** Org-Tree-Slide
 If LaTeX beamer presentations aren't your thing, or you want to use literate

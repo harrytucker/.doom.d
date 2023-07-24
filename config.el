@@ -196,7 +196,8 @@
 ;; fly, so I can avoid using a massive install of texlive-full.
 ;;
 ;; It also handles re-runs automatically for tools like Bibtex.
-(setq org-latex-pdf-process '("tectonic --outdir=%o %f"))
+(setq org-latex-pdf-process
+      `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir)))
 
 ;; Provides support for presenting directly from 'org-mode' buffers
 (use-package! org-tree-slide
