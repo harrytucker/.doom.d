@@ -11,7 +11,6 @@
       doom-themes-treemacs-theme "doom-colors"
       doom-font (font-spec
                  :family "JetBrains Mono"
-                 :weight 'bold
                  :size 14))
 
 (defun random-element-of-list (items)
