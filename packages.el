@@ -33,3 +33,6 @@
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! org-modern) ; nicer fontification than doom's +pretty
 (package! engrave-faces) ; comprehensive latex code output
+
+;; Miscellaneous
+(package! command-log-mode)

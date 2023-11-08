@@ -144,6 +144,18 @@
   (setq org-log-done 'time)
   (setq org-agenda-start-with-log-mode t)
 
+  ;; Capture scrum notes into new files, adapted from:
+  ;; https://stackoverflow.com/a/11903246
+  (defun capture-retro-file (path)
+    (let ((name (read-string "Sprint Number: ")))
+      (expand-file-name (format "Sprint %s Retrospective.org" name) path)))
+
+  ;; Add capture templates for scrum tasks
+  (add-to-list 'org-capture-templates
+               `("r" "Sprint Retrospective" entry
+                 (file (lambda () (capture-retro-file "~/org/Reports")))
+                 (file ,(concat doom-user-dir "templates/sprint.org"))))
+
   ;; Use 'pdf-tools' as the default viewer for exported Org documents
   (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
   ;; Enlarge top and second level heading fonts
@@ -161,6 +173,15 @@
   ;; Enable export support for LaTeX and BibTeX formats
   (require 'ox-latex)
   (require 'ox-bibtex)
+
+
+  ;; Tectonic is a self-contained LaTeX engine, and downloads dependencies on the
+  ;; fly, so I can avoid using a massive install of texlive-full.
+  ;;
+  ;; It also handles re-runs automatically for tools like Bibtex.
+  (setq org-latex-pdf-process
+        `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir)))
+
   ;; Better syntax highlighting in exported LaTeX
   (setq org-latex-src-block-backend 'engraved)
   ;; Enable additional packages for exported LaTeX, takes the form:
@@ -190,13 +211,6 @@
         org-modern-label-border 0.3)
   ;; Enable org-modern globally
   (global-org-modern-mode))
-
-;; Tectonic is a self-contained LaTeX engine, and downloads dependencies on the
-;; fly, so I can avoid using a massive install of texlive-full.
-;;
-;; It also handles re-runs automatically for tools like Bibtex.
-(setq org-latex-pdf-process
-      `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir)))
 
 ;; Provides support for presenting directly from 'org-mode' buffers
 (use-package! org-tree-slide

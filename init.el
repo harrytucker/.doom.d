@@ -27,7 +27,7 @@
        (popup            ; tame sudden yet inevitable temporary windows
         +all             ; catch all popups that start with an asterix
         +defaults)       ; default popup rules
-       treemacs          ; a project drawer, like neotree but cooler
+       (treemacs +lsp)   ; a project drawer, like neotree but cooler
        unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB
@@ -65,7 +65,7 @@
         +docsets)        ; ...or in Dash docsets locally
        (debugger +lsp)   ; FIXME stepping through code, to help you add bugs
        docker            ; thar she blows
-       lsp               ; integrate with *every* language
+       (lsp +peek)       ; integrate with *every* language
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        pdf               ; pdf enhancements
@@ -122,7 +122,10 @@
        data              ; config/data formats
        (markdown +grip)  ; writing docs for people to ignore
        nim               ; python + lisp at the speed of c
-       (rest +jq)              ; Emacs as a REST client
+       (rest +jq)        ; Emacs as a REST client
+       (cc
+        +lsp
+        +tree-sitter)
 
        :email
        ;;(mu4e +org +gmail)

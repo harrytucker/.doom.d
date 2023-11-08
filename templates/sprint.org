@@ -1,0 +1,20 @@
+* Sprint %^{Sprint Number}
+*Date: %t*
+** Project Goal:
+/What is the goal of the team? This is *not* the RP./
+** Summary
+/One line summary of the sprint./
+%?
+** Goal: Hit/Miss
+** Velocity
+- *Committed Points:*
+- *Completed Points:*
+- *Average Velocity:*
+** Kaizen
+** Topic: %^{Retrospective Topic}
+*** Continue
+/What helped us move forward?/
+*** Stop
+/What held us back?/
+*** Invent
+/How could we do things differently?/
