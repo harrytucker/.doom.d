@@ -1,5 +1,7 @@
 * Sprint %^{Sprint Number}
 ** Team - Sprint
+#+options: h:2 toc:nil
+#+beamer_theme: sthlmnord [mode=light]
 # Use your team logo/branding here as a title slide.
 [[file:~/org/Images/thisisfine.jpg]]
 ** Metrics
