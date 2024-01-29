@@ -250,17 +250,6 @@
       :prefix ("o" . "open")
       :desc "Open calendar" "c" #'cfw:open-org-calendar)
 
-;; Provides configuration for interacting with Kubernetes clusters from within
-;; Emacs
-(use-package! kele
-  :init
-  ;; Provide key map to access 'kele' from leader key
-  (map! :leader
-        :desc "Kubernetes" "k" #'kele-dispatch)
-  ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
-  ;; resources
-  (kele-mode))
-
 ;; Enable scaling for HiDPI displays
 (use-package! pdf-tools
   :defer

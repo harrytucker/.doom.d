@@ -448,7 +448,7 @@ use with the overview window.
 This module is currently experimental, both for me to use and for the author to
 write at the moment. I need to think of an Evil keymap for this, but for now
 I've just mapped the dispatch menu to =SPC-k=.
-#+begin_src elisp
+#+begin_src elisp :tangle no
 ;; Provides configuration for interacting with Kubernetes clusters from within
 ;; Emacs
 (use-package! kele
