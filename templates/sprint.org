@@ -1,20 +1,44 @@
 * Sprint %^{Sprint Number}
-*Date: %t*
-** Project Goal:
-/What is the goal of the team? This is *not* the RP./
-** Summary
-/One line summary of the sprint./
-%?
-** Goal: Hit/Miss
+** Team - Sprint
+# Use your team logo/branding here as a title slide.
+[[file:~/org/Images/thisisfine.jpg]]
+** Metrics
+# Fill in as necessary, you can use formula to calculate rolling averages as and
+# when needed. @I..@II can be used to index the column values between the first
+# and second horizontal lines.
+| Sprint Number | Committed | Completed        | Average Velocity |
+|---------------+-----------+------------------+------------------|
+|               |           |                  |                  |
+|               |           |                  |                  |
+|               |           |                  |                  |
+|               |           |                  |                  |
+|               |           |                  |                  |
+|               |           |                  |                  |
+|---------------+-----------+------------------+------------------|
+|               |           | Overall Average: |                  |
+#+TBLFM: @7$4=vmean(@-2$3..$3)::@8$4=vmean(@I$3..@II$3)
 ** Velocity
+# Fill in as a overview of the Say/Do for just the most recent sprint instead of
+# a bunch of previous ones as in the previous table.
 - *Committed Points:*
 - *Completed Points:*
 - *Average Velocity:*
+** Goal: Partially/Hit/Miss
+# Short list of the team's goal(s) for the sprint and whether they were
+# achieved.
+*Date: %t*
+- [ ] /Goal goes here/
 ** Kaizen
+# Insert Kaizen here if one has been put forward for the sprint.
 ** Topic: %^{Retrospective Topic}
+# These will get generated into content boxes on the exported Beamer frames. If
+# they overflow the frame, duplicate the above section to retain the title and
+# move the sub-trees into it as necessary to split across multiple frames.
 *** Continue
 /What helped us move forward?/
 *** Stop
 /What held us back?/
 *** Invent
 /How could we do things differently?/
+*** Actions
+/Things we should act on from our retrospective./
