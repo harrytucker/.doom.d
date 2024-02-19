@@ -118,7 +118,8 @@ populated by Doom Emacs in this case, but this would be possible to handle by
 checking the =system-type= variable which is part of the default Emacs install.
 #+begin_src elisp
 ;; If running on a Mac, automatically fullscreen on launch
-(if IS-MAC (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
+(if (featurep :system 'macos)
+    (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
 #+end_src
 **** Eshell
 Doom Emacs disables =eshell= from indicating colour support by default in order to
@@ -127,6 +128,12 @@ functional terminal emulator. I'm fine with working around that when it comes
 up, since I can add to =eshell-visual-commands= when needed, so I've re-enabled
 colour support.
 #+begin_src elisp
+;; Experimenting with Eshell's Plan 9 emulation, see here:
+;; https://www.masteringemacs.org/article/complete-guide-mastering-eshell
+(after! eshell
+  (require 'em-smart)
+  (eshell-smart-initialize))
+
 ;; Eshell's visual command handling is part of a separate library called
 ;; em-term, so defer loading this until em-term has been loaded
 (after! em-term

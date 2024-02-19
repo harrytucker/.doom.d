@@ -39,7 +39,14 @@
 (evil-set-undo-system 'undo-tree)
 
 ;; If running on a Mac, automatically fullscreen on launch
-(if IS-MAC (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
+(if (featurep :system 'macos)
+    (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
+
+;; Experimenting with Eshell's Plan 9 emulation, see here:
+;; https://www.masteringemacs.org/article/complete-guide-mastering-eshell
+(after! eshell
+  (require 'em-smart)
+  (eshell-smart-initialize))
 
 ;; Eshell's visual command handling is part of a separate library called
 ;; em-term, so defer loading this until em-term has been loaded
