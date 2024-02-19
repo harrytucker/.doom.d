@@ -1,7 +1,3 @@
-"GNU Emacs 28.2 (build 1, x86_64-apple-darwin21.5.0, Carbon Version 165 AppKit 2113.5)\n of 2023-02-06"
-
-"--enable-locallisppath=/usr/local/share/emacs/site-lisp --infodir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/info --mandir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/man --prefix=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-mac --enable-mac-app=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-gnutls --with-modules --with-native-compilation 'CFLAGS=-I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include' 'LDFLAGS=-L/usr/local/lib/gcc/12 -I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include'"
-
 ;; Emacs User Identification
 (setq user-full-name "Harry Tucker"
       user-mail-address "tucker.harry@outlook.com")
@@ -45,12 +41,10 @@
 ;; If running on a Mac, automatically fullscreen on launch
 (if IS-MAC (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
 
-;; Provides configuration for working with 'eshell', a shell within Emacs
-(use-package! eshell
-  :defer
-  :config
-  ;; Sets the $TERM environment variable to indicate colour support
-  (setq eshell-term-name "xterm-256-color"))
+;; Eshell's visual command handling is part of a separate library called
+;; em-term, so defer loading this until em-term has been loaded
+(after! em-term
+  (add-to-list 'eshell-visual-commands "saml2aws"))
 
 (use-package! projectile
   :defer
@@ -132,10 +126,25 @@
                                      :target nil
                                      :cwd nil)))
 
+;; Provides configuration for working with remote machines over SSH using Tramp
+(use-package! tramp
+  :defer
+  :config
+  ;; Use sshx by default for speed
+  ;; Don't use /bin/sh as the default shell
+  (let ((+tramp-shell "/bin/bash"))
+    (setq tramp-default-remote-shell +tramp-shell)
+    (setq vterm-tramp-shells `(("ssh" ,+tramp-shell)
+                               ("sshx" ,+tramp-shell)
+                               ("docker" ,+tramp-shell)))))
+
 ;; Provides configuration for working with 'org-mode'
 (use-package! org
   ;; Wrap text at 80 characters for better Git diffs and readability
   :hook (org-mode . auto-fill-mode)
+  ;; Org is a large package, defer loading but also load during downtime to
+  ;; prevent hangs on first load
+  :defer-incrementally t
   :config
   ;; Hide emphasis markers that wrap text (i.e. bold, italics)
   (setq org-hide-emphasis-markers t)

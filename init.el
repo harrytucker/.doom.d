@@ -12,7 +12,7 @@
        (company          ; the ultimate code completion backend
         +auto
         +childframe)
-       (vertico +icons)  ; the search engine of the future
+       (vertico +icons +childframe) ; the search engine of the future
 
        :ui
        doom              ; what makes DOOM look the way it does

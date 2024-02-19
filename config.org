@@ -29,23 +29,21 @@ different machines. At time of writing, I've overhauled the configuration to
 consolidate a bunch of disparate lisp into something that's hopefully more
 coherent, and is more useful for me and others.
 ** Build Information
-#+begin_src elisp :exports output :tangle no :results code
+#+begin_src elisp :tangle no
 (emacs-version)
 #+end_src
 
 #+RESULTS:
-#+begin_src elisp
-"GNU Emacs 28.2 (build 1, x86_64-apple-darwin21.5.0, Carbon Version 165 AppKit 2113.5)\n of 2023-02-06"
-#+end_src
+: GNU Emacs 28.2 (build 1, x86_64-apple-darwin21.5.0, Carbon Version 165 AppKit 2113.5)
+:  of 2023-02-06
 
-#+begin_src elisp :exports output :tangle no :results code
+#+begin_src elisp :tangle no
 system-configuration-options
 #+end_src
 
 #+RESULTS:
-#+begin_src elisp
-"--enable-locallisppath=/usr/local/share/emacs/site-lisp --infodir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/info --mandir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/man --prefix=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-mac --enable-mac-app=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-gnutls --with-modules --with-native-compilation 'CFLAGS=-I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include' 'LDFLAGS=-L/usr/local/lib/gcc/12 -I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include'"
-#+end_src
+: --enable-locallisppath=/usr/local/share/emacs/site-lisp --infodir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/info --mandir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/man --prefix=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-mac --enable-mac-app=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-gnutls --with-modules --with-native-compilation 'CFLAGS=-I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include' 'LDFLAGS=-L/usr/local/lib/gcc/12 -I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include'
+
 * Configuration
 ** User Identification
 #+begin_src elisp
@@ -129,12 +127,10 @@ functional terminal emulator. I'm fine with working around that when it comes
 up, since I can add to =eshell-visual-commands= when needed, so I've re-enabled
 colour support.
 #+begin_src elisp
-;; Provides configuration for working with 'eshell', a shell within Emacs
-(use-package! eshell
-  :defer
-  :config
-  ;; Sets the $TERM environment variable to indicate colour support
-  (setq eshell-term-name "xterm-256-color"))
+;; Eshell's visual command handling is part of a separate library called
+;; em-term, so defer loading this until em-term has been loaded
+(after! em-term
+  (add-to-list 'eshell-visual-commands "saml2aws"))
 #+end_src
 *** Projects
 When using =projectile=, I don't want to search some directories that are just
@@ -277,6 +273,23 @@ to =M-x= every single command.
                                      :target nil
                                      :cwd nil)))
 #+end_src
+*** Remote Access Tools
+I'm trying to speed up Tramp for remote access as the default from Doom doesn't
+work very well for me. I currently try using =sshx= as my access method as well as
+avoiding projectile and lsp usage on remote machines.
+#+begin_src elisp
+;; Provides configuration for working with remote machines over SSH using Tramp
+(use-package! tramp
+  :defer
+  :config
+  ;; Use sshx by default for speed
+  ;; Don't use /bin/sh as the default shell
+  (let ((+tramp-shell "/bin/bash"))
+    (setq tramp-default-remote-shell +tramp-shell)
+    (setq vterm-tramp-shells `(("ssh" ,+tramp-shell)
+                               ("sshx" ,+tramp-shell)
+                               ("docker" ,+tramp-shell)))))
+#+end_src
 ** Writing
 *** Org Mode
 Org Mode is probably the most popular markdown format for Emacs users, and has a
@@ -296,6 +309,9 @@ For writing in Org, I've configured a few things:
 (use-package! org
   ;; Wrap text at 80 characters for better Git diffs and readability
   :hook (org-mode . auto-fill-mode)
+  ;; Org is a large package, defer loading but also load during downtime to
+  ;; prevent hangs on first load
+  :defer-incrementally t
   :config
   ;; Hide emphasis markers that wrap text (i.e. bold, italics)
   (setq org-hide-emphasis-markers t)
