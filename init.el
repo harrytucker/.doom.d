@@ -67,7 +67,6 @@
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        pdf               ; pdf enhancements
-       rgb               ; creating color strings
        upload            ; map local to remote projects via ssh/ftp
        tree-sitter
        direnv
