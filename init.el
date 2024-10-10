@@ -9,9 +9,7 @@
 ;; found in modules/README.org.
 
 (doom! :completion
-       (company          ; the ultimate code completion backend
-        +auto
-        +childframe)
+       (corfu +icons +dabbrev)      ; complete with cap(f), cape and a flying feather!
        (vertico +icons +childframe) ; the search engine of the future
 
        :ui
@@ -41,7 +39,7 @@
        file-templates    ; auto-snippets for empty files
        fold              ; (nigh) universal code folding
        multiple-cursors  ; editing in many places at once
-       parinfer          ; turn lisp into python, sort of
+       ;; parinfer          ; turn lisp into python, sort of (disabled as currently not working on ARM)
        rotate-text       ; cycle region at point between text candidates
        snippets          ; my elves. They type so I don't have to
 
@@ -72,9 +70,10 @@
        rgb               ; creating color strings
        upload            ; map local to remote projects via ssh/ftp
        tree-sitter
+       direnv
 
        :os
-       (:if IS-MAC macos) ; improve compatibility with macOS
+       (:if (featurep :system 'macos) macos) ; improve compatibility with macOS
 
        :lang
        (go               ; the hipster dialect
@@ -85,7 +84,6 @@
         +tree-sitter)
        (python           ; beautiful is better than ugly
         +pyright
-        +pyenv
         +poetry
         +lsp
         +tree-sitter)
@@ -124,6 +122,9 @@
        nim               ; python + lisp at the speed of c
        (rest +jq)        ; Emacs as a REST client
        (cc
+        +lsp
+        +tree-sitter)
+       (nix
         +lsp
         +tree-sitter)
 

@@ -38,10 +38,6 @@
 ;; linear changes
 (evil-set-undo-system 'undo-tree)
 
-;; If running on a Mac, automatically fullscreen on launch
-(if (featurep :system 'macos)
-    (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
-
 ;; Experimenting with Eshell's Plan 9 emulation, see here:
 ;; https://www.masteringemacs.org/article/complete-guide-mastering-eshell
 (after! eshell
@@ -271,3 +267,9 @@
   :defer
   :config
   (setq pdf-view-use-scaling t))
+
+;; Rebind hash key
+(map!
+  :desc "Override M-3 to insert # rather than change workspace when in insert mode"
+  :i "M-3"
+  #'(lambda () (interactive) (insert "#")))

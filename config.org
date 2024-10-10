@@ -111,16 +111,6 @@ hatch to have, so I've enabled it as my undo system.
 ;; linear changes
 (evil-set-undo-system 'undo-tree)
 #+end_src
-**** Frames
-This snippet automatically maximises the Emacs frame on startup. Enabled on
-MacOS only as WSL2doesn't play nicely with this. The =IS-MAC= variable is
-populated by Doom Emacs in this case, but this would be possible to handle by
-checking the =system-type= variable which is part of the default Emacs install.
-#+begin_src elisp
-;; If running on a Mac, automatically fullscreen on launch
-(if (featurep :system 'macos)
-    (add-to-list 'default-frame-alist'(fullscreen . fullboth)))
-#+end_src
 **** Eshell
 Doom Emacs disables =eshell= from indicating colour support by default in order to
 avoid running into issues with applications using it as an indicator of a fully
@@ -527,4 +517,12 @@ need to set this variable within my config.
   :defer
   :config
   (setq pdf-view-use-scaling t))
+#+end_src
+** UK Keyboard
+#+begin_src elisp
+;; Rebind hash key
+(map!
+  :desc "Override M-3 to insert # rather than change workspace when in insert mode"
+  :i "M-3"
+  #'(lambda () (interactive) (insert "#")))
 #+end_src
