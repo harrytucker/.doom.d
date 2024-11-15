@@ -139,6 +139,17 @@ noise, so I want to ignore them.
   ;; When looking for Go project files, I don't care about vendored dependencies
   (add-to-list 'projectile-globally-ignored-directories "*vendor"))
 #+end_src
+*** Completions
+I'm trying out replacing =company-mode= with =corfu=. This is mainly because I've
+read largely positive things about this new completion package and I'm hoping
+it's a bit leaner and faster than =company-mode=.
+#+begin_src elisp
+(use-package! corfu
+  :defer
+  :config
+  ;; Automatically select the first valid completion candidate
+  (setq corfu-preselect 'prompt))
+#+end_src
 ** Programming
 *** Databases
 I only really use PostgreSQL in my day-to-day, so I set it as my default SQL

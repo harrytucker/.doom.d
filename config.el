@@ -55,6 +55,12 @@
   ;; When looking for Go project files, I don't care about vendored dependencies
   (add-to-list 'projectile-globally-ignored-directories "*vendor"))
 
+(use-package! corfu
+  :defer
+  :config
+  ;; Automatically select the first valid completion candidate
+  (setq corfu-preselect 'prompt))
+
 ;; Provides configuration for working with SQL within Emacs
 (use-package! sql
   :defer
