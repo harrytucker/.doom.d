@@ -95,12 +95,6 @@
        (zig              ; C, but simpler
         +lsp
         +tree-sitter)
-       (java             ; the poster child for carpal tunnel syndrome
-        +meghanada
-        +tree-sitter)
-       (haskell          ; a language that's lazier than I am
-        +lsp
-        +tree-sitter)
        (org              ; organize your plain life in plain text
         +dragndrop       ; drag & drop files/images into org buffers
         +hugo            ; use Emacs for hugo blogging
@@ -118,7 +112,6 @@
        emacs-lisp        ; drown in parentheses
        data              ; config/data formats
        (markdown +grip)  ; writing docs for people to ignore
-       nim               ; python + lisp at the speed of c
        (rest +jq)        ; Emacs as a REST client
        (cc
         +lsp
