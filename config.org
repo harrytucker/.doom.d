@@ -62,7 +62,7 @@ Treemacs uses a colour scheme based on the Atom text editor, so I set this to
 (setq doom-theme 'doom-dracula
       doom-themes-treemacs-theme "doom-colors"
       doom-font (font-spec
-                 :family "JetBrains Mono"
+                 :family "JetBrainsMono Nerd Font"
                  :size 14))
 #+end_src
 **** Splash Image
@@ -124,10 +124,10 @@ colour support.
   (require 'em-smart)
   (eshell-smart-initialize))
 
-;; Eshell's visual command handling is part of a separate library called
-;; em-term, so defer loading this until em-term has been loaded
-(after! em-term
-  (add-to-list 'eshell-visual-commands "saml2aws"))
+;; Point bash-completion at the Homebrew installed Bash version as MacOS ships
+;; an outdated Bash version.
+(after! bash-completion
+  (setq bash-completion-prog "/opt/homebrew/bin/bash"))
 #+end_src
 *** Projects
 When using =projectile=, I don't want to search some directories that are just
@@ -153,13 +153,23 @@ it's a bit leaner and faster than =company-mode=.
 ** Programming
 *** Databases
 I only really use PostgreSQL in my day-to-day, so I set it as my default SQL
-product dialect.
+product dialect. Auto formatting is configured with =apheleia-mode= to use
+=pgformatter=, available on the Homebrew repository. Some configuration is
+included for the PostgreSQL formatting to follow the style that I prefer.
 #+begin_src elisp
 ;; Provides configuration for working with SQL within Emacs
 (use-package! sql
   :defer
   :config
   (sql-set-product 'postgres))
+
+;; Use pg_format for formatting SQL files upon saving the buffer
+(set-formatter! 'pg_format '("pg_format" "--comma-break" "--keep-newline" "-") :modes '(sql-mode))
+(setq-hook! 'sql-mode-hook +format-with 'pg_format)
+(add-hook! 'sql-mode-hook #'apheleia-mode)
+
+;; Doom disables SQL formatting by default, so you need to override this.
+(delete 'sql-mode +format-on-save-disabled-modes)
 #+end_src
 *** Javascript/Typescript
 I don't write a lot of Javascript or Typescript, so I haven't invested a lot of
@@ -189,7 +199,10 @@ script support.
   ;; support for crates that rely on macros and build scripts
   (setq lsp-rust-server 'rust-analyzer
         lsp-rust-analyzer-proc-macro-enable t
-        lsp-rust-analyzer-cargo-run-build-scripts t))
+        lsp-rust-analyzer-cargo-run-build-scripts t)
+  ;; For some reason this has been lowered to 2 which conflicts with rustfmt,
+  ;; override this back to 4 spaces
+  (setq rustic-indent-offset 4))
 #+end_src
 *** Python
 I like using hard line wraps to keep my Python comments tidy, so let's use a
@@ -227,59 +240,12 @@ local leader key.
         :prefix "t" ; t for tests
         :desc "view coverage" "c" #'go-cover-buffer))
 #+end_src
-*** Debugging
-Doom Emacs can install =dap-mode= and the additional relevant modes for Python
-and Go support. However, some of the stuff around it doesn't appear to be set-up
-upon enabling the module in =init.el=. This configures a bunch of keybinds to
-enable easier use of =dap-mode= once a session has been started without having
-to =M-x= every single command.
+*** PlantUML
+The standard file extension is =.plantuml= but I've got many files that use =.puml=
+instead. Add a mapping for this file extension to use =plantuml-mode= as the major
+mode for these files.
 #+begin_src elisp
-;; Provides configuration for using the Debug Adapter Protocol from Emacs
-(use-package! dap-mode
-  :defer
-  :init
-  ;; Provides key map for interacting with 'dap-mode' for debugging supported
-  ;; languages
-  (map! :map dap-mode-map
-        :leader
-        :prefix ("d" . "dap")
-        ;; basics
-        :desc "dap next"          "n" #'dap-next
-        :desc "dap step in"       "i" #'dap-step-in
-        :desc "dap step out"      "o" #'dap-step-out
-        :desc "dap continue"      "c" #'dap-continue
-        :desc "dap hydra"         "h" #'dap-hydra
-        :desc "dap debug restart" "r" #'dap-debug-restart
-        :desc "dap debug"         "s" #'dap-debug
-
-        ;; debug
-        :prefix ("dd" . "Debug")
-        :desc "dap debug recent"  "r" #'dap-debug-recent
-        :desc "dap debug last"    "l" #'dap-debug-last
-
-        ;; eval
-        :prefix ("de" . "Eval")
-        :desc "eval"                "e" #'dap-eval
-        :desc "eval region"         "r" #'dap-eval-region
-        :desc "eval thing at point" "s" #'dap-eval-thing-at-point
-        :desc "add expression"      "a" #'dap-ui-expressions-add
-        :desc "remove expression"   "d" #'dap-ui-expressions-remove
-
-        ;; breakpoints
-        :prefix ("db" . "Breakpoint")
-        :desc "dap breakpoint toggle"      "b" #'dap-breakpoint-toggle
-        :desc "dap breakpoint condition"   "c" #'dap-breakpoint-condition
-        :desc "dap breakpoint hit count"   "h" #'dap-breakpoint-hit-condition
-        :desc "dap breakpoint log message" "l" #'dap-breakpoint-log-message)
-  :config
-  ;; Rust template for DAP debugging
-  (dap-register-debug-template "Rust::GDB Run Configuration"
-                               (list :type "gdb"
-                                     :request "launch"
-                                     :name "GDB::Run"
-                                     :gdbpath "rust-gdb"
-                                     :target nil
-                                     :cwd nil)))
+(add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 #+end_src
 *** Remote Access Tools
 I'm trying to speed up Tramp for remote access as the default from Doom doesn't
@@ -383,18 +349,6 @@ For writing in Org, I've configured a few things:
                  ("\\paragraph{%s}" . "\\paragraph\*{%s}")
                  ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
   (setq org-latex-default-class "mimore"))
-
-
-;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
-(use-package! org-modern
-  :after org
-  :config
-  ;; Disable table formatting and star hiding, increase label border
-  (setq org-modern-table nil
-        org-modern-hide-stars nil
-        org-modern-label-border 0.3)
-  ;; Enable org-modern globally
-  (global-org-modern-mode))
 #+end_src
 **** Org-Tree-Slide
 If LaTeX beamer presentations aren't your thing, or you want to use literate
@@ -462,7 +416,7 @@ so I just need to map that function to a key.
 #+begin_src elisp
 (map! :leader
       :prefix ("o" . "open")
-      :desc "Open calendar" "c" #'cfw:open-org-calendar)
+      :desc "Open calendar" "C" #'cfw:open-org-calendar)
 #+end_src
 ** Tooling
 *** Kubernetes
@@ -483,6 +437,27 @@ I've just mapped the dispatch menu to =SPC-k=.
   ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
   ;; resources
   (kele-mode))
+#+end_src
+*** GitHub Copilot
+/AI is all the rage these days./ I'm trying out two packages here:
+- =gptel=: Provides an LLM client for Emacs that can be used to chat with LLMs
+- =elyisum=: Frontend for =gptel=, allows you to query LLMs from any buffer and then
+  merge in the suggested changes using =smerge-mode=.
+#+begin_src elisp
+;; Configure `gptel` to use your model of choice, I'm using Claude 3.7 Sonnet
+;; on Github Copilot.
+(use-package! gptel
+  :config
+  (setq gptel-model 'claude-3.7-sonnet
+        gptel-backend (gptel-make-gh-copilot "Copilot")))
+
+;; Elysium doesn't need any backend configuration as it just uses whatever
+;; `gptel` is using.
+(use-package! elysium
+  :custom
+  ;; Below are the default values
+  (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
+  (elysium-window-style 'vertical)) ; Can be customized to horizontal
 #+end_src
 * Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
@@ -510,8 +485,17 @@ These are imported using Doom's =package!= macro.
 ;; Org
 (unpin! org-roam) ; use latest version of org-roam
 (package! org-roam-ui) ; enable org-roam-ui server
-(package! org-modern) ; nicer fontification than doom's +pretty
 (package! engrave-faces) ; comprehensive latex code output
+
+;; AI!
+
+;; Trying out GPTEL as it seems more advanced than the plugins I've been using
+;; up until now.
+(package! gptel :recipe (:nonrecursive t))
+
+;; Elysium is a gptel add-on that allows you to merge in code changes with a
+;; side-by-side chat buffer.
+(package! elysium)
 
 ;; Miscellaneous
 (package! command-log-mode)
@@ -536,4 +520,12 @@ need to set this variable within my config.
   :desc "Override M-3 to insert # rather than change workspace when in insert mode"
   :i "M-3"
   #'(lambda () (interactive) (insert "#")))
+#+end_src
+** Manuals
+MacOS comes with BSD =sed=, which causes issues with the regex used by =Man-mode=
+for reading manual pages. Override the =Man-sed-command= varibale to use the GNU
+version instead. You can install these through the =coreutils= package on the
+Homebrew repository.
+#+begin_src elisp
+(setq Man-sed-command "gsed")
 #+end_src

@@ -6,7 +6,7 @@
 (setq doom-theme 'doom-dracula
       doom-themes-treemacs-theme "doom-colors"
       doom-font (font-spec
-                 :family "JetBrains Mono"
+                 :family "JetBrainsMono Nerd Font"
                  :size 14))
 
 (defun random-element-of-list (items)
@@ -44,10 +44,10 @@
   (require 'em-smart)
   (eshell-smart-initialize))
 
-;; Eshell's visual command handling is part of a separate library called
-;; em-term, so defer loading this until em-term has been loaded
-(after! em-term
-  (add-to-list 'eshell-visual-commands "saml2aws"))
+;; Point bash-completion at the Homebrew installed Bash version as MacOS ships
+;; an outdated Bash version.
+(after! bash-completion
+  (setq bash-completion-prog "/opt/homebrew/bin/bash"))
 
 (use-package! projectile
   :defer
@@ -67,6 +67,14 @@
   :config
   (sql-set-product 'postgres))
 
+;; Use pg_format for formatting SQL files upon saving the buffer
+(set-formatter! 'pg_format '("pg_format" "--comma-break" "--keep-newline" "-") :modes '(sql-mode))
+(setq-hook! 'sql-mode-hook +format-with 'pg_format)
+(add-hook! 'sql-mode-hook #'apheleia-mode)
+
+;; Doom disables SQL formatting by default, so you need to override this.
+(delete 'sql-mode +format-on-save-disabled-modes)
+
 ;; Provides configuration for using 'eslint' with Emacs
 (use-package! lsp-eslint
   :defer
@@ -82,58 +90,16 @@
   ;; support for crates that rely on macros and build scripts
   (setq lsp-rust-server 'rust-analyzer
         lsp-rust-analyzer-proc-macro-enable t
-        lsp-rust-analyzer-cargo-run-build-scripts t))
+        lsp-rust-analyzer-cargo-run-build-scripts t)
+  ;; For some reason this has been lowered to 2 which conflicts with rustfmt,
+  ;; override this back to 4 spaces
+  (setq rustic-indent-offset 4))
 
 ;; Provides better Emacs support for Python docstrings
 (use-package! python-docstring-mode
   :hook python-mode)
 
-;; Provides configuration for using the Debug Adapter Protocol from Emacs
-(use-package! dap-mode
-  :defer
-  :init
-  ;; Provides key map for interacting with 'dap-mode' for debugging supported
-  ;; languages
-  (map! :map dap-mode-map
-        :leader
-        :prefix ("d" . "dap")
-        ;; basics
-        :desc "dap next"          "n" #'dap-next
-        :desc "dap step in"       "i" #'dap-step-in
-        :desc "dap step out"      "o" #'dap-step-out
-        :desc "dap continue"      "c" #'dap-continue
-        :desc "dap hydra"         "h" #'dap-hydra
-        :desc "dap debug restart" "r" #'dap-debug-restart
-        :desc "dap debug"         "s" #'dap-debug
-
-        ;; debug
-        :prefix ("dd" . "Debug")
-        :desc "dap debug recent"  "r" #'dap-debug-recent
-        :desc "dap debug last"    "l" #'dap-debug-last
-
-        ;; eval
-        :prefix ("de" . "Eval")
-        :desc "eval"                "e" #'dap-eval
-        :desc "eval region"         "r" #'dap-eval-region
-        :desc "eval thing at point" "s" #'dap-eval-thing-at-point
-        :desc "add expression"      "a" #'dap-ui-expressions-add
-        :desc "remove expression"   "d" #'dap-ui-expressions-remove
-
-        ;; breakpoints
-        :prefix ("db" . "Breakpoint")
-        :desc "dap breakpoint toggle"      "b" #'dap-breakpoint-toggle
-        :desc "dap breakpoint condition"   "c" #'dap-breakpoint-condition
-        :desc "dap breakpoint hit count"   "h" #'dap-breakpoint-hit-condition
-        :desc "dap breakpoint log message" "l" #'dap-breakpoint-log-message)
-  :config
-  ;; Rust template for DAP debugging
-  (dap-register-debug-template "Rust::GDB Run Configuration"
-                               (list :type "gdb"
-                                     :request "launch"
-                                     :name "GDB::Run"
-                                     :gdbpath "rust-gdb"
-                                     :target nil
-                                     :cwd nil)))
+(add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 
 ;; Provides configuration for working with remote machines over SSH using Tramp
 (use-package! tramp
@@ -218,18 +184,6 @@
                  ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
   (setq org-latex-default-class "mimore"))
 
-
-;; Provides 'org-modern' configuration in place of Doom's (org +pretty)
-(use-package! org-modern
-  :after org
-  :config
-  ;; Disable table formatting and star hiding, increase label border
-  (setq org-modern-table nil
-        org-modern-hide-stars nil
-        org-modern-label-border 0.3)
-  ;; Enable org-modern globally
-  (global-org-modern-mode))
-
 ;; Provides support for presenting directly from 'org-mode' buffers
 (use-package! org-tree-slide
   :after org
@@ -266,7 +220,22 @@
 
 (map! :leader
       :prefix ("o" . "open")
-      :desc "Open calendar" "c" #'cfw:open-org-calendar)
+      :desc "Open calendar" "C" #'cfw:open-org-calendar)
+
+;; Configure `gptel` to use your model of choice, I'm using Claude 3.7 Sonnet
+;; on Github Copilot.
+(use-package! gptel
+  :config
+  (setq gptel-model 'claude-3.7-sonnet
+        gptel-backend (gptel-make-gh-copilot "Copilot")))
+
+;; Elysium doesn't need any backend configuration as it just uses whatever
+;; `gptel` is using.
+(use-package! elysium
+  :custom
+  ;; Below are the default values
+  (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
+  (elysium-window-style 'vertical)) ; Can be customized to horizontal
 
 ;; Enable scaling for HiDPI displays
 (use-package! pdf-tools
@@ -279,3 +248,5 @@
   :desc "Override M-3 to insert # rather than change workspace when in insert mode"
   :i "M-3"
   #'(lambda () (interactive) (insert "#")))
+
+(setq Man-sed-command "gsed")
