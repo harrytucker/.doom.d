@@ -92,16 +92,15 @@
        (web              ; the tubes
         +lsp
         +tree-sitter)
-       (zig              ; C, but simpler
-        +lsp
-        +tree-sitter)
        (org              ; organize your plain life in plain text
         +dragndrop       ; drag & drop files/images into org buffers
         +hugo            ; use Emacs for hugo blogging
         +pandoc          ; export-with-pandoc support
         +pomodoro        ; be fruitful with the tomato technique
         +roam2           ; enable org-roam v2
+        +pretty
         +present)        ; using org-mode for presentations
+       plantuml          ; diagrams for confusing people more
        (json
         +tree-sitter)    ; no trailing commas for you
        (sh               ; she sells {ba,z,fi}sh shells on the C xor
@@ -114,9 +113,6 @@
        (markdown +grip)  ; writing docs for people to ignore
        (rest +jq)        ; Emacs as a REST client
        (cc
-        +lsp
-        +tree-sitter)
-       (nix
         +lsp
         +tree-sitter)
 
