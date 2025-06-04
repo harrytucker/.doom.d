@@ -164,7 +164,13 @@
   ;;
   ;; It also handles re-runs automatically for tools like Bibtex.
   (setq org-latex-pdf-process
-        `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir)))
+        ;; PDF process expects a list of commands here as pdflatex normally
+        ;; needs to be repeated.
+        ;;
+        ;; Since tectonic handles this automatically, we only need one item. The
+        ;; `,` marker is used to partially evaluate the list so that
+        ;; `doom-user-dir` is correctly concatenated using its value.
+        `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir "latex")))
 
   ;; Better syntax highlighting in exported LaTeX
   (setq org-latex-src-block-backend 'engraved)
