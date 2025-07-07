@@ -34,8 +34,8 @@ coherent, and is more useful for me and others.
 #+end_src
 
 #+RESULTS:
-: GNU Emacs 28.2 (build 1, x86_64-apple-darwin21.5.0, Carbon Version 165 AppKit 2113.5)
-:  of 2023-02-06
+: GNU Emacs 30.1 (build 2, aarch64-apple-darwin24.3.0, NS appkit-2575.40 Version 15.3.1 (Build 24D70))
+:  of 2025-03-07
 
 #+begin_src elisp :tangle no
 system-configuration-options
@@ -95,8 +95,10 @@ Normally this is the first thing I set up for any given text editor. Pairing
 delimiters by colour makes a lot of sense, and I find it makes code easier to
 parse, so I've set this up globally across all programming modes.
 #+begin_src elisp
-;; Highlights delimiter pairs with varying colours
-(add-hook! 'prog-mode-hook #'rainbow-delimiters-mode)
+;; Highlights scope with various colours, replaces rainbow-delimiters-mode
+(add-hook! 'prog-mode-hook #'prism-mode)
+(add-hook! 'python-mode-hook #'prism-whitespace-mode)
+(add-hook! 'yaml-mode-hook #'prism-whitespace-mode)
 
 ;; Lower the delay for displaying potential key chords
 (setq which-key-idle-delay 0.2)
@@ -424,6 +426,19 @@ so I just need to map that function to a key.
       :prefix ("o" . "open")
       :desc "Open calendar" "C" #'cfw:open-org-calendar)
 #+end_src
+*** Markdown
+You can use =grip-mode= to provide GitHub markdown previews, but by default you'll
+get rate limited by the GitHub API. To avoid this you'll need to authenticate
+with a personal access token.
+#+begin_src elisp
+;; You'll need to require the auth-source library. It's built into Emacs.
+(require 'auth-source)
+
+;; Fetch API credentials from ~/.authinfo or ~/.netrc
+(let ((credential (auth-source-user-and-password "api.github.com")))
+  (setq grip-github-user (car credential)
+        grip-github-password (cadr credential)))
+#+end_src
 ** Tooling
 *** Kubernetes
 Define autoloads for commands from =kubernetes=, and enable =evil-mode= bindings for
@@ -454,16 +469,16 @@ I've just mapped the dispatch menu to =SPC-k=.
 ;; on Github Copilot.
 (use-package! gptel
   :config
+  ;; configure model and GitHub backend
   (setq gptel-model 'claude-3.7-sonnet
-        gptel-backend (gptel-make-gh-copilot "Copilot")))
-
-;; Elysium doesn't need any backend configuration as it just uses whatever
-;; `gptel` is using.
-(use-package! elysium
-  :custom
-  ;; Below are the default values
-  (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
-  (elysium-window-style 'vertical)) ; Can be customized to horizontal
+        gptel-backend (gptel-make-gh-copilot "Copilot"))
+  ;; configure keybind for opening copilot from anywhere
+  (map! :leader
+        :prefix ("o" . "open")
+        :desc "Open copilot" "c" #'gptel)
+  ;; configure keybinds for gptel-mode
+  (map! :map gptel-mode-map
+        :desc "Open menu" :n "?" #'gptel-menu))
 #+end_src
 * Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
@@ -493,18 +508,9 @@ These are imported using Doom's =package!= macro.
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! engrave-faces) ; comprehensive latex code output
 
-;; AI!
-
-;; Trying out GPTEL as it seems more advanced than the plugins I've been using
-;; up until now.
-(package! gptel :recipe (:nonrecursive t))
-
-;; Elysium is a gptel add-on that allows you to merge in code changes with a
-;; side-by-side chat buffer.
-(package! elysium)
-
 ;; Miscellaneous
 (package! command-log-mode)
+(package! prism)
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools
@@ -518,6 +524,9 @@ need to set this variable within my config.
   :defer
   :config
   (setq pdf-view-use-scaling t))
+
+;; Enable precision scrolling globally
+(pixel-scroll-precision-mode)
 #+end_src
 ** UK Keyboard
 #+begin_src elisp
@@ -533,5 +542,5 @@ for reading manual pages. Override the =Man-sed-command= varibale to use the GNU
 version instead. You can install these through the =coreutils= package on the
 Homebrew repository.
 #+begin_src elisp
-(setq Man-sed-command "gsed")
+(if (featurep :system 'macos) (setq Man-sed-command "gsed"))
 #+end_src

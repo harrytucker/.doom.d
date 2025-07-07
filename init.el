@@ -58,6 +58,7 @@
        syntax            ; tasing you for every semicolon you forget
 
        :tools
+       llm
        (eval +overlay)   ; run code, run (also, repls)
        (lookup           ; helps you navigate your code and documentation
         +docsets)        ; ...or in Dash docsets locally

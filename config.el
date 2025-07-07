@@ -28,8 +28,10 @@
 (setq doom-modeline-major-mode-icon t
       doom-modeline-major-mode-color-icon t)
 
-;; Highlights delimiter pairs with varying colours
-(add-hook! 'prog-mode-hook #'rainbow-delimiters-mode)
+;; Highlights scope with various colours, replaces rainbow-delimiters-mode
+(add-hook! 'prog-mode-hook #'prism-mode)
+(add-hook! 'python-mode-hook #'prism-whitespace-mode)
+(add-hook! 'yaml-mode-hook #'prism-whitespace-mode)
 
 ;; Lower the delay for displaying potential key chords
 (setq which-key-idle-delay 0.2)
@@ -228,20 +230,28 @@
       :prefix ("o" . "open")
       :desc "Open calendar" "C" #'cfw:open-org-calendar)
 
+;; You'll need to require the auth-source library. It's built into Emacs.
+(require 'auth-source)
+
+;; Fetch API credentials from ~/.authinfo or ~/.netrc
+(let ((credential (auth-source-user-and-password "api.github.com")))
+  (setq grip-github-user (car credential)
+        grip-github-password (cadr credential)))
+
 ;; Configure `gptel` to use your model of choice, I'm using Claude 3.7 Sonnet
 ;; on Github Copilot.
 (use-package! gptel
   :config
+  ;; configure model and GitHub backend
   (setq gptel-model 'claude-3.7-sonnet
-        gptel-backend (gptel-make-gh-copilot "Copilot")))
-
-;; Elysium doesn't need any backend configuration as it just uses whatever
-;; `gptel` is using.
-(use-package! elysium
-  :custom
-  ;; Below are the default values
-  (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
-  (elysium-window-style 'vertical)) ; Can be customized to horizontal
+        gptel-backend (gptel-make-gh-copilot "Copilot"))
+  ;; configure keybind for opening copilot from anywhere
+  (map! :leader
+        :prefix ("o" . "open")
+        :desc "Open copilot" "c" #'gptel)
+  ;; configure keybinds for gptel-mode
+  (map! :map gptel-mode-map
+        :desc "Open menu" :n "?" #'gptel-menu))
 
 ;; Enable scaling for HiDPI displays
 (use-package! pdf-tools
@@ -249,10 +259,13 @@
   :config
   (setq pdf-view-use-scaling t))
 
+;; Enable precision scrolling globally
+(pixel-scroll-precision-mode)
+
 ;; Rebind hash key
 (map!
   :desc "Override M-3 to insert # rather than change workspace when in insert mode"
   :i "M-3"
   #'(lambda () (interactive) (insert "#")))
 
-(setq Man-sed-command "gsed")
+(if (featurep :system 'macos) (setq Man-sed-command "gsed"))
