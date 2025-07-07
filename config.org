@@ -460,10 +460,8 @@ I've just mapped the dispatch menu to =SPC-k=.
   (kele-mode))
 #+end_src
 *** GitHub Copilot
-/AI is all the rage these days./ I'm trying out two packages here:
+/AI is all the rage these days./
 - =gptel=: Provides an LLM client for Emacs that can be used to chat with LLMs
-- =elyisum=: Frontend for =gptel=, allows you to query LLMs from any buffer and then
-  merge in the suggested changes using =smerge-mode=.
 #+begin_src elisp
 ;; Configure `gptel` to use your model of choice, I'm using Claude 3.7 Sonnet
 ;; on Github Copilot.
