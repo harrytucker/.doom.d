@@ -238,14 +238,23 @@
   (setq grip-github-user (car credential)
         grip-github-password (cadr credential)))
 
-;; Configure `gptel` to use your model of choice, I'm using Claude 3.7 Sonnet
-;; on Github Copilot.
 (use-package! gptel
   :config
-  ;; configure model and GitHub backend
-  (setq gptel-model 'claude-sonnet-4
+  ;; using claude sonnet 4 for my chosen default AI model
+  (setq gptel-model #'claude-sonnet-4
+        ;; gptel uses markdown-mode by default, use org-mode instead
+        gptel-default-mode #'org-mode
+        ;; override the doom emacs llm module to display buffer side-by-side
+        gptel-display-buffer-action t
+        ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
-  (add-hook! 'gptel-post-stream-hook 'gptel-auto-scroll))
+  ;; add keybind for activating gptel-mode on an old org-buffer
+  (map! :leader
+        :prefix ("o" . "open")
+        (:prefix ("l" . "llm")
+         :desc "Toggle gptel mode for current buffer" "t" #'gptel-mode))
+  ;; enable automatic scrolling of llm responses
+  (add-hook! #'gptel-post-stream-hook #'gptel-auto-scroll))
 
 ;; Enable scaling for HiDPI displays
 (use-package! pdf-tools
