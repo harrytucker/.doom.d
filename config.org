@@ -468,15 +468,10 @@ I've just mapped the dispatch menu to =SPC-k=.
 (use-package! gptel
   :config
   ;; configure model and GitHub backend
-  (setq gptel-model 'claude-3.7-sonnet
+  (setq gptel-model 'claude-sonnet-4
         gptel-backend (gptel-make-gh-copilot "Copilot"))
-  ;; configure keybind for opening copilot from anywhere
-  (map! :leader
-        :prefix ("o" . "open")
-        :desc "Open copilot" "c" #'gptel)
-  ;; configure keybinds for gptel-mode
-  (map! :map gptel-mode-map
-        :desc "Open menu" :n "?" #'gptel-menu))
+  (add-hook! 'gptel-post-stream-hook 'gptel-auto-scroll))
+
 #+end_src
 * Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
