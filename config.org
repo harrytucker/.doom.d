@@ -102,6 +102,11 @@ parse, so I've set this up globally across all programming modes.
 
 ;; Lower the delay for displaying potential key chords
 (setq which-key-idle-delay 0.2)
+
+;; Fancy, modern looking flycheck displays
+(use-package! flyover
+  :config
+  (add-hook 'flycheck-mode-hook #'flyover-mode))
 #+end_src
 **** Evil
 I can use =undo-tree= as a linear system most of the time, which is what ends up
@@ -124,7 +129,9 @@ colour support.
 ;; https://www.masteringemacs.org/article/complete-guide-mastering-eshell
 (after! eshell
   (require 'em-smart)
-  (eshell-smart-initialize))
+  (eshell-smart-initialize)
+  ;; Eshell's emulated echo doesn't seem to honour the -n flag.
+  (setq eshell-plain-echo-behavior t))
 
 ;; Point bash-completion at the Homebrew installed Bash version as MacOS ships
 ;; an outdated Bash version.
@@ -473,13 +480,16 @@ I've just mapped the dispatch menu to =SPC-k=.
         gptel-display-buffer-action t
         ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
+  ;; Register LLM community tool collection
+  (mapcar (apply-partially #'apply #'gptel-make-tool)
+          (llm-tool-collection-get-all))
   ;; add keybind for activating gptel-mode on an old org-buffer
   (map! :leader
         :prefix ("o" . "open")
         (:prefix ("l" . "llm")
          :desc "Toggle gptel mode for current buffer" "t" #'gptel-mode))
   ;; enable automatic scrolling of llm responses
-  (add-hook! #'gptel-post-stream-hook #'gptel-auto-scroll))
+  (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
 #+end_src
 * Packages
 I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
@@ -509,9 +519,16 @@ These are imported using Doom's =package!= macro.
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! engrave-faces) ; comprehensive latex code output
 
+;; AI Tools
+(package!
+  llm-tool-collection :recipe
+  (:host github
+   :repo "skissue/llm-tool-collection"))
+
 ;; Miscellaneous
 (package! command-log-mode)
 (package! prism)
+(package! flyover)
 #+end_src
 * Workarounds
 ** MacOS & PDF Tools

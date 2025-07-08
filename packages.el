@@ -22,6 +22,13 @@
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! engrave-faces) ; comprehensive latex code output
 
+;; AI Tools
+(package!
+  llm-tool-collection :recipe
+  (:host github
+   :repo "skissue/llm-tool-collection"))
+
 ;; Miscellaneous
 (package! command-log-mode)
 (package! prism)
+(package! flyover)

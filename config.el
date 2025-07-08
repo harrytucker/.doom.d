@@ -36,6 +36,11 @@
 ;; Lower the delay for displaying potential key chords
 (setq which-key-idle-delay 0.2)
 
+;; Fancy, modern looking flycheck displays
+(use-package! flyover
+  :config
+  (add-hook 'flycheck-mode-hook #'flyover-mode))
+
 ;; Allows undoing and redoing as a tree of changes, instead of being limited to
 ;; linear changes
 (evil-set-undo-system 'undo-tree)
@@ -44,7 +49,9 @@
 ;; https://www.masteringemacs.org/article/complete-guide-mastering-eshell
 (after! eshell
   (require 'em-smart)
-  (eshell-smart-initialize))
+  (eshell-smart-initialize)
+  ;; Eshell's emulated echo doesn't seem to honour the -n flag.
+  (setq eshell-plain-echo-behavior t))
 
 ;; Point bash-completion at the Homebrew installed Bash version as MacOS ships
 ;; an outdated Bash version.
@@ -248,13 +255,16 @@
         gptel-display-buffer-action t
         ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
+  ;; Register LLM community tool collection
+  (mapcar (apply-partially #'apply #'gptel-make-tool)
+          (llm-tool-collection-get-all))
   ;; add keybind for activating gptel-mode on an old org-buffer
   (map! :leader
         :prefix ("o" . "open")
         (:prefix ("l" . "llm")
          :desc "Toggle gptel mode for current buffer" "t" #'gptel-mode))
   ;; enable automatic scrolling of llm responses
-  (add-hook! #'gptel-post-stream-hook #'gptel-auto-scroll))
+  (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
 
 ;; Enable scaling for HiDPI displays
 (use-package! pdf-tools
