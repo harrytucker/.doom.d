@@ -8,26 +8,14 @@
 # ------------------------------------------------------------------------------
 
 * About
-I've made multiple attempts in the past at using Emacs as my primary text
-editor, and didn't have much luck. About three years ago I found out about Doom
-Emacs and forced myself to use it for two weeks, initially starting with
-probably the most basic possible configuration, just setting up the theme:
-#+begin_src elisp :tangle no
-;;; .doom.d/config.el -*- lexical-binding: t; -*-
-
-;; Place your private configuration here
-
-;; Set emacs theme
-(setq doom-theme 'doom-dracula)
+Come one, come all and see the folly of a man trying to configure a perfect
+Emacs setup. First, shut up the linter:
+#+begin_src elisp
+;;; -*- lexical-binding: t; -*-
 #+end_src
 
-Once I figured out how to use =magit=, I've stuck with Emacs since then. It's
-progressively taken over more and more of the tasks I do at work and on personal
-projects. This literate config has grown since then to encompass a bunch of
-different tasks, and is available on Git so I can use the same editor across
-different machines. At time of writing, I've overhauled the configuration to
-consolidate a bunch of disparate lisp into something that's hopefully more
-coherent, and is more useful for me and others.
+Hopefully you find this useful in some manner if you want to configure Doom
+Emacs in a similar way to mine.
 ** Build Information
 #+begin_src elisp :tangle no
 (emacs-version)
@@ -107,6 +95,9 @@ parse, so I've set this up globally across all programming modes.
 (use-package! flyover
   :config
   (add-hook 'flycheck-mode-hook #'flyover-mode))
+
+;; Enable precision scrolling globally
+(pixel-scroll-precision-mode)
 #+end_src
 **** Evil
 I can use =undo-tree= as a linear system most of the time, which is what ends up
@@ -481,8 +472,8 @@ I've just mapped the dispatch menu to =SPC-k=.
         ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
   ;; Register LLM community tool collection
-  (mapcar (apply-partially #'apply #'gptel-make-tool)
-          (llm-tool-collection-get-all))
+  (mapc (apply-partially #'apply #'gptel-make-tool)
+        (llm-tool-collection-get-all))
   ;; add keybind for activating gptel-mode on an old org-buffer
   (map! :leader
         :prefix ("o" . "open")
@@ -531,34 +522,18 @@ These are imported using Doom's =package!= macro.
 (package! flyover)
 #+end_src
 * Workarounds
-** MacOS & PDF Tools
-When using HiDPI displays, =pdf-tools= needs to scale the output image in order to
-display something that's readable in an Emacs buffer. As of =pdf-tools= v1.1.0,
-this is enabled by default, but Doom Emacs currently pins an older version, so I
-need to set this variable within my config.
+** MacOS
+MacOS has a few things that can sometimes cause issues with Doom Emacs. Here's
+some configuration that only activates on MacOS installs to fix those.
 #+begin_src elisp
-;; Enable scaling for HiDPI displays
-(use-package! pdf-tools
-  :defer
-  :config
-  (setq pdf-view-use-scaling t))
-
-;; Enable precision scrolling globally
-(pixel-scroll-precision-mode)
-#+end_src
-** UK Keyboard
-#+begin_src elisp
-;; Rebind hash key
-(map!
-  :desc "Override M-3 to insert # rather than change workspace when in insert mode"
-  :i "M-3"
-  #'(lambda () (interactive) (insert "#")))
-#+end_src
-** Manuals
-MacOS comes with BSD =sed=, which causes issues with the regex used by =Man-mode=
-for reading manual pages. Override the =Man-sed-command= varibale to use the GNU
-version instead. You can install these through the =coreutils= package on the
-Homebrew repository.
-#+begin_src elisp
-(if (featurep :system 'macos) (setq Man-sed-command "gsed"))
+;; MacOS only configuration
+(when (featurep :system 'macos)
+  ;; Mac UK keyboard layout puts the '#' symbol under Opt + 3 which
+  ;; conflicts with Doom's workspace shortcuts.
+  ;;
+  ;; Rebind this in insert mode only so that I can still use the hash
+  ;; symbol.
+  (map! :i "M-3" #'(lambda () (interactive) (insert "#")))
+  ;; BSD sed doesn't work with Man-mode, use the GNU variant.
+  (setq Man-sed-command "gsed"))
 #+end_src

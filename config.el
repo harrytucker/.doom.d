@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t; -*-
+
 ;; Emacs User Identification
 (setq user-full-name "Harry Tucker"
       user-mail-address "tucker.harry@outlook.com")
@@ -40,6 +42,9 @@
 (use-package! flyover
   :config
   (add-hook 'flycheck-mode-hook #'flyover-mode))
+
+;; Enable precision scrolling globally
+(pixel-scroll-precision-mode)
 
 ;; Allows undoing and redoing as a tree of changes, instead of being limited to
 ;; linear changes
@@ -256,8 +261,8 @@
         ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
   ;; Register LLM community tool collection
-  (mapcar (apply-partially #'apply #'gptel-make-tool)
-          (llm-tool-collection-get-all))
+  (mapc (apply-partially #'apply #'gptel-make-tool)
+        (llm-tool-collection-get-all))
   ;; add keybind for activating gptel-mode on an old org-buffer
   (map! :leader
         :prefix ("o" . "open")
@@ -266,19 +271,13 @@
   ;; enable automatic scrolling of llm responses
   (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
 
-;; Enable scaling for HiDPI displays
-(use-package! pdf-tools
-  :defer
-  :config
-  (setq pdf-view-use-scaling t))
-
-;; Enable precision scrolling globally
-(pixel-scroll-precision-mode)
-
-;; Rebind hash key
-(map!
-  :desc "Override M-3 to insert # rather than change workspace when in insert mode"
-  :i "M-3"
-  #'(lambda () (interactive) (insert "#")))
-
-(if (featurep :system 'macos) (setq Man-sed-command "gsed"))
+;; MacOS only configuration
+(when (featurep :system 'macos)
+  ;; Mac UK keyboard layout puts the '#' symbol under Opt + 3 which
+  ;; conflicts with Doom's workspace shortcuts.
+  ;;
+  ;; Rebind this in insert mode only so that I can still use the hash
+  ;; symbol.
+  (map! :i "M-3" #'(lambda () (interactive) (insert "#")))
+  ;; BSD sed doesn't work with Man-mode, use the GNU variant.
+  (setq Man-sed-command "gsed"))
