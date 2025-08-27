@@ -22,9 +22,10 @@
        nav-flash         ; blink the current line after jumping
        minimap
        ophints           ; highlight the region an operation acts on
-       (popup            ; tame sudden yet inevitable temporary windows
-        +all             ; catch all popups that start with an asterix
-        +defaults)       ; default popup rules
+       ;; FIXME: Either keep or remove this depending on how I feel.
+       ;; (popup            ; tame sudden yet inevitable temporary windows
+       ;;  +all             ; catch all popups that start with an asterix
+       ;;  +defaults)       ; default popup rules
        (treemacs +lsp)   ; a project drawer, like neotree but cooler
        unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
@@ -44,7 +45,9 @@
        snippets          ; my elves. They type so I don't have to
 
        :emacs
-       (dired +icons)    ; making dired pretty [functional]
+       (dired
+        +icons
+        +dirvish)        ; making dired pretty [functional]
        (ibuffer +icons)  ; interactive buffer management
        (undo +tree)      ; undoing stuff with a tree looks cool
        electric          ; smarter, keyword-based electric-indent
@@ -83,8 +86,6 @@
         +lsp
         +tree-sitter)
        (python           ; beautiful is better than ugly
-        +pyright
-        +poetry
         +lsp
         +tree-sitter)
        (javascript       ; all(hope(abandon(ye(who(enter(here))))))

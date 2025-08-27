@@ -76,15 +76,18 @@
   (setq corfu-preselect 'prompt))
 
 ;; Provides configuration for working with SQL within Emacs
-(use-package! sql
-  :defer
-  :config
-  (sql-set-product 'postgres))
-
-;; Use pg_format for formatting SQL files upon saving the buffer
-(set-formatter! 'pg_format '("pg_format" "--comma-break" "--keep-newline" "-") :modes '(sql-mode))
-(setq-hook! 'sql-mode-hook +format-with 'pg_format)
-(add-hook! 'sql-mode-hook #'apheleia-mode)
+(after! sql-mode
+  ;; Use PostgreSQL
+  (sql-set-product 'postgres)
+  ;; Enable apheleia-mode in SQL buffers
+  (add-hook 'sql-mode-hook #'apheleia-mode)
+  ;; Use pg_format for formatting SQL files upon saving the buffer (set-formatter!
+  (set-formatter!
+    'pg_format '("pg_format"
+                 "--comma-break"
+                 "--keep-newline"
+                 "-")
+    :modes '(sql-mode)))
 
 ;; Doom disables SQL formatting by default, so you need to override this.
 (delete 'sql-mode +format-on-save-disabled-modes)
@@ -112,6 +115,12 @@
 ;; Provides better Emacs support for Python docstrings
 (use-package! python-docstring-mode
   :hook python-mode)
+
+;; Use ruff instead of black for formatting, apheleia already defines the
+;; formatter so we can just modify the mapping in the alist.
+(after! python-mode
+  (setf  (alist-get 'python-mode apheleia-mode-alist)
+         '(ruff)))
 
 (add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 
@@ -240,7 +249,7 @@
 
 (map! :leader
       :prefix ("o" . "open")
-      :desc "Open calendar" "C" #'cfw:open-org-calendar)
+      :desc "Open calendar" "c" #'cfw:open-org-calendar)
 
 ;; You'll need to require the auth-source library. It's built into Emacs.
 (require 'auth-source)

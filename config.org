@@ -158,15 +158,18 @@ product dialect. Auto formatting is configured with =apheleia-mode= to use
 included for the PostgreSQL formatting to follow the style that I prefer.
 #+begin_src elisp
 ;; Provides configuration for working with SQL within Emacs
-(use-package! sql
-  :defer
-  :config
-  (sql-set-product 'postgres))
-
-;; Use pg_format for formatting SQL files upon saving the buffer
-(set-formatter! 'pg_format '("pg_format" "--comma-break" "--keep-newline" "-") :modes '(sql-mode))
-(setq-hook! 'sql-mode-hook +format-with 'pg_format)
-(add-hook! 'sql-mode-hook #'apheleia-mode)
+(after! sql-mode
+  ;; Use PostgreSQL
+  (sql-set-product 'postgres)
+  ;; Enable apheleia-mode in SQL buffers
+  (add-hook 'sql-mode-hook #'apheleia-mode)
+  ;; Use pg_format for formatting SQL files upon saving the buffer (set-formatter!
+  (set-formatter!
+    'pg_format '("pg_format"
+                 "--comma-break"
+                 "--keep-newline"
+                 "-")
+    :modes '(sql-mode)))
 
 ;; Doom disables SQL formatting by default, so you need to override this.
 (delete 'sql-mode +format-on-save-disabled-modes)
@@ -213,6 +216,12 @@ highlighting in docstrings.
 ;; Provides better Emacs support for Python docstrings
 (use-package! python-docstring-mode
   :hook python-mode)
+
+;; Use ruff instead of black for formatting, apheleia already defines the
+;; formatter so we can just modify the mapping in the alist.
+(after! python-mode
+  (setf  (alist-get 'python-mode apheleia-mode-alist)
+         '(ruff)))
 #+end_src
 *** Go
 Out of the box, =go-mode= provides everything I need, but visualising coverage
@@ -422,7 +431,7 @@ so I just need to map that function to a key.
 #+begin_src elisp
 (map! :leader
       :prefix ("o" . "open")
-      :desc "Open calendar" "C" #'cfw:open-org-calendar)
+      :desc "Open calendar" "c" #'cfw:open-org-calendar)
 #+end_src
 *** Markdown
 You can use =grip-mode= to provide GitHub markdown previews, but by default you'll
