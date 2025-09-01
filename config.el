@@ -144,24 +144,11 @@
   ;; prevent hangs on first load
   :defer-incrementally t
   :config
-  ;; Hide emphasis markers that wrap text (i.e. bold, italics)
-  (setq org-hide-emphasis-markers t)
-
-  ;; Record timestamps on task completion for org-agenda usage
-  (setq org-log-done 'time)
-  (setq org-agenda-start-with-log-mode t)
-
-  ;; Capture scrum notes into new files, adapted from:
-  ;; https://stackoverflow.com/a/11903246
-  (defun capture-retro-file (path)
-    (let ((name (read-string "Sprint Number: ")))
-      (expand-file-name (format "Sprint %s Retrospective.org" name) path)))
-
-  ;; Add capture templates for scrum tasks
-  (add-to-list 'org-capture-templates
-               `("r" "Sprint Retrospective" entry
-                 (file (lambda () (capture-retro-file "~/org/Reports")))
-                 (file ,(concat doom-user-dir "templates/sprint.org"))))
+  (setq org-log-done 'time ; Record timestamps on task completion for org-agenda usage
+        org-agenda-start-with-log-mode t ; Start agenda in log mode with timestamps for completion displayed
+        org-hide-emphasis-markers t ; Hide emphasis markers that wrap text (i.e. bold, italics)
+        +org-capture-todo-file "Tasks.org" ; Capture tasks to ~/org/Tasks.org
+        org-archive-location "::* Archive") ; Archive sub-trees to an "Archive" top-level heading
 
   ;; Use 'pdf-tools' as the default viewer for exported Org documents
   (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
@@ -273,10 +260,15 @@
   (mapc (apply-partially #'apply #'gptel-make-tool)
         (llm-tool-collection-get-all))
   ;; add keybind for activating gptel-mode on an old org-buffer
+  (defun my/gptel-toggle-and-enable-solaire ()
+    (interactive)
+    (gptel-mode 'toggle)
+    (solaire-mode 'toggle))
+
   (map! :leader
         :prefix ("o" . "open")
         (:prefix ("l" . "llm")
-         :desc "Toggle gptel mode for current buffer" "t" #'gptel-mode))
+         :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire))
   ;; enable automatic scrolling of llm responses
   (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
 
