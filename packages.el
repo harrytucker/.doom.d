@@ -32,3 +32,4 @@
 (package! command-log-mode)
 (package! prism)
 (package! flyover)
+(package! eat)

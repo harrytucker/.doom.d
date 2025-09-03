@@ -122,7 +122,14 @@ colour support.
   (require 'em-smart)
   (eshell-smart-initialize)
   ;; Eshell's emulated echo doesn't seem to honour the -n flag.
-  (setq eshell-plain-echo-behavior t))
+  (setq eshell-plain-echo-behavior t
+        eshell-visual-commands '())
+
+  ;; Use Emacs-eat. I've gotten rid of vterm as this works well enough for my purposes,
+  ;; and I much prefer staying in Eshell.
+  ;;
+  ;; Using eat also requires unsetting eshell-visual-commands, done above here.
+  (add-hook 'eshell-load-hook #'eat-eshell-mode))
 
 ;; Point bash-completion at the Homebrew installed Bash version as MacOS ships
 ;; an outdated Bash version.
@@ -460,27 +467,33 @@ I've just mapped the dispatch menu to =SPC-k=.
 (use-package! gptel
   :config
   ;; using claude sonnet 4 for my chosen default AI model
-  (setq gptel-model #'claude-sonnet-4
+  (setq gptel-model #'gpt-5
         ;; gptel uses markdown-mode by default, use org-mode instead
         gptel-default-mode #'org-mode
         ;; override the doom emacs llm module to display buffer side-by-side
         gptel-display-buffer-action t
+        ;; use branching context mode
+        gptel-org-branching-context t
         ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
   ;; Register LLM community tool collection
   (mapc (apply-partially #'apply #'gptel-make-tool)
         (llm-tool-collection-get-all))
+
+  ;; since branching mode is enabled, don't use headings in prompt prefixes
+  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+  (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
+
   ;; add keybind for activating gptel-mode on an old org-buffer
   (defun my/gptel-toggle-and-enable-solaire ()
     (interactive)
     (gptel-mode 'toggle)
     (solaire-mode 'toggle))
-
   (map! :leader
         :prefix ("o" . "open")
         (:prefix ("l" . "llm")
          :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire))
-  ;; enable automatic scrolling of llm responses
+   ;; enable automatic scrolling of llm responses
   (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
 #+end_src
 * Packages
@@ -521,6 +534,7 @@ These are imported using Doom's =package!= macro.
 (package! command-log-mode)
 (package! prism)
 (package! flyover)
+(package! eat)
 #+end_src
 * Workarounds
 ** MacOS

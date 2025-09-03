@@ -22,10 +22,6 @@
        nav-flash         ; blink the current line after jumping
        minimap
        ophints           ; highlight the region an operation acts on
-       ;; FIXME: Either keep or remove this depending on how I feel.
-       ;; (popup            ; tame sudden yet inevitable temporary windows
-       ;;  +all             ; catch all popups that start with an asterix
-       ;;  +defaults)       ; default popup rules
        (treemacs +lsp)   ; a project drawer, like neotree but cooler
        unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
@@ -55,7 +51,6 @@
 
        :term
        eshell            ; a consistent, cross-platform shell
-       vterm             ; another terminals in Emacs
 
        :checkers
        syntax            ; tasing you for every semicolon you forget
@@ -87,6 +82,7 @@
         +tree-sitter)
        (python           ; beautiful is better than ugly
         +lsp
+        +pyright
         +tree-sitter)
        (javascript       ; all(hope(abandon(ye(who(enter(here))))))
         +lsp             ; enable lsp support
