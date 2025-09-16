@@ -92,9 +92,9 @@ parse, so I've set this up globally across all programming modes.
 (setq which-key-idle-delay 0.2)
 
 ;; Fancy, modern looking flycheck displays
-(use-package! flyover
-  :config
-  (add-hook 'flycheck-mode-hook #'flyover-mode))
+;; (use-package! flyover
+;;   :config
+;;   (add-hook 'flycheck-mode-hook #'flyover-mode))
 
 ;; Enable precision scrolling globally
 (pixel-scroll-precision-mode)
@@ -123,8 +123,11 @@ colour support.
   (eshell-smart-initialize)
   ;; Eshell's emulated echo doesn't seem to honour the -n flag.
   (setq eshell-plain-echo-behavior t
-        eshell-visual-commands '())
+        eshell-visual-commands '()))
 
+(use-package! eat
+  :defer t
+  :init
   ;; Use Emacs-eat. I've gotten rid of vterm as this works well enough for my purposes,
   ;; and I much prefer staying in Eshell.
   ;;
