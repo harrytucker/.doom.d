@@ -22,19 +22,19 @@
        nav-flash         ; blink the current line after jumping
        minimap
        ophints           ; highlight the region an operation acts on
-       (treemacs +lsp)   ; a project drawer, like neotree but cooler
        unicode           ; extended unicode support for various languages
        vc-gutter         ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        window-select     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces
-       ;;tabs            ; an tab bar for Emacs
+       zen               ; distraction-free mode for the eternally distracted
 
        :editor
        (evil +everywhere); come to the dark side, we have cookies
        (format +onsave)  ; automated prettiness
        file-templates    ; auto-snippets for empty files
-       fold              ; (nigh) universal code folding
+       (fold
+        +tree-sitter)    ; (nigh) universal code folding
        multiple-cursors  ; editing in many places at once
        parinfer          ; turn lisp into python, sort of
        rotate-text       ; cycle region at point between text candidates
@@ -108,7 +108,9 @@
         +tree-sitter)
        emacs-lisp        ; drown in parentheses
        data              ; config/data formats
-       (markdown +grip)  ; writing docs for people to ignore
+       (markdown
+        +tree-sitter
+        +grip)           ; writing docs for people to ignore
        (rest +jq)        ; Emacs as a REST client
        (cc
         +lsp

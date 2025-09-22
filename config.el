@@ -134,18 +134,6 @@
 
 (add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 
-;; Provides configuration for working with remote machines over SSH using Tramp
-(use-package! tramp
-  :defer
-  :config
-  ;; Use sshx by default for speed
-  ;; Don't use /bin/sh as the default shell
-  (let ((+tramp-shell "/bin/bash"))
-    (setq tramp-default-remote-shell +tramp-shell)
-    (setq vterm-tramp-shells `(("ssh" ,+tramp-shell)
-                               ("sshx" ,+tramp-shell)
-                               ("docker" ,+tramp-shell)))))
-
 ;; Provides configuration for working with 'org-mode'
 (use-package! org
   ;; Wrap text at 80 characters for better Git diffs and readability
@@ -271,6 +259,9 @@
   ;; Register LLM community tool collection
   (mapc (apply-partially #'apply #'gptel-make-tool)
         (llm-tool-collection-get-all))
+
+  ;; Install Macher presets for agentic use
+  (macher-install)
 
   ;; since branching mode is enabled, don't use headings in prompt prefixes
   (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")

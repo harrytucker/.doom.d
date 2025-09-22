@@ -27,6 +27,10 @@
   llm-tool-collection :recipe
   (:host github
    :repo "skissue/llm-tool-collection"))
+(package!
+  macher :recipe
+  (:host github
+   :repo "kmontag/macher"))
 
 ;; Miscellaneous
 (package! command-log-mode)

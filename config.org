@@ -266,23 +266,6 @@ mode for these files.
 #+begin_src elisp
 (add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 #+end_src
-*** Remote Access Tools
-I'm trying to speed up Tramp for remote access as the default from Doom doesn't
-work very well for me. I currently try using =sshx= as my access method as well as
-avoiding projectile and lsp usage on remote machines.
-#+begin_src elisp
-;; Provides configuration for working with remote machines over SSH using Tramp
-(use-package! tramp
-  :defer
-  :config
-  ;; Use sshx by default for speed
-  ;; Don't use /bin/sh as the default shell
-  (let ((+tramp-shell "/bin/bash"))
-    (setq tramp-default-remote-shell +tramp-shell)
-    (setq vterm-tramp-shells `(("ssh" ,+tramp-shell)
-                               ("sshx" ,+tramp-shell)
-                               ("docker" ,+tramp-shell)))))
-#+end_src
 ** Writing
 *** Org Mode
 Org Mode is probably the most popular markdown format for Emacs users, and has a
@@ -483,6 +466,9 @@ I've just mapped the dispatch menu to =SPC-k=.
   (mapc (apply-partially #'apply #'gptel-make-tool)
         (llm-tool-collection-get-all))
 
+  ;; Install Macher presets for agentic use
+  (macher-install)
+
   ;; since branching mode is enabled, don't use headings in prompt prefixes
   (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
   (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
@@ -532,6 +518,10 @@ These are imported using Doom's =package!= macro.
   llm-tool-collection :recipe
   (:host github
    :repo "skissue/llm-tool-collection"))
+(package!
+  macher :recipe
+  (:host github
+   :repo "kmontag/macher"))
 
 ;; Miscellaneous
 (package! command-log-mode)
