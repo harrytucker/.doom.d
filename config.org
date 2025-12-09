@@ -604,13 +604,13 @@ with a personal access token.
 #+end_src
 ** Tooling
 *** Kubernetes
-Define autoloads for commands from =kubernetes=, and enable =evil-mode= bindings for
-use with the overview window.
+Define autoloads for commands from =kele=, and enable =evil-mode= bindings for use
+with the Kubernetes management interface.
 
-This module is currently experimental, both for me to use and for the author to
-write at the moment. I need to think of an Evil keymap for this, but for now
-I've just mapped the dispatch menu to =SPC-k=.
-#+begin_src elisp :tangle no
+=kele= provides a comprehensive Kubernetes client for Emacs with transient-based
+menus. This configuration enables it and sets up evil bindings for its various
+buffer types.
+#+begin_src elisp
 ;; Provides configuration for interacting with Kubernetes clusters from within
 ;; Emacs
 (use-package! kele
@@ -618,13 +618,58 @@ I've just mapped the dispatch menu to =SPC-k=.
   ;; Provide key map to access 'kele' from leader key
   (map! :leader
         :desc "Kubernetes" "k" #'kele-dispatch)
+  :config
   ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
   ;; resources
   (kele-mode))
+
+;; Kele evil-mode integration
+;; Kele uses magit-section-mode and vtable for its list buffers. Set up proper
+;; evil bindings for navigation and actions.
+(after! kele
+  ;; Set initial evil state to normal for kele list buffers
+  (evil-set-initial-state 'kele-list-mode 'normal)
+  (evil-set-initial-state 'kele-get-mode 'normal)
+
+  ;; List mode bindings (viewing resources like pods, deployments, etc.)
+  (map! :map kele-list-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'quit-window
+        :n "gr" #'kele-list-refresh
+        :n [return] #'kele-list-table-dwim
+        :n "d" #'kele-list-kill
+        :n [tab] #'vtable-next-column
+        :n [backtab] #'vtable-previous-column
+        :n "]]" #'magit-section-forward
+        :n "[[" #'magit-section-backward
+        :n "gj" #'magit-section-forward-sibling
+        :n "gk" #'magit-section-backward-sibling
+        :n "za" #'magit-section-toggle
+        :n "zc" #'magit-section-hide
+        :n "zo" #'magit-section-show)
+
+  ;; Get mode bindings (viewing individual resource YAML)
+  (map! :map kele-get-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'quit-window
+        :n "Q" #'kele--quit-and-kill
+        :n "gr" #'kele-refetch)
+
+  ;; Table navigation within list buffers
+  (map! :map kele-list-table-map
+        :n [return] #'kele-list-table-dwim
+        :n "d" #'kele-list-kill))
 #+end_src
-*** GitHub Copilot
+*** AI Assistants
 /AI is all the rage these days./
-- =gptel=: Provides an LLM client for Emacs that can be used to chat with LLMs
+**** gptel
+=gptel= provides an LLM client for Emacs that can be used to chat with LLMs.
 #+begin_src elisp
 (use-package! gptel
   :config

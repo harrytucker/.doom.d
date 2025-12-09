@@ -417,6 +417,61 @@
   (setq grip-github-user (car credential)
         grip-github-password (cadr credential)))
 
+;; Provides configuration for interacting with Kubernetes clusters from within
+;; Emacs
+(use-package! kele
+  :init
+  ;; Provide key map to access 'kele' from leader key
+  (map! :leader
+        :desc "Kubernetes" "k" #'kele-dispatch)
+  :config
+  ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
+  ;; resources
+  (kele-mode))
+
+;; Kele evil-mode integration
+;; Kele uses magit-section-mode and vtable for its list buffers. Set up proper
+;; evil bindings for navigation and actions.
+(after! kele
+  ;; Set initial evil state to normal for kele list buffers
+  (evil-set-initial-state 'kele-list-mode 'normal)
+  (evil-set-initial-state 'kele-get-mode 'normal)
+
+  ;; List mode bindings (viewing resources like pods, deployments, etc.)
+  (map! :map kele-list-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'quit-window
+        :n "gr" #'kele-list-refresh
+        :n [return] #'kele-list-table-dwim
+        :n "d" #'kele-list-kill
+        :n [tab] #'vtable-next-column
+        :n [backtab] #'vtable-previous-column
+        :n "]]" #'magit-section-forward
+        :n "[[" #'magit-section-backward
+        :n "gj" #'magit-section-forward-sibling
+        :n "gk" #'magit-section-backward-sibling
+        :n "za" #'magit-section-toggle
+        :n "zc" #'magit-section-hide
+        :n "zo" #'magit-section-show)
+
+  ;; Get mode bindings (viewing individual resource YAML)
+  (map! :map kele-get-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'quit-window
+        :n "Q" #'kele--quit-and-kill
+        :n "gr" #'kele-refetch)
+
+  ;; Table navigation within list buffers
+  (map! :map kele-list-table-map
+        :n [return] #'kele-list-table-dwim
+        :n "d" #'kele-list-kill))
+
 (use-package! gptel
   :config
   ;; using claude sonnet 4 for my chosen default AI model
