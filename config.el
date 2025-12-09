@@ -102,6 +102,179 @@
 ;; Doom disables SQL formatting by default, so you need to override this.
 (delete 'sql-mode +format-on-save-disabled-modes)
 
+;; PGmacs evil-mode integration
+;; PGmacs is a PostgreSQL database browser that uses its own keymaps which don't
+;; play nicely with evil-mode. This configuration sets up proper evil bindings.
+(after! pgmacs
+  ;; Set initial evil state to normal for PGmacs buffers
+  (evil-set-initial-state 'pgmacs-mode 'normal)
+
+  ;; Helper to make motion keys work properly in pgmacs buffers
+  (defun pgmacs--evil-next-line ()
+    "Move to next line in pgmacs buffer, respecting table boundaries."
+    (interactive)
+    (forward-line 1))
+
+  (defun pgmacs--evil-prev-line ()
+    "Move to previous line in pgmacs buffer, respecting table boundaries."
+    (interactive)
+    (forward-line -1))
+
+  ;; Table list buffer bindings (main database view)
+  (map! :map pgmacs-table-list-map
+        :n "j" #'pgmacs--evil-next-line
+        :n "k" #'pgmacs--evil-prev-line
+        :n "l" #'pgmacstbl-next-column
+        :n "h" #'pgmacstbl-previous-column
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "gr" #'pgmacs--table-list-redraw
+        :n "?" #'pgmacs--table-list-help
+        :n "o" #'pgmacs-open-table
+        :n "p" #'pgmacs--display-procedures
+        :n "e" #'pgmacs-run-sql
+        :n "E" #'pgmacs-run-buffer-sql
+        :n "=" #'pgmacs--shrink-columns
+        :n "r" #'pgmacs--redraw-pgmacstbl
+        :n "T" #'pgmacs--switch-to-database-buffer
+        :n [tab] #'pgmacs--next-item)
+
+  ;; Table list buffer when point is in a table
+  (map! :map pgmacs-table-list-map/table
+        :n "j" #'pgmacs--evil-next-line
+        :n "k" #'pgmacs--evil-prev-line
+        :n "l" #'pgmacstbl-next-column
+        :n "h" #'pgmacstbl-previous-column
+        :n [return] #'pgmacs--table-list-RET
+        :n "d" #'pgmacs--table-list-delete
+        :n "S" #'pgmacs--schemaspy-database
+        :n "R" #'pgmacs--table-list-rename
+        :n "J" #'pgmacs--row-as-json
+        :n "v" #'pgmacs--view-value
+        :n "<" (lambda () (interactive)
+                 (text-property-search-backward 'pgmacstbl)
+                 (forward-line))
+        :n ">" (lambda () (interactive)
+                 (text-property-search-forward 'pgmacstbl)
+                 (forward-line -1))
+        :n "0" (lambda () (interactive) (pgmacstbl-goto-column 0))
+        :n "1" (lambda () (interactive) (pgmacstbl-goto-column 1))
+        :n "2" (lambda () (interactive) (pgmacstbl-goto-column 2))
+        :n "3" (lambda () (interactive) (pgmacstbl-goto-column 3))
+        :n "4" (lambda () (interactive) (pgmacstbl-goto-column 4))
+        :n "5" (lambda () (interactive) (pgmacstbl-goto-column 5))
+        :n "6" (lambda () (interactive) (pgmacstbl-goto-column 6))
+        :n "7" (lambda () (interactive) (pgmacstbl-goto-column 7))
+        :n "8" (lambda () (interactive) (pgmacstbl-goto-column 8))
+        :n "9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
+
+  ;; Row list buffer bindings (viewing table rows)
+  (map! :map pgmacs-row-list-map
+        :n "j" #'pgmacs--evil-next-line
+        :n "k" #'pgmacs--evil-prev-line
+        :n "l" #'pgmacstbl-next-column
+        :n "h" #'pgmacstbl-previous-column
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "?" #'pgmacs--row-list-help
+        :n "I" #'pgmacs--insert-row-empty
+        :n "o" #'pgmacs-open-table
+        :n "r" #'pgmacs--redraw-pgmacstbl
+        :n "gr" #'pgmacs--row-list-redraw
+        :n "e" #'pgmacs-run-sql
+        :n "E" #'pgmacs-run-buffer-sql
+        :n "W" #'pgmacs--add-where-filter
+        :n "S" #'pgmacs--schemaspy-table
+        :n "T" #'pgmacs--switch-to-database-buffer
+        :n [tab] #'pgmacs--next-item)
+
+  ;; Row list buffer when point is in a table (editing rows)
+  (map! :map pgmacs-row-list-map/table
+        :n "j" #'pgmacs--evil-next-line
+        :n "k" #'pgmacs--evil-prev-line
+        :n "l" #'pgmacstbl-next-column
+        :n "h" #'pgmacstbl-previous-column
+        :n [return] #'pgmacs--row-list-dwim
+        :n "w" #'pgmacs--edit-value-widget
+        :n "!" #'pgmacs--shell-command-on-value
+        :n "&" #'pgmacs--async-command-on-value
+        :n "gU" #'pgmacs--upcase-value
+        :n "gu" #'pgmacs--downcase-value
+        :n "g~" #'pgmacs--capitalize-value
+        :n "V" #'pgmacs--view-value
+        :n "dd" #'pgmacs--row-list-delete-row
+        :n "x" #'pgmacs--row-list-delete-marked
+        :n [backspace] #'pgmacs--row-list-delete-row
+        :n "R" #'pgmacs--row-list-rename-column
+        :n "a" #'pgmacs--insert-row
+        :n "i" #'pgmacs--insert-row-widget
+        :n "yy" #'pgmacs--copy-row
+        :n "p" #'pgmacs--yank-row
+        :n "=" #'pgmacs--shrink-columns
+        :n "J" #'pgmacs--row-as-json
+        :n "m" #'pgmacs--row-list-mark-row
+        :n "u" #'pgmacs--row-list-unmark-row
+        :n "U" #'pgmacs--row-list-unmark-all
+        :n "<" (lambda () (interactive)
+                 (text-property-search-backward 'pgmacstbl)
+                 (forward-line))
+        :n ">" (lambda () (interactive)
+                 (text-property-search-forward 'pgmacstbl)
+                 (forward-line -1))
+        :n "0" (lambda () (interactive) (pgmacstbl-goto-column 0))
+        :n "1" (lambda () (interactive) (pgmacstbl-goto-column 1))
+        :n "2" (lambda () (interactive) (pgmacstbl-goto-column 2))
+        :n "3" (lambda () (interactive) (pgmacstbl-goto-column 3))
+        :n "4" (lambda () (interactive) (pgmacstbl-goto-column 4))
+        :n "5" (lambda () (interactive) (pgmacstbl-goto-column 5))
+        :n "6" (lambda () (interactive) (pgmacstbl-goto-column 6))
+        :n "7" (lambda () (interactive) (pgmacstbl-goto-column 7))
+        :n "8" (lambda () (interactive) (pgmacstbl-goto-column 8))
+        :n "9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
+
+  ;; Procedure list buffer bindings
+  (map! :map pgmacs-proc-list-map
+        :n "j" #'pgmacs--evil-next-line
+        :n "k" #'pgmacs--evil-prev-line
+        :n "l" #'pgmacstbl-next-column
+        :n "h" #'pgmacstbl-previous-column
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "?" #'pgmacs--proc-list-help
+        :n [return] #'pgmacs--proc-list-RET
+        :n [tab] #'pgmacs--next-item
+        :n "dd" #'pgmacs--proc-list-delete
+        :n "T" #'pgmacs--switch-to-database-buffer
+        :n "R" #'pgmacs--proc-list-rename
+        :n "<" (lambda () (interactive)
+                 (text-property-search-backward 'pgmacstbl)
+                 (forward-line))
+        :n ">" (lambda () (interactive)
+                 (text-property-search-forward 'pgmacstbl)
+                 (forward-line -1)))
+
+  ;; Transient buffer bindings (query results, etc.)
+  (map! :map pgmacs-transient-map
+        :n "j" #'pgmacs--evil-next-line
+        :n "k" #'pgmacs--evil-prev-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "o" #'pgmacs-open-table
+        :n "e" #'pgmacs-run-sql
+        :n "E" #'pgmacs-run-buffer-sql
+        :n "T" #'pgmacs--switch-to-database-buffer)
+
+  ;; Paginated buffer bindings (for large tables)
+  (map! :map pgmacs-paginated-map
+        :n "n" #'pgmacs--paginated-next
+        :n "]p" #'pgmacs--paginated-next
+        :n "[p" #'pgmacs--paginated-prev
+        :n "N" #'pgmacs--paginated-prev))
+
 ;; Provides configuration for using 'eslint' with Emacs
 (use-package! lsp-eslint
   :defer
@@ -278,6 +451,107 @@
          :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire))
    ;; enable automatic scrolling of llm responses
   (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
+
+;; ECA configuration
+;; Set default model to Claude Opus 4.5 via GitHub Copilot
+(setq eca-chat-custom-model "github-copilot/claude-opus-4.5")
+
+;; ECA evil-mode integration
+;; ECA uses markdown-mode based buffers with custom keymaps that don't work well
+;; with evil-mode. This configuration sets up proper evil bindings for the chat
+;; and MCP details buffers.
+(after! eca-chat
+  ;; Set initial evil state to insert for chat buffers (for typing prompts)
+  ;; but use normal mode for navigation
+  (evil-set-initial-state 'eca-chat-mode 'normal)
+
+  ;; Chat buffer bindings
+  (map! :map eca-chat-mode-map
+        ;; Normal mode - navigation and actions
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "gr" #'eca-chat-reset
+        :n "gc" #'eca-chat-clear
+        :n [return] #'eca-chat--key-pressed-return
+        :n [tab] #'eca-chat--key-pressed-tab
+
+        ;; Chat navigation
+        :n "[[" #'eca-chat-go-to-prev-user-message
+        :n "]]" #'eca-chat-go-to-next-user-message
+        :n "[e" #'eca-chat-go-to-prev-expandable-block
+        :n "]e" #'eca-chat-go-to-next-expandable-block
+        :n "za" #'eca-chat-toggle-expandable-block
+
+        ;; Tool call approval (crucial for agentic workflows)
+        :n "ga" #'eca-chat-tool-call-accept-all
+        :n "gA" #'eca-chat-tool-call-accept-next
+        :n "gs" #'eca-chat-tool-call-accept-all-and-remember
+        :n "gx" #'eca-chat-tool-call-reject-next
+
+        ;; Chat management
+        :n "gn" #'eca-chat-new
+        :n "gf" #'eca-chat-select
+        :n "gm" #'eca-chat-select-model
+        :n "gb" #'eca-chat-select-behavior
+        :n "gB" #'eca-chat-cycle-behavior
+        :n "gR" #'eca-chat-rename
+        :n "gh" #'eca-chat-timeline
+        :n "g," #'eca-mcp-details
+        :n "g." #'eca-transient-menu
+
+        ;; Prompt operations
+        :n "gp" #'eca-chat-repeat-prompt
+        :n "gd" #'eca-chat-clear-prompt
+        :n "gt" #'eca-chat-talk
+
+        ;; Insert mode - for typing in prompts
+        :i "S-<return>" #'eca-chat--key-pressed-newline
+        :i "C-<up>" #'eca-chat--key-pressed-previous-prompt-history
+        :i "C-<down>" #'eca-chat--key-pressed-next-prompt-history
+        :i [return] #'eca-chat--key-pressed-return
+        :i [tab] #'eca-chat--key-pressed-tab
+
+        ;; Visual mode - for selecting text
+        :v "y" #'evil-yank
+
+        ;; Leader key bindings for common operations
+        :localleader
+        :n "a" #'eca-chat-tool-call-accept-all
+        :n "A" #'eca-chat-tool-call-accept-next
+        :n "s" #'eca-chat-tool-call-accept-all-and-remember
+        :n "r" #'eca-chat-tool-call-reject-next
+        :n "n" #'eca-chat-new
+        :n "f" #'eca-chat-select
+        :n "m" #'eca-chat-select-model
+        :n "b" #'eca-chat-select-behavior
+        :n "B" #'eca-chat-cycle-behavior
+        :n "R" #'eca-chat-rename
+        :n "c" #'eca-chat-clear
+        :n "k" #'eca-chat-reset
+        :n "t" #'eca-chat-talk
+        :n "h" #'eca-chat-timeline
+        :n "," #'eca-mcp-details
+        :n "." #'eca-transient-menu))
+
+;; MCP details buffer bindings
+(after! eca-mcp
+  (evil-set-initial-state 'eca-mcp-details-mode 'normal)
+
+  (map! :map eca-mcp-details-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "gr" #'eca-mcp-details
+        :n [return] #'push-button
+        :n [tab] #'forward-button
+        :n [backtab] #'backward-button
+        :n "g," #'eca
+        :n "g." #'eca-transient-menu))
 
 ;; MacOS only configuration
 (when (featurep :system 'macos)

@@ -48,6 +48,7 @@
        (undo +tree)      ; undoing stuff with a tree looks cool
        electric          ; smarter, keyword-based electric-indent
        vc                ; version-control and Emacs, sitting in a tree
+       tramp             ; remote files at your arthritic fingertips
 
        :term
        eshell            ; a consistent, cross-platform shell

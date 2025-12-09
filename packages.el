@@ -22,7 +22,18 @@
 (package! org-roam-ui) ; enable org-roam-ui server
 (package! engrave-faces) ; comprehensive latex code output
 
+;; PostgreSQL
+(package! ; dependency of pgmacs
+  pg :recipe
+  (:host github
+   :repo "emarsden/pg-el"))
+(package!
+  pgmacs :recipe
+  (:host github
+   :repo "emarsden/pgmacs"))
+
 ;; AI Tools
+(unpin! gptel) ; use latest version of gptel, many bugs abound
 (package!
   llm-tool-collection :recipe
   (:host github
@@ -31,6 +42,11 @@
   macher :recipe
   (:host github
    :repo "kmontag/macher"))
+(package!
+  eca :recipe
+  (:host github
+   :repo "editor-code-assistant/eca-emacs"
+   :files ("*.el")))
 
 ;; Miscellaneous
 (package! command-log-mode)
