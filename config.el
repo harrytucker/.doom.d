@@ -32,8 +32,11 @@
 
 ;; Highlights scope with various colours, replaces rainbow-delimiters-mode
 (add-hook! 'prog-mode-hook #'prism-mode)
-(add-hook! 'python-mode-hook #'prism-whitespace-mode)
-(add-hook! 'yaml-mode-hook #'prism-whitespace-mode)
+(add-hook! '(python-mode-hook
+             python-ts-mode-hook
+             yaml-mode-hook
+             yaml-ts-mode-hook)
+           #'prism-whitespace-mode)
 
 ;; Lower the delay for displaying potential key chords
 (setq which-key-idle-delay 0.2)
