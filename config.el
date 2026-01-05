@@ -306,9 +306,8 @@
 
 ;; Use ruff instead of black for formatting, apheleia already defines the
 ;; formatter so we can just modify the mapping in the alist.
-(after! python-mode
-  (setf  (alist-get 'python-mode apheleia-mode-alist)
-         '(ruff)))
+(after! python
+  (set-formatter! 'ruff :modes '(python-mode python-ts-mode)§))
 
 (add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 
