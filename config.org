@@ -98,6 +98,9 @@ parse, so I've set this up globally across all programming modes.
 
 ;; Enable precision scrolling globally
 (pixel-scroll-precision-mode)
+
+;; Automatically select help windows when they open
+(setq help-window-select t)
 #+end_src
 **** Evil
 I can use =undo-tree= as a linear system most of the time, which is what ends up

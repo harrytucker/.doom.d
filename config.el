@@ -46,6 +46,9 @@
 ;; Enable precision scrolling globally
 (pixel-scroll-precision-mode)
 
+;; Automatically select help windows when they open
+(setq help-window-select t)
+
 ;; Allows undoing and redoing as a tree of changes, instead of being limited to
 ;; linear changes
 (evil-set-undo-system 'undo-tree)
