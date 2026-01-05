@@ -190,175 +190,177 @@ Let's enable some Evil mode bindings for =pgmacs=:
 ;; PGmacs evil-mode integration
 ;; PGmacs is a PostgreSQL database browser that uses its own keymaps which don't
 ;; play nicely with evil-mode. This configuration sets up proper evil bindings.
+;;
+;; The key insight is that pgmacs uses `use-local-map' to set buffer-local keymaps,
+;; which can conflict with evil's state-based keymaps. We need to:
+;; 1. Suppress the conflicting keys in the original pgmacs keymaps
+;; 2. Use evil-define-key* to properly bind keys in evil's normal state
 (after! pgmacs
   ;; Set initial evil state to normal for PGmacs buffers
   (evil-set-initial-state 'pgmacs-mode 'normal)
 
-  ;; Helper to make motion keys work properly in pgmacs buffers
-  (defun pgmacs--evil-next-line ()
-    "Move to next line in pgmacs buffer, respecting table boundaries."
-    (interactive)
-    (forward-line 1))
-
-  (defun pgmacs--evil-prev-line ()
-    "Move to previous line in pgmacs buffer, respecting table boundaries."
-    (interactive)
-    (forward-line -1))
+  ;; Remove conflicting keybindings from pgmacs keymaps.
+  ;; These keys (j, k, h, etc.) are used for navigation in evil-mode,
+  ;; but pgmacs binds them to other functions.
+  (dolist (key '("j" "k" "h" "d" "u" "i" "p" "g" "r" "v" "y"))
+    (define-key pgmacs-table-list-map (kbd key) nil)
+    (define-key pgmacs-table-list-map/table (kbd key) nil)
+    (define-key pgmacs-row-list-map (kbd key) nil)
+    (define-key pgmacs-row-list-map/table (kbd key) nil)
+    (define-key pgmacs-proc-list-map (kbd key) nil))
 
   ;; Table list buffer bindings (main database view)
-  (map! :map pgmacs-table-list-map
-        :n "j" #'pgmacs--evil-next-line
-        :n "k" #'pgmacs--evil-prev-line
-        :n "l" #'pgmacstbl-next-column
-        :n "h" #'pgmacstbl-previous-column
-        :n "gg" #'beginning-of-buffer
-        :n "G" #'end-of-buffer
-        :n "q" #'bury-buffer
-        :n "gr" #'pgmacs--table-list-redraw
-        :n "?" #'pgmacs--table-list-help
-        :n "o" #'pgmacs-open-table
-        :n "p" #'pgmacs--display-procedures
-        :n "e" #'pgmacs-run-sql
-        :n "E" #'pgmacs-run-buffer-sql
-        :n "=" #'pgmacs--shrink-columns
-        :n "r" #'pgmacs--redraw-pgmacstbl
-        :n "T" #'pgmacs--switch-to-database-buffer
-        :n [tab] #'pgmacs--next-item)
+  (evil-define-key* 'normal pgmacs-table-list-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "gr" #'pgmacs--table-list-redraw
+    "?" #'pgmacs--table-list-help
+    "go" #'pgmacs-open-table
+    "gp" #'pgmacs--display-procedures
+    "e" #'pgmacs-run-sql
+    "E" #'pgmacs-run-buffer-sql
+    "=" #'pgmacs--shrink-columns
+    "r" #'pgmacs--redraw-pgmacstbl
+    "gT" #'pgmacs--switch-to-database-buffer
+    (kbd "TAB") #'pgmacs--next-item)
 
   ;; Table list buffer when point is in a table
-  (map! :map pgmacs-table-list-map/table
-        :n "j" #'pgmacs--evil-next-line
-        :n "k" #'pgmacs--evil-prev-line
-        :n "l" #'pgmacstbl-next-column
-        :n "h" #'pgmacstbl-previous-column
-        :n [return] #'pgmacs--table-list-RET
-        :n "d" #'pgmacs--table-list-delete
-        :n "S" #'pgmacs--schemaspy-database
-        :n "R" #'pgmacs--table-list-rename
-        :n "J" #'pgmacs--row-as-json
-        :n "v" #'pgmacs--view-value
-        :n "<" (lambda () (interactive)
-                 (text-property-search-backward 'pgmacstbl)
-                 (forward-line))
-        :n ">" (lambda () (interactive)
-                 (text-property-search-forward 'pgmacstbl)
-                 (forward-line -1))
-        :n "0" (lambda () (interactive) (pgmacstbl-goto-column 0))
-        :n "1" (lambda () (interactive) (pgmacstbl-goto-column 1))
-        :n "2" (lambda () (interactive) (pgmacstbl-goto-column 2))
-        :n "3" (lambda () (interactive) (pgmacstbl-goto-column 3))
-        :n "4" (lambda () (interactive) (pgmacstbl-goto-column 4))
-        :n "5" (lambda () (interactive) (pgmacstbl-goto-column 5))
-        :n "6" (lambda () (interactive) (pgmacstbl-goto-column 6))
-        :n "7" (lambda () (interactive) (pgmacstbl-goto-column 7))
-        :n "8" (lambda () (interactive) (pgmacstbl-goto-column 8))
-        :n "9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
+  (evil-define-key* 'normal pgmacs-table-list-map/table
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    (kbd "RET") #'pgmacs--table-list-RET
+    "D" #'pgmacs--table-list-delete
+    "gS" #'pgmacs--schemaspy-database
+    "gR" #'pgmacs--table-list-rename
+    "gj" #'pgmacs--row-as-json
+    "gv" #'pgmacs--view-value
+    "<" (lambda () (interactive)
+          (text-property-search-backward 'pgmacstbl)
+          (forward-line))
+    ">" (lambda () (interactive)
+          (text-property-search-forward 'pgmacstbl)
+          (forward-line -1))
+    "g0" (lambda () (interactive) (pgmacstbl-goto-column 0))
+    "g1" (lambda () (interactive) (pgmacstbl-goto-column 1))
+    "g2" (lambda () (interactive) (pgmacstbl-goto-column 2))
+    "g3" (lambda () (interactive) (pgmacstbl-goto-column 3))
+    "g4" (lambda () (interactive) (pgmacstbl-goto-column 4))
+    "g5" (lambda () (interactive) (pgmacstbl-goto-column 5))
+    "g6" (lambda () (interactive) (pgmacstbl-goto-column 6))
+    "g7" (lambda () (interactive) (pgmacstbl-goto-column 7))
+    "g8" (lambda () (interactive) (pgmacstbl-goto-column 8))
+    "g9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
 
   ;; Row list buffer bindings (viewing table rows)
-  (map! :map pgmacs-row-list-map
-        :n "j" #'pgmacs--evil-next-line
-        :n "k" #'pgmacs--evil-prev-line
-        :n "l" #'pgmacstbl-next-column
-        :n "h" #'pgmacstbl-previous-column
-        :n "gg" #'beginning-of-buffer
-        :n "G" #'end-of-buffer
-        :n "q" #'bury-buffer
-        :n "?" #'pgmacs--row-list-help
-        :n "I" #'pgmacs--insert-row-empty
-        :n "o" #'pgmacs-open-table
-        :n "r" #'pgmacs--redraw-pgmacstbl
-        :n "gr" #'pgmacs--row-list-redraw
-        :n "e" #'pgmacs-run-sql
-        :n "E" #'pgmacs-run-buffer-sql
-        :n "W" #'pgmacs--add-where-filter
-        :n "S" #'pgmacs--schemaspy-table
-        :n "T" #'pgmacs--switch-to-database-buffer
-        :n [tab] #'pgmacs--next-item)
+  (evil-define-key* 'normal pgmacs-row-list-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "?" #'pgmacs--row-list-help
+    "I" #'pgmacs--insert-row-empty
+    "go" #'pgmacs-open-table
+    "r" #'pgmacs--redraw-pgmacstbl
+    "gr" #'pgmacs--row-list-redraw
+    "e" #'pgmacs-run-sql
+    "E" #'pgmacs-run-buffer-sql
+    "gW" #'pgmacs--add-where-filter
+    "gS" #'pgmacs--schemaspy-table
+    "gT" #'pgmacs--switch-to-database-buffer
+    (kbd "TAB") #'pgmacs--next-item)
 
   ;; Row list buffer when point is in a table (editing rows)
-  (map! :map pgmacs-row-list-map/table
-        :n "j" #'pgmacs--evil-next-line
-        :n "k" #'pgmacs--evil-prev-line
-        :n "l" #'pgmacstbl-next-column
-        :n "h" #'pgmacstbl-previous-column
-        :n [return] #'pgmacs--row-list-dwim
-        :n "w" #'pgmacs--edit-value-widget
-        :n "!" #'pgmacs--shell-command-on-value
-        :n "&" #'pgmacs--async-command-on-value
-        :n "gU" #'pgmacs--upcase-value
-        :n "gu" #'pgmacs--downcase-value
-        :n "g~" #'pgmacs--capitalize-value
-        :n "V" #'pgmacs--view-value
-        :n "dd" #'pgmacs--row-list-delete-row
-        :n "x" #'pgmacs--row-list-delete-marked
-        :n [backspace] #'pgmacs--row-list-delete-row
-        :n "R" #'pgmacs--row-list-rename-column
-        :n "a" #'pgmacs--insert-row
-        :n "i" #'pgmacs--insert-row-widget
-        :n "yy" #'pgmacs--copy-row
-        :n "p" #'pgmacs--yank-row
-        :n "=" #'pgmacs--shrink-columns
-        :n "J" #'pgmacs--row-as-json
-        :n "m" #'pgmacs--row-list-mark-row
-        :n "u" #'pgmacs--row-list-unmark-row
-        :n "U" #'pgmacs--row-list-unmark-all
-        :n "<" (lambda () (interactive)
-                 (text-property-search-backward 'pgmacstbl)
-                 (forward-line))
-        :n ">" (lambda () (interactive)
-                 (text-property-search-forward 'pgmacstbl)
-                 (forward-line -1))
-        :n "0" (lambda () (interactive) (pgmacstbl-goto-column 0))
-        :n "1" (lambda () (interactive) (pgmacstbl-goto-column 1))
-        :n "2" (lambda () (interactive) (pgmacstbl-goto-column 2))
-        :n "3" (lambda () (interactive) (pgmacstbl-goto-column 3))
-        :n "4" (lambda () (interactive) (pgmacstbl-goto-column 4))
-        :n "5" (lambda () (interactive) (pgmacstbl-goto-column 5))
-        :n "6" (lambda () (interactive) (pgmacstbl-goto-column 6))
-        :n "7" (lambda () (interactive) (pgmacstbl-goto-column 7))
-        :n "8" (lambda () (interactive) (pgmacstbl-goto-column 8))
-        :n "9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
+  (evil-define-key* 'normal pgmacs-row-list-map/table
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    (kbd "RET") #'pgmacs--row-list-dwim
+    "w" #'pgmacs--edit-value-widget
+    "!" #'pgmacs--shell-command-on-value
+    "&" #'pgmacs--async-command-on-value
+    "gU" #'pgmacs--upcase-value
+    "gu" #'pgmacs--downcase-value
+    "g~" #'pgmacs--capitalize-value
+    "gv" #'pgmacs--view-value
+    "dd" #'pgmacs--row-list-delete-row
+    "x" #'pgmacs--row-list-delete-marked
+    (kbd "DEL") #'pgmacs--row-list-delete-row
+    "gR" #'pgmacs--row-list-rename-column
+    "a" #'pgmacs--insert-row
+    "gi" #'pgmacs--insert-row-widget
+    "yy" #'pgmacs--copy-row
+    "p" #'pgmacs--yank-row
+    "=" #'pgmacs--shrink-columns
+    "gj" #'pgmacs--row-as-json
+    "m" #'pgmacs--row-list-mark-row
+    "u" #'pgmacs--row-list-unmark-row
+    "U" #'pgmacs--row-list-unmark-all
+    "<" (lambda () (interactive)
+          (text-property-search-backward 'pgmacstbl)
+          (forward-line))
+    ">" (lambda () (interactive)
+          (text-property-search-forward 'pgmacstbl)
+          (forward-line -1))
+    "g0" (lambda () (interactive) (pgmacstbl-goto-column 0))
+    "g1" (lambda () (interactive) (pgmacstbl-goto-column 1))
+    "g2" (lambda () (interactive) (pgmacstbl-goto-column 2))
+    "g3" (lambda () (interactive) (pgmacstbl-goto-column 3))
+    "g4" (lambda () (interactive) (pgmacstbl-goto-column 4))
+    "g5" (lambda () (interactive) (pgmacstbl-goto-column 5))
+    "g6" (lambda () (interactive) (pgmacstbl-goto-column 6))
+    "g7" (lambda () (interactive) (pgmacstbl-goto-column 7))
+    "g8" (lambda () (interactive) (pgmacstbl-goto-column 8))
+    "g9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
 
   ;; Procedure list buffer bindings
-  (map! :map pgmacs-proc-list-map
-        :n "j" #'pgmacs--evil-next-line
-        :n "k" #'pgmacs--evil-prev-line
-        :n "l" #'pgmacstbl-next-column
-        :n "h" #'pgmacstbl-previous-column
-        :n "gg" #'beginning-of-buffer
-        :n "G" #'end-of-buffer
-        :n "q" #'bury-buffer
-        :n "?" #'pgmacs--proc-list-help
-        :n [return] #'pgmacs--proc-list-RET
-        :n [tab] #'pgmacs--next-item
-        :n "dd" #'pgmacs--proc-list-delete
-        :n "T" #'pgmacs--switch-to-database-buffer
-        :n "R" #'pgmacs--proc-list-rename
-        :n "<" (lambda () (interactive)
-                 (text-property-search-backward 'pgmacstbl)
-                 (forward-line))
-        :n ">" (lambda () (interactive)
-                 (text-property-search-forward 'pgmacstbl)
-                 (forward-line -1)))
+  (evil-define-key* 'normal pgmacs-proc-list-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "?" #'pgmacs--proc-list-help
+    (kbd "RET") #'pgmacs--proc-list-RET
+    (kbd "TAB") #'pgmacs--next-item
+    "dd" #'pgmacs--proc-list-delete
+    "gT" #'pgmacs--switch-to-database-buffer
+    "gR" #'pgmacs--proc-list-rename
+    "<" (lambda () (interactive)
+          (text-property-search-backward 'pgmacstbl)
+          (forward-line))
+    ">" (lambda () (interactive)
+          (text-property-search-forward 'pgmacstbl)
+          (forward-line -1)))
 
   ;; Transient buffer bindings (query results, etc.)
-  (map! :map pgmacs-transient-map
-        :n "j" #'pgmacs--evil-next-line
-        :n "k" #'pgmacs--evil-prev-line
-        :n "gg" #'beginning-of-buffer
-        :n "G" #'end-of-buffer
-        :n "q" #'bury-buffer
-        :n "o" #'pgmacs-open-table
-        :n "e" #'pgmacs-run-sql
-        :n "E" #'pgmacs-run-buffer-sql
-        :n "T" #'pgmacs--switch-to-database-buffer)
+  (evil-define-key* 'normal pgmacs-transient-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "go" #'pgmacs-open-table
+    "e" #'pgmacs-run-sql
+    "E" #'pgmacs-run-buffer-sql
+    "gT" #'pgmacs--switch-to-database-buffer)
 
   ;; Paginated buffer bindings (for large tables)
-  (map! :map pgmacs-paginated-map
-        :n "n" #'pgmacs--paginated-next
-        :n "]p" #'pgmacs--paginated-next
-        :n "[p" #'pgmacs--paginated-prev
-        :n "N" #'pgmacs--paginated-prev))
+  (evil-define-key* 'normal pgmacs-paginated-map
+    "]p" #'pgmacs--paginated-next
+    "[p" #'pgmacs--paginated-prev))
 #+end_src
 *** Javascript/Typescript
 I don't write a lot of Javascript or Typescript, so I haven't invested a lot of
@@ -617,11 +619,10 @@ buffer types.
   :init
   ;; Provide key map to access 'kele' from leader key
   (map! :leader
-        :desc "Kubernetes" "k" #'kele-dispatch)
-  :config
+        :desc "Kubernetes" "k" #'kele-dispatch))
   ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
   ;; resources
-  (kele-mode))
+  ;;(kele-mode))
 
 ;; Kele evil-mode integration
 ;; Kele uses magit-section-mode and vtable for its list buffers. Set up proper
