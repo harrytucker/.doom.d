@@ -83,7 +83,7 @@
         +tree-sitter)
        (python           ; beautiful is better than ugly
         +lsp
-        +pyright
+        +uv
         +tree-sitter)
        (javascript       ; all(hope(abandon(ye(who(enter(here))))))
         +lsp             ; enable lsp support
