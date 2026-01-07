@@ -484,6 +484,8 @@
   (setq gptel-model #'claude-opus-4.5
         ;; gptel uses markdown-mode by default, use org-mode instead
         gptel-default-mode #'org-mode
+        ;; include tool use results in the chat buffer
+        gptel-include-tool-results t
         ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
 
@@ -500,7 +502,7 @@
         :prefix ("o" . "open")
         (:prefix ("l" . "llm")
          :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire))
-   ;; enable automatic scrolling of llm responses
+  ;; enable automatic scrolling of llm responses
   (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
 
 ;; ECA configuration
