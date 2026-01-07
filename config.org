@@ -679,26 +679,17 @@ buffer types.
 #+begin_src elisp
 (use-package! gptel
   :config
-  ;; using claude sonnet 4 for my chosen default AI model
-  (setq gptel-model #'gpt-5
+  ;; using claude opus 4.5 for my chosen default AI model
+  (setq gptel-model #'claude-opus-4.5
         ;; gptel uses markdown-mode by default, use org-mode instead
         gptel-default-mode #'org-mode
-        ;; override the doom emacs llm module to display buffer side-by-side
-        gptel-display-buffer-action t
-        ;; use branching context mode
-        gptel-org-branching-context t
         ;; configure github copilot backend
         gptel-backend (gptel-make-gh-copilot "Copilot"))
-  ;; Register LLM community tool collection
-  (mapc (apply-partially #'apply #'gptel-make-tool)
-        (llm-tool-collection-get-all))
 
   ;; Install Macher presets for agentic use
   (macher-install)
-
-  ;; since branching mode is enabled, don't use headings in prompt prefixes
-  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
-  (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
+  (macher-enable)
+  (gptel--apply-preset 'macher)
 
   ;; add keybind for activating gptel-mode on an old org-buffer
   (defun my/gptel-toggle-and-enable-solaire ()
@@ -858,10 +849,6 @@ These are imported using Doom's =package!= macro.
 
 ;; AI Tools
 (unpin! gptel) ; use latest version of gptel, many bugs abound
-(package!
-  llm-tool-collection :recipe
-  (:host github
-   :repo "skissue/llm-tool-collection"))
 (package!
   macher :recipe
   (:host github

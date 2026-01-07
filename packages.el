@@ -35,10 +35,6 @@
 ;; AI Tools
 (unpin! gptel) ; use latest version of gptel, many bugs abound
 (package!
-  llm-tool-collection :recipe
-  (:host github
-   :repo "skissue/llm-tool-collection"))
-(package!
   macher :recipe
   (:host github
    :repo "kmontag/macher"))
