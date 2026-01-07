@@ -689,7 +689,6 @@ buffer types.
   ;; Install Macher presets for agentic use
   (macher-install)
   (macher-enable)
-  (gptel--apply-preset 'macher)
 
   ;; add keybind for activating gptel-mode on an old org-buffer
   (defun my/gptel-toggle-and-enable-solaire ()
