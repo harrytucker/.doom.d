@@ -312,6 +312,28 @@
 (after! python
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 
+;; Provides configuration for working with the Go programming language
+(use-package! go-mode
+  :defer
+  :config
+  ;; Runs Go tests, and generate a coverage profile to 'cover.out'
+  ;;
+  ;; Note: this function does not currently clean up the produced coverage profile
+  ;; once you're done.
+  ;; (defun go-cover-buffer ()
+  ;;   (interactive)
+  ;;   (+go--run-tests "-coverprofile cover.out")
+  ;;   (go-coverage "cover.out"))
+  ;; Doom's config doesn't currently configure the Go Treesitter mode indent
+  ;; offset correctly. The formatter will pick this up anyway but set it
+  ;; correctly here so the cursor is positioned correctly on new lines.
+  (setq go-ts-mode-indent-offset 4))
+  ;; Make 'go-cover-buffer' available through the local leader key map
+  ;; (map! :map go-mode-map
+  ;;       :localleader
+  ;;       :prefix "t" ; t for tests
+  ;;       :desc "view coverage" "c" #'go-cover-buffer))
+
 (add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 
 ;; Provides configuration for working with 'org-mode'

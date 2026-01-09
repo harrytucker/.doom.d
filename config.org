@@ -423,7 +423,7 @@ job but my Elisp isn't great. After loading in the =+go--run-tests= function, I'
 defined my own function for running it, then automatically calling =go-coverage=
 against the generated output, then binding that to a shortcut underneath the
 local leader key.
-#+begin_src elisp :tangle no
+#+begin_src elisp
 ;; Provides configuration for working with the Go programming language
 (use-package! go-mode
   :defer
@@ -432,15 +432,19 @@ local leader key.
   ;;
   ;; Note: this function does not currently clean up the produced coverage profile
   ;; once you're done.
-  (defun go-cover-buffer ()
-    (interactive)
-    (+go--run-tests "-coverprofile cover.out")
-    (go-coverage "cover.out"))
+  ;; (defun go-cover-buffer ()
+  ;;   (interactive)
+  ;;   (+go--run-tests "-coverprofile cover.out")
+  ;;   (go-coverage "cover.out"))
+  ;; Doom's config doesn't currently configure the Go Treesitter mode indent
+  ;; offset correctly. The formatter will pick this up anyway but set it
+  ;; correctly here so the cursor is positioned correctly on new lines.
+  (setq go-ts-mode-indent-offset 4))
   ;; Make 'go-cover-buffer' available through the local leader key map
-  (map! :map go-mode-map
-        :localleader
-        :prefix "t" ; t for tests
-        :desc "view coverage" "c" #'go-cover-buffer))
+  ;; (map! :map go-mode-map
+  ;;       :localleader
+  ;;       :prefix "t" ; t for tests
+  ;;       :desc "view coverage" "c" #'go-cover-buffer))
 #+end_src
 *** PlantUML
 The standard file extension is =.plantuml= but I've got many files that use =.puml=
