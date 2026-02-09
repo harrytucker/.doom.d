@@ -1,19 +1,20 @@
 #+title: UI Configuration
 
-* Visuals
-** Theme & Font
-Dracula is my theme of choice, and JetBrains Mono my favourite font. By default,
-Treemacs uses a colour scheme based on the Atom text editor, so I set this to
-=doom-colors= match the rest of the editor.
+* Theme & Font
+Using the Dracula colour scheme with JetBrains Mono as the primary font.
+Treemacs is configured to use Doom's colour palette instead of the default
+Atom-inspired theme.
 #+begin_src elisp
-;; Set themes for Doom and Treemacs, and select the JetBrains Mono font
 (setq doom-theme 'doom-dracula
       doom-themes-treemacs-theme "doom-colors"
       doom-font (font-spec
                  :family "JetBrainsMono Nerd Font"
                  :size 14))
 #+end_src
-** Splash Image
+
+* Splash Image
+Randomly select a splash image from the =images/= directory on startup for some
+visual variety.
 #+begin_src elisp
 (defun random-element-of-list (items)
   "Return a random element from a given list."
@@ -27,23 +28,26 @@ Treemacs uses a colour scheme based on the Atom text editor, so I set this to
       ((splash-directory (concat doom-user-dir "images/")))
     (directory-files splash-directory 'full (rx ".png" eos))))
 
-;; Sets the splash image to a random PNG file from the splash image directory
 (setq fancy-splash-image (random-element-of-list (splash-images)))
 #+end_src
-** Modeline
-This provides no functionality whatsoever, but I like having an icon that
-displays the current major-mode in use.
+
+* Modeline
+Enable major mode icons with colour support in the modeline. Purely aesthetic.
 #+begin_src elisp
-;; Enables modeline icons with colour support
 (setq doom-modeline-major-mode-icon t
       doom-modeline-major-mode-color-icon t)
 #+end_src
-** Editor
-Normally this is the first thing I set up for any given text editor. Pairing
-delimiters by colour makes a lot of sense, and I find it makes code easier to
-parse, so I've set this up globally across all programming modes.
+
+* Editor Visuals
+Configure visual enhancements for the editing experience:
+- =prism-mode= highlights code by scope depth with different colours, replacing
+  =rainbow-delimiters=. Also enables =prism-whitespace-mode= for indentation-based
+  languages like Python and YAML.
+- Reduce =which-key= popup delay for faster discoverability.
+- Enable pixel-perfect smooth scrolling.
+- Auto-focus help windows when they open.
 #+begin_src elisp
-;; Highlights scope with various colours, replaces rainbow-delimiters-mode
+;; Scope-based syntax highlighting (replaces rainbow-delimiters)
 (add-hook! 'prog-mode-hook #'prism-mode)
 (add-hook! '(python-mode-hook
              python-ts-mode-hook
@@ -51,17 +55,12 @@ parse, so I've set this up globally across all programming modes.
              yaml-ts-mode-hook)
            #'prism-whitespace-mode)
 
-;; Lower the delay for displaying potential key chords
+;; Faster which-key popup
 (setq which-key-idle-delay 0.2)
 
-;; Fancy, modern looking flycheck displays
-;; (use-package! flyover
-;;   :config
-;;   (add-hook 'flycheck-mode-hook #'flyover-mode))
-
-;; Enable precision scrolling globally
+;; Smooth scrolling
 (pixel-scroll-precision-mode)
 
-;; Automatically select help windows when they open
+;; Auto-focus help windows
 (setq help-window-select t)
 #+end_src

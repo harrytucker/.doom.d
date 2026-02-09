@@ -1,18 +1,16 @@
 #+title: Programming Configuration
 
 * Databases
-I only really use PostgreSQL in my day-to-day, so I set it as my default SQL
-product dialect. Auto formatting is configured with =apheleia-mode= to use
-=pgformatter=, available on the Homebrew repository. Some configuration is
-included for the PostgreSQL formatting to follow the style that I prefer.
+** SQL
+PostgreSQL is the default SQL dialect. Formatting uses =pg_format= (from Homebrew)
+via =apheleia-mode=, with preferences for comma placement and newline handling.
+
+Note: Doom disables SQL formatting by default, so we explicitly remove it from
+the disabled modes list.
 #+begin_src elisp
-;; Provides configuration for working with SQL within Emacs
 (after! sql-mode
-  ;; Use PostgreSQL
   (sql-set-product 'postgres)
-  ;; Enable apheleia-mode in SQL buffers
   (add-hook 'sql-mode-hook #'apheleia-mode)
-  ;; Use pg_format for formatting SQL files upon saving the buffer (set-formatter!
   (set-formatter!
     'pg_format '("pg_format"
                  "--comma-break"
@@ -20,27 +18,19 @@ included for the PostgreSQL formatting to follow the style that I prefer.
                  "-")
     :modes '(sql-mode)))
 
-;; Doom disables SQL formatting by default, so you need to override this.
 (delete 'sql-mode +format-on-save-disabled-modes)
 #+end_src
 
-Let's enable some Evil mode bindings for =pgmacs=:
+** PGmacs
+=pgmacs= is a PostgreSQL database browser. Its keymaps conflict with Evil mode, so
+this configuration suppresses the conflicting bindings and sets up proper Evil
+navigation. Bindings follow Evil conventions: =j/k= for line movement, =h/l= for
+column navigation, =g= prefix for actions, and =q= to quit.
 #+begin_src elisp
-;; PGmacs evil-mode integration
-;; PGmacs is a PostgreSQL database browser that uses its own keymaps which don't
-;; play nicely with evil-mode. This configuration sets up proper evil bindings.
-;;
-;; The key insight is that pgmacs uses `use-local-map' to set buffer-local keymaps,
-;; which can conflict with evil's state-based keymaps. We need to:
-;; 1. Suppress the conflicting keys in the original pgmacs keymaps
-;; 2. Use evil-define-key* to properly bind keys in evil's normal state
 (after! pgmacs
-  ;; Set initial evil state to normal for PGmacs buffers
   (evil-set-initial-state 'pgmacs-mode 'normal)
 
-  ;; Remove conflicting keybindings from pgmacs keymaps.
-  ;; These keys (j, k, h, etc.) are used for navigation in evil-mode,
-  ;; but pgmacs binds them to other functions.
+  ;; Suppress conflicting single-key bindings
   (dolist (key '("j" "k" "h" "d" "u" "i" "p" "g" "r" "v" "y"))
     (define-key pgmacs-table-list-map (kbd key) nil)
     (define-key pgmacs-table-list-map/table (kbd key) nil)
@@ -48,7 +38,7 @@ Let's enable some Evil mode bindings for =pgmacs=:
     (define-key pgmacs-row-list-map/table (kbd key) nil)
     (define-key pgmacs-proc-list-map (kbd key) nil))
 
-  ;; Table list buffer bindings (main database view)
+  ;; Table list buffer (main database view)
   (evil-define-key* 'normal pgmacs-table-list-map
     "j" #'evil-next-line
     "k" #'evil-previous-line
@@ -68,7 +58,7 @@ Let's enable some Evil mode bindings for =pgmacs=:
     "gT" #'pgmacs--switch-to-database-buffer
     (kbd "TAB") #'pgmacs--next-item)
 
-  ;; Table list buffer when point is in a table
+  ;; Table list buffer when point is on a table
   (evil-define-key* 'normal pgmacs-table-list-map/table
     "j" #'evil-next-line
     "k" #'evil-previous-line
@@ -97,7 +87,7 @@ Let's enable some Evil mode bindings for =pgmacs=:
     "g8" (lambda () (interactive) (pgmacstbl-goto-column 8))
     "g9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
 
-  ;; Row list buffer bindings (viewing table rows)
+  ;; Row list buffer (viewing table contents)
   (evil-define-key* 'normal pgmacs-row-list-map
     "j" #'evil-next-line
     "k" #'evil-previous-line
@@ -118,7 +108,7 @@ Let's enable some Evil mode bindings for =pgmacs=:
     "gT" #'pgmacs--switch-to-database-buffer
     (kbd "TAB") #'pgmacs--next-item)
 
-  ;; Row list buffer when point is in a table (editing rows)
+  ;; Row list buffer when point is on a row (editing mode)
   (evil-define-key* 'normal pgmacs-row-list-map/table
     "j" #'evil-next-line
     "k" #'evil-previous-line
@@ -162,7 +152,7 @@ Let's enable some Evil mode bindings for =pgmacs=:
     "g8" (lambda () (interactive) (pgmacstbl-goto-column 8))
     "g9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
 
-  ;; Procedure list buffer bindings
+  ;; Procedure list buffer
   (evil-define-key* 'normal pgmacs-proc-list-map
     "j" #'evil-next-line
     "k" #'evil-previous-line
@@ -184,7 +174,7 @@ Let's enable some Evil mode bindings for =pgmacs=:
           (text-property-search-forward 'pgmacstbl)
           (forward-line -1)))
 
-  ;; Transient buffer bindings (query results, etc.)
+  ;; Transient buffer (query results)
   (evil-define-key* 'normal pgmacs-transient-map
     "j" #'evil-next-line
     "k" #'evil-previous-line
@@ -196,98 +186,62 @@ Let's enable some Evil mode bindings for =pgmacs=:
     "E" #'pgmacs-run-buffer-sql
     "gT" #'pgmacs--switch-to-database-buffer)
 
-  ;; Paginated buffer bindings (for large tables)
+  ;; Paginated buffer (large tables)
   (evil-define-key* 'normal pgmacs-paginated-map
     "]p" #'pgmacs--paginated-next
     "[p" #'pgmacs--paginated-prev))
 #+end_src
 
 * Javascript/Typescript
-I don't write a lot of Javascript or Typescript, so I haven't invested a lot of
-time building a proper configuration for those modes. In what experience I have
-had, running code actions through =SPC-c-a= doesn't work as well as the language
-servers for Go or Rust, so I've enabled auto fixes to run on save to avoid
-running eslint through a shell or fixing those lint failures by hand.
+ESLint auto-fix on save is enabled to handle trivial lint failures
+automatically. This compensates for =lsp-eslint='s code actions being less
+reliable than those for Go or Rust.
 #+begin_src elisp
-;; Provides configuration for using 'eslint' with Emacs
 (use-package! lsp-eslint
   :defer
   :config
-  ;; Automatically fix trivial lint failures
   (setq lsp-eslint-auto-fix-on-save t))
 #+end_src
 
 * Rust
-RLS has been deprecated as the primary language server for Rust and
-rust-analyzer is official language server going forward. I've set rust-analyzer
-as my language server choice and enabled procedural macro expansion and build
-script support.
+Configure =rustic= to use =rust-analyzer= (the official language server) with
+procedural macro expansion and build script support enabled for better
+completion in macro-heavy crates. The indent offset is explicitly set to 4
+spaces to match =rustfmt= defaults.
 #+begin_src elisp
-;; Provides configuration for working with the Rust programming language
 (use-package! rustic
   :defer
   :config
-  ;; Use 'rust-analyser', and enable options that allow further completion
-  ;; support for crates that rely on macros and build scripts
   (setq lsp-rust-server 'rust-analyzer
         lsp-rust-analyzer-proc-macro-enable t
-        lsp-rust-analyzer-cargo-run-build-scripts t)
-  ;; For some reason this has been lowered to 2 which conflicts with rustfmt,
-  ;; override this back to 4 spaces
-  (setq rustic-indent-offset 4))
+        lsp-rust-analyzer-cargo-run-build-scripts t
+        rustic-indent-offset 4))
 #+end_src
 
 * Python
-I like using hard line wraps to keep my Python comments tidy, so let's use a
-hook to enable =python-docstring-mode= for any Python buffers. This minor mode
-lets me use =fill-paragraph= while keeping everything Pythonic, and enables syntax
-highlighting in docstrings.
+Enable =python-docstring-mode= for better docstring editing with =fill-paragraph=
+support and syntax highlighting. Use =ruff= instead of =black= for formatting
+(faster and more comprehensive).
 #+begin_src elisp
-;; Provides better Emacs support for Python docstrings
 (use-package! python-docstring-mode
   :hook python-mode)
 
-;; Use ruff instead of black for formatting, apheleia already defines the
-;; formatter so we can just modify the mapping in the alist.
 (after! python
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 #+end_src
 
 * Go
-Out of the box, =go-mode= provides everything I need, but visualising coverage
-using the =go-coverage= command is kind of lacklustre. This is kind of a bad hack
-job but my Elisp isn't great. After loading in the =+go--run-tests= function, I've
-defined my own function for running it, then automatically calling =go-coverage=
-against the generated output, then binding that to a shortcut underneath the
-local leader key.
+Configure =go-ts-mode= with the correct 4-space indent offset to match =gofmt=.
 #+begin_src elisp
-;; Provides configuration for working with the Go programming language
 (use-package! go-mode
   :defer
   :config
-  ;; Runs Go tests, and generate a coverage profile to 'cover.out'
-  ;;
-  ;; Note: this function does not currently clean up the produced coverage profile
-  ;; once you're done.
-  ;; (defun go-cover-buffer ()
-  ;;   (interactive)
-  ;;   (+go--run-tests "-coverprofile cover.out")
-  ;;   (go-coverage "cover.out"))
-  ;; Doom's config doesn't currently configure the Go Treesitter mode indent
-  ;; offset correctly. The formatter will pick this up anyway but set it
-  ;; correctly here so the cursor is positioned correctly on new lines.
   (setq go-ts-mode-indent-offset 4))
-  ;; Make 'go-cover-buffer' available through the local leader key map
-  ;; (map! :map go-mode-map
-  ;;       :localleader
-  ;;       :prefix "t" ; t for tests
-  ;;       :desc "view coverage" "c" #'go-cover-buffer))
 #+end_src
 
 * PlantUML
-The standard file extension is =.plantuml= but I've got many files that use =.puml=
-instead. Add a mapping for this file extension to use =plantuml-mode= as the major
-mode for these files.
+Add =.puml= as an alternative file extension for PlantUML (in addition to the
+standard =.plantuml=).
 #+begin_src elisp
 (add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
 #+end_src

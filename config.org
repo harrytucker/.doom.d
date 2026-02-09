@@ -8,15 +8,27 @@
 # ------------------------------------------------------------------------------
 
 * About
-Come one, come all and see the folly of a man trying to configure a perfect
-Emacs setup. First, shut up the linter:
+This is a literate Doom Emacs configuration that tangles into the various
+configuration files that Doom expects. The configuration is split into modular
+files for better organization:
+
+| Module           | Purpose                                         |
+|------------------+-------------------------------------------------|
+| =ui.org=           | Theme, fonts, modeline, and visual settings     |
+| =editor.org=       | Evil mode, projectile, and completion settings  |
+| =shell.org=        | Eshell and terminal emulator configuration      |
+| =programming.org=  | Language-specific settings (Go, Rust, Python)   |
+| =writing.org=      | Org mode, Org Roam, Markdown, and LaTeX export  |
+| =tools.org=        | Kubernetes, AI assistants (gptel, ECA)          |
+| =workarounds.org=  | MacOS-specific fixes and quirks                 |
+
+First, enable lexical binding for better performance:
 #+begin_src elisp
 ;;; -*- lexical-binding: t; -*-
 #+end_src
 
-Hopefully you find this useful in some manner if you want to configure Doom
-Emacs in a similar way to mine.
 ** Build Information
+Running on Emacs 30.1 with native compilation on Apple Silicon:
 #+begin_src elisp :tangle no
 (emacs-version)
 #+end_src
@@ -25,26 +37,19 @@ Emacs in a similar way to mine.
 : GNU Emacs 30.1 (build 2, aarch64-apple-darwin24.3.0, NS appkit-2575.40 Version 15.3.1 (Build 24D70))
 :  of 2025-03-07
 
-#+begin_src elisp :tangle no
-system-configuration-options
-#+end_src
-
-#+RESULTS:
-: --enable-locallisppath=/usr/local/share/emacs/site-lisp --infodir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/info --mandir=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1/share/man --prefix=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-mac --enable-mac-app=/usr/local/Cellar/emacs-mac/emacs-28.2-mac-9.1 --with-gnutls --with-modules --with-native-compilation 'CFLAGS=-I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include' 'LDFLAGS=-L/usr/local/lib/gcc/12 -I/usr/local/opt/gcc/include -I/usr/local/opt/libgccjit/include'
-
 * Configuration
 ** User Identification
+Set the name and email address used by Emacs for things like email composition
+and source control metadata.
 #+begin_src elisp
-;; Emacs User Identification
 (setq user-full-name "Harry Tucker"
       user-mail-address "tucker.harry@outlook.com")
 #+END_SRC
 
 ** Load Modules
-Load configuration from separate module files for better organization.
+Load configuration from separate module files. Each module is a literate Org
+file that tangles into elisp, which =org-babel-load-file= handles automatically.
 #+begin_src elisp
-;; Load modular configuration files using org-babel-load-file
-;; This allows us to keep configuration organized in separate .org files
 (org-babel-load-file (expand-file-name "modules/ui.org" doom-user-dir))
 (org-babel-load-file (expand-file-name "modules/editor.org" doom-user-dir))
 (org-babel-load-file (expand-file-name "modules/shell.org" doom-user-dir))
@@ -55,63 +60,46 @@ Load configuration from separate module files for better organization.
 #+end_src
 
 * Packages
-I use some packages from [[https://melpa.org][MELPA]] that Doom Emacs doesn't expose through =init.el=.
-These are imported using Doom's =package!= macro.
+Additional packages from [[https://melpa.org][MELPA]] that aren't exposed through Doom's =init.el=,
+imported using the =package!= macro. Organized by category.
 #+begin_src elisp :tangle packages.el
 ;; -*- no-byte-compile: t; -*-
 ;;; .doom.d/packages.el
 
-;; Doom Emacs
-
-;; Behaviour Driven Development (BDD)
+;; Testing - BDD support
 (package! feature-mode)
 
-;; Python
-(package! python-docstring) ; provides syntax highlighting and fill-paragraph
-                            ; functionality
+;; Python - docstring editing and syntax highlighting
+(package! python-docstring)
 
-;; gRPC
-(package! protobuf-mode) ; work with .proto files
+;; Protobuf/gRPC - .proto file support
+(package! protobuf-mode)
 
-;; Kubernetes
+;; Kubernetes - cluster management and Jsonnet config files
 (package! kele)
 (package! jsonnet-mode)
 
-;; Org
-(unpin! org-roam) ; use latest version of org-roam
-(package! org-roam-ui) ; enable org-roam-ui server
-(package! engrave-faces) ; comprehensive latex code output
+;; Org Mode extensions
+(unpin! org-roam)      ; use latest org-roam
+(package! org-roam-ui) ; graph visualization web UI
+(package! engrave-faces) ; better syntax highlighting in LaTeX exports
 
-;; PostgreSQL
-(package! ; dependency of pgmacs
-  pg :recipe
-  (:host github
-   :repo "emarsden/pg-el"))
-(package!
-  pgmacs :recipe
-  (:host github
-   :repo "emarsden/pgmacs"))
+;; PostgreSQL - database browser and client library
+(package! pg :recipe (:host github :repo "emarsden/pg-el"))
+(package! pgmacs :recipe (:host github :repo "emarsden/pgmacs"))
 
-;; AI Tools
-(unpin! gptel) ; use latest version of gptel, many bugs abound
-(package!
-  macher :recipe
-  (:host github
-   :repo "kmontag/macher"))
-(package!
-  eca :recipe
-  (:host github
-   :repo "editor-code-assistant/eca-emacs"
-   :files ("*.el")))
-;; Agent Shell Stuff
+;; AI Assistants
+(unpin! gptel) ; use latest gptel
+(package! macher :recipe (:host github :repo "kmontag/macher"))
+(package! eca :recipe (:host github :repo "editor-code-assistant/eca-emacs" :files ("*.el")))
 (package! shell-maker)
 (package! acp)
 (package! agent-shell)
 
-;; Miscellaneous
-(package! command-log-mode)
-(package! prism)
-(package! flyover)
-(package! eat)
+;; Utilities
+(package! command-log-mode) ; display keystrokes in a buffer
+(package! prism)            ; scope-based syntax highlighting
+(package! flyover)          ; modern flycheck display
+(package! eat)              ; terminal emulator for eshell
 #+end_src
 
