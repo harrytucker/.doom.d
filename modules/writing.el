@@ -1,0 +1,84 @@
+(use-package! org
+  :hook (org-mode . auto-fill-mode)
+  :defer-incrementally t
+  :config
+  (setq org-log-done 'time
+        org-agenda-start-with-log-mode t
+        org-hide-emphasis-markers t
+        +org-capture-todo-file "Tasks.org"
+        org-archive-location "::* Archive"
+        org-agenda-files '("~/org"
+                           "~/org/roam"
+                           "~/org/roam/daily"))
+
+  ;; Use pdf-tools for viewing exported PDFs
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
+
+  ;; Larger heading fonts for visual hierarchy
+  (custom-set-faces!
+    '(org-level-1
+      :height 1.2
+      :inherit outline-1)
+    '(org-level-2
+      :height 1.1
+      :inherit outline-2))
+
+  ;; LaTeX export configuration
+  (require 'ox-latex)
+  (require 'ox-bibtex)
+
+  ;; Use Tectonic as the LaTeX engine (self-contained, auto-fetches dependencies)
+  (setq org-latex-pdf-process
+        `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir "latex")))
+
+  ;; Use engrave-faces for syntax-highlighted code blocks in LaTeX
+  (setq org-latex-src-block-backend 'engraved)
+
+  ;; Additional LaTeX packages for better tables and colours
+  (setq org-latex-packages-alist '(("" "booktabs")
+                                   ("" "tabularx")
+                                   ("" "color")))
+
+  ;; Custom 'mimore' document class for exports
+  (add-to-list 'org-latex-classes
+               '("mimore"
+                 "\\documentclass{mimore}\n\[NO-DEFAULT-PACKAGES\]\n\[PACKAGES\]\n\[EXTRA\]"
+                 ("\\section{%s}" . "\\section\*{%s}")
+                 ("\\subsection{%s}" . "\\subsection\*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph\*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
+  (setq org-latex-default-class "mimore"))
+
+(use-package! org-tree-slide
+  :after org
+  :config
+  (setq org-tree-slide-skip-outline-level 2)
+  (org-tree-slide-presentation-profile))
+
+(use-package! org-roam
+  :after org
+  :config
+  (setq org-roam-graph-link-hidden-types
+        '("file" "http" "https")))
+
+(use-package! websocket
+  :after org-roam)
+
+(use-package! org-roam-ui
+  :after org-roam
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+
+(map! :leader
+      :prefix ("o" . "open")
+      :desc "Open calendar" "c" #'cfw:open-org-calendar)
+
+(require 'auth-source)
+
+(let ((credential (auth-source-user-and-password "api.github.com")))
+  (setq grip-github-user (car credential)
+        grip-github-password (cadr credential)))

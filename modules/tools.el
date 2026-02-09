@@ -1,11 +1,3 @@
-#+title: Tools Configuration
-
-* Kubernetes
-** kubernetes.el
-=kubernetes.el= provides an interactive Kubernetes dashboard inside Emacs.
-Bound under =SPC o k=.
-
-#+begin_src elisp
 (use-package! kubernetes
   :commands (kubernetes-overview)
   :init
@@ -82,15 +74,7 @@ Bound under =SPC o k=.
         :n "?"   #'kubernetes-dispatch
         :n "c"   #'kubernetes-config-popup
         :n "P"   #'kubernetes-proxy))
-#+end_src
 
-** kele (temporarily disabled)
-=kele= is temporarily disabled because it doesn't support the cluster
-permissions setup I have to use.
-
-If/when it's re-enabled, the configuration/bindings below can be restored.
-
-#+begin_src elisp
 ;; (use-package! kele
 ;;   :init
 ;;   (map! :leader
@@ -134,14 +118,7 @@ If/when it's re-enabled, the configuration/bindings below can be restored.
 ;;   (map! :map kele-list-table-map
 ;;         :n [return] #'kele-list-table-dwim
 ;;         :n "d" #'kele-list-kill))
-#+end_src
 
-* AI Assistants
-** gptel
-=gptel= is an LLM chat client. Configured to use Claude Opus 4.5 via GitHub
-Copilot, with Org mode as the default buffer format. =macher= provides agentic
-tool-use capabilities.
-#+begin_src elisp
 (use-package! gptel
   :config
   (setq gptel-model #'claude-opus-4.5
@@ -162,19 +139,7 @@ tool-use capabilities.
         :prefix ("o" . "open")
         (:prefix ("l" . "llm")
          :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire)))
-#+end_src
 
-** ECA (Editor Code Assistant)
-=eca-emacs= provides an agentic coding assistant. The chat interface uses custom
-keymaps that conflict with Evil mode, so comprehensive bindings are configured
-for normal, insert, and visual states.
-
-Key bindings follow Evil conventions with =g= prefix for actions:
-- =ga=/=gA= - accept tool calls (all/next)
-- =gs= - accept and remember
-- =gx= - reject next tool call
-- =[[=/=]]= - navigate between messages
-#+begin_src elisp
 (setq eca-chat-custom-model "github-copilot/claude-opus-4.5")
 
 (after! eca-chat
@@ -266,13 +231,7 @@ Key bindings follow Evil conventions with =g= prefix for actions:
         :n [backtab] #'backward-button
         :n "g," #'eca
         :n "g." #'eca-transient-menu))
-#+end_src
 
-** Agent Shell
-=agent-shell= provides an interactive shell interface for AI agents. Configured
-with the Atlassian MCP server for Jira/Confluence integration. Diff buffers use
-Emacs state for compatibility with diff-mode keybindings.
-#+begin_src elisp
 (use-package! agent-shell
   :config
   ;; RET behavior: newline in insert mode, send in normal mode
@@ -291,13 +250,8 @@ Emacs state for compatibility with diff-mode keybindings.
 	    (lambda ()
 	      (when (string-match-p "\\*agent-shell-diff\\*" (buffer-name))
 		(evil-emacs-state)))))
-#+end_src
 
-* Diff Mode
-Evil-friendly binding for applying a diff buffer to its target file.
-#+begin_src elisp
 (map! :after diff-mode
       :map diff-mode-map
       :localleader
       :desc "Apply buffer" "a" #'diff-apply-buffer)
-#+end_src

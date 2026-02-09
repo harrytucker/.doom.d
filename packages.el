@@ -11,7 +11,8 @@
 (package! protobuf-mode)
 
 ;; Kubernetes - cluster management and Jsonnet config files
-(package! kele)
+(package! kubernetes)
+;;(package! kele) ; temporarily disabled (see modules/tools.org)
 (package! jsonnet-mode)
 
 ;; Org Mode extensions
