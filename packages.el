@@ -1,55 +1,38 @@
 ;; -*- no-byte-compile: t; -*-
 ;;; .doom.d/packages.el
 
-;; Doom Emacs
-
-;; Behaviour Driven Development (BDD)
+;; Testing - BDD support
 (package! feature-mode)
 
-;; Python
-(package! python-docstring) ; provides syntax highlighting and fill-paragraph
-                            ; functionality
+;; Python - docstring editing and syntax highlighting
+(package! python-docstring)
 
-;; gRPC
-(package! protobuf-mode) ; work with .proto files
+;; Protobuf/gRPC - .proto file support
+(package! protobuf-mode)
 
-;; Kubernetes
+;; Kubernetes - cluster management and Jsonnet config files
 (package! kele)
 (package! jsonnet-mode)
 
-;; Org
-(unpin! org-roam) ; use latest version of org-roam
-(package! org-roam-ui) ; enable org-roam-ui server
-(package! engrave-faces) ; comprehensive latex code output
+;; Org Mode extensions
+(unpin! org-roam)      ; use latest org-roam
+(package! org-roam-ui) ; graph visualization web UI
+(package! engrave-faces) ; better syntax highlighting in LaTeX exports
 
-;; PostgreSQL
-(package! ; dependency of pgmacs
-  pg :recipe
-  (:host github
-   :repo "emarsden/pg-el"))
-(package!
-  pgmacs :recipe
-  (:host github
-   :repo "emarsden/pgmacs"))
+;; PostgreSQL - database browser and client library
+(package! pg :recipe (:host github :repo "emarsden/pg-el"))
+(package! pgmacs :recipe (:host github :repo "emarsden/pgmacs"))
 
-;; AI Tools
-(unpin! gptel) ; use latest version of gptel, many bugs abound
-(package!
-  macher :recipe
-  (:host github
-   :repo "kmontag/macher"))
-(package!
-  eca :recipe
-  (:host github
-   :repo "editor-code-assistant/eca-emacs"
-   :files ("*.el")))
-;; Agent Shell Stuff
+;; AI Assistants
+(unpin! gptel) ; use latest gptel
+(package! macher :recipe (:host github :repo "kmontag/macher"))
+(package! eca :recipe (:host github :repo "editor-code-assistant/eca-emacs" :files ("*.el")))
 (package! shell-maker)
 (package! acp)
 (package! agent-shell)
 
-;; Miscellaneous
-(package! command-log-mode)
-(package! prism)
-(package! flyover)
-(package! eat)
+;; Utilities
+(package! command-log-mode) ; display keystrokes in a buffer
+(package! prism)            ; scope-based syntax highlighting
+(package! flyover)          ; modern flycheck display
+(package! eat)              ; terminal emulator for eshell

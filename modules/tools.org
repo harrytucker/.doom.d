@@ -75,10 +75,7 @@ tool-use capabilities.
   (map! :leader
         :prefix ("o" . "open")
         (:prefix ("l" . "llm")
-         :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire))
-
-  ;; Auto-scroll during streaming responses
-  (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
+         :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire)))
 #+end_src
 
 ** ECA (Editor Code Assistant)
