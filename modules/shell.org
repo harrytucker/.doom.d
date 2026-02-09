@@ -1,0 +1,32 @@
+#+title: Shell Configuration
+
+* Eshell
+Doom Emacs disables =eshell= from indicating colour support by default in order to
+avoid running into issues with applications using it as an indicator of a fully
+functional terminal emulator. I'm fine with working around that when it comes
+up, since I can add to =eshell-visual-commands= when needed, so I've re-enabled
+colour support.
+#+begin_src elisp
+;; Experimenting with Eshell's Plan 9 emulation, see here:
+;; https://www.masteringemacs.org/article/complete-guide-mastering-eshell
+(after! eshell
+  (require 'em-smart)
+  (eshell-smart-initialize)
+  ;; Eshell's emulated echo doesn't seem to honour the -n flag.
+  (setq eshell-plain-echo-behavior t
+        eshell-visual-commands '()))
+
+(use-package! eat
+  :defer t
+  :init
+  ;; Use Emacs-eat. I've gotten rid of vterm as this works well enough for my purposes,
+  ;; and I much prefer staying in Eshell.
+  ;;
+  ;; Using eat also requires unsetting eshell-visual-commands, done above here.
+  (add-hook 'eshell-load-hook #'eat-eshell-mode))
+
+;; Point bash-completion at the Homebrew installed Bash version as MacOS ships
+;; an outdated Bash version.
+(after! bash-completion
+  (setq bash-completion-prog "/opt/homebrew/bin/bash"))
+#+end_src

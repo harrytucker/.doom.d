@@ -1,0 +1,293 @@
+#+title: Programming Configuration
+
+* Databases
+I only really use PostgreSQL in my day-to-day, so I set it as my default SQL
+product dialect. Auto formatting is configured with =apheleia-mode= to use
+=pgformatter=, available on the Homebrew repository. Some configuration is
+included for the PostgreSQL formatting to follow the style that I prefer.
+#+begin_src elisp
+;; Provides configuration for working with SQL within Emacs
+(after! sql-mode
+  ;; Use PostgreSQL
+  (sql-set-product 'postgres)
+  ;; Enable apheleia-mode in SQL buffers
+  (add-hook 'sql-mode-hook #'apheleia-mode)
+  ;; Use pg_format for formatting SQL files upon saving the buffer (set-formatter!
+  (set-formatter!
+    'pg_format '("pg_format"
+                 "--comma-break"
+                 "--keep-newline"
+                 "-")
+    :modes '(sql-mode)))
+
+;; Doom disables SQL formatting by default, so you need to override this.
+(delete 'sql-mode +format-on-save-disabled-modes)
+#+end_src
+
+Let's enable some Evil mode bindings for =pgmacs=:
+#+begin_src elisp
+;; PGmacs evil-mode integration
+;; PGmacs is a PostgreSQL database browser that uses its own keymaps which don't
+;; play nicely with evil-mode. This configuration sets up proper evil bindings.
+;;
+;; The key insight is that pgmacs uses `use-local-map' to set buffer-local keymaps,
+;; which can conflict with evil's state-based keymaps. We need to:
+;; 1. Suppress the conflicting keys in the original pgmacs keymaps
+;; 2. Use evil-define-key* to properly bind keys in evil's normal state
+(after! pgmacs
+  ;; Set initial evil state to normal for PGmacs buffers
+  (evil-set-initial-state 'pgmacs-mode 'normal)
+
+  ;; Remove conflicting keybindings from pgmacs keymaps.
+  ;; These keys (j, k, h, etc.) are used for navigation in evil-mode,
+  ;; but pgmacs binds them to other functions.
+  (dolist (key '("j" "k" "h" "d" "u" "i" "p" "g" "r" "v" "y"))
+    (define-key pgmacs-table-list-map (kbd key) nil)
+    (define-key pgmacs-table-list-map/table (kbd key) nil)
+    (define-key pgmacs-row-list-map (kbd key) nil)
+    (define-key pgmacs-row-list-map/table (kbd key) nil)
+    (define-key pgmacs-proc-list-map (kbd key) nil))
+
+  ;; Table list buffer bindings (main database view)
+  (evil-define-key* 'normal pgmacs-table-list-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "gr" #'pgmacs--table-list-redraw
+    "?" #'pgmacs--table-list-help
+    "go" #'pgmacs-open-table
+    "gp" #'pgmacs--display-procedures
+    "e" #'pgmacs-run-sql
+    "E" #'pgmacs-run-buffer-sql
+    "=" #'pgmacs--shrink-columns
+    "r" #'pgmacs--redraw-pgmacstbl
+    "gT" #'pgmacs--switch-to-database-buffer
+    (kbd "TAB") #'pgmacs--next-item)
+
+  ;; Table list buffer when point is in a table
+  (evil-define-key* 'normal pgmacs-table-list-map/table
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    (kbd "RET") #'pgmacs--table-list-RET
+    "D" #'pgmacs--table-list-delete
+    "gS" #'pgmacs--schemaspy-database
+    "gR" #'pgmacs--table-list-rename
+    "gj" #'pgmacs--row-as-json
+    "gv" #'pgmacs--view-value
+    "<" (lambda () (interactive)
+          (text-property-search-backward 'pgmacstbl)
+          (forward-line))
+    ">" (lambda () (interactive)
+          (text-property-search-forward 'pgmacstbl)
+          (forward-line -1))
+    "g0" (lambda () (interactive) (pgmacstbl-goto-column 0))
+    "g1" (lambda () (interactive) (pgmacstbl-goto-column 1))
+    "g2" (lambda () (interactive) (pgmacstbl-goto-column 2))
+    "g3" (lambda () (interactive) (pgmacstbl-goto-column 3))
+    "g4" (lambda () (interactive) (pgmacstbl-goto-column 4))
+    "g5" (lambda () (interactive) (pgmacstbl-goto-column 5))
+    "g6" (lambda () (interactive) (pgmacstbl-goto-column 6))
+    "g7" (lambda () (interactive) (pgmacstbl-goto-column 7))
+    "g8" (lambda () (interactive) (pgmacstbl-goto-column 8))
+    "g9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
+
+  ;; Row list buffer bindings (viewing table rows)
+  (evil-define-key* 'normal pgmacs-row-list-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "?" #'pgmacs--row-list-help
+    "I" #'pgmacs--insert-row-empty
+    "go" #'pgmacs-open-table
+    "r" #'pgmacs--redraw-pgmacstbl
+    "gr" #'pgmacs--row-list-redraw
+    "e" #'pgmacs-run-sql
+    "E" #'pgmacs-run-buffer-sql
+    "gW" #'pgmacs--add-where-filter
+    "gS" #'pgmacs--schemaspy-table
+    "gT" #'pgmacs--switch-to-database-buffer
+    (kbd "TAB") #'pgmacs--next-item)
+
+  ;; Row list buffer when point is in a table (editing rows)
+  (evil-define-key* 'normal pgmacs-row-list-map/table
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    (kbd "RET") #'pgmacs--row-list-dwim
+    "w" #'pgmacs--edit-value-widget
+    "!" #'pgmacs--shell-command-on-value
+    "&" #'pgmacs--async-command-on-value
+    "gU" #'pgmacs--upcase-value
+    "gu" #'pgmacs--downcase-value
+    "g~" #'pgmacs--capitalize-value
+    "gv" #'pgmacs--view-value
+    "dd" #'pgmacs--row-list-delete-row
+    "x" #'pgmacs--row-list-delete-marked
+    (kbd "DEL") #'pgmacs--row-list-delete-row
+    "gR" #'pgmacs--row-list-rename-column
+    "a" #'pgmacs--insert-row
+    "gi" #'pgmacs--insert-row-widget
+    "yy" #'pgmacs--copy-row
+    "p" #'pgmacs--yank-row
+    "=" #'pgmacs--shrink-columns
+    "gj" #'pgmacs--row-as-json
+    "m" #'pgmacs--row-list-mark-row
+    "u" #'pgmacs--row-list-unmark-row
+    "U" #'pgmacs--row-list-unmark-all
+    "<" (lambda () (interactive)
+          (text-property-search-backward 'pgmacstbl)
+          (forward-line))
+    ">" (lambda () (interactive)
+          (text-property-search-forward 'pgmacstbl)
+          (forward-line -1))
+    "g0" (lambda () (interactive) (pgmacstbl-goto-column 0))
+    "g1" (lambda () (interactive) (pgmacstbl-goto-column 1))
+    "g2" (lambda () (interactive) (pgmacstbl-goto-column 2))
+    "g3" (lambda () (interactive) (pgmacstbl-goto-column 3))
+    "g4" (lambda () (interactive) (pgmacstbl-goto-column 4))
+    "g5" (lambda () (interactive) (pgmacstbl-goto-column 5))
+    "g6" (lambda () (interactive) (pgmacstbl-goto-column 6))
+    "g7" (lambda () (interactive) (pgmacstbl-goto-column 7))
+    "g8" (lambda () (interactive) (pgmacstbl-goto-column 8))
+    "g9" (lambda () (interactive) (pgmacstbl-goto-column 9)))
+
+  ;; Procedure list buffer bindings
+  (evil-define-key* 'normal pgmacs-proc-list-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "l" #'pgmacstbl-next-column
+    "h" #'pgmacstbl-previous-column
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "?" #'pgmacs--proc-list-help
+    (kbd "RET") #'pgmacs--proc-list-RET
+    (kbd "TAB") #'pgmacs--next-item
+    "dd" #'pgmacs--proc-list-delete
+    "gT" #'pgmacs--switch-to-database-buffer
+    "gR" #'pgmacs--proc-list-rename
+    "<" (lambda () (interactive)
+          (text-property-search-backward 'pgmacstbl)
+          (forward-line))
+    ">" (lambda () (interactive)
+          (text-property-search-forward 'pgmacstbl)
+          (forward-line -1)))
+
+  ;; Transient buffer bindings (query results, etc.)
+  (evil-define-key* 'normal pgmacs-transient-map
+    "j" #'evil-next-line
+    "k" #'evil-previous-line
+    "gg" #'beginning-of-buffer
+    "G" #'end-of-buffer
+    "q" #'bury-buffer
+    "go" #'pgmacs-open-table
+    "e" #'pgmacs-run-sql
+    "E" #'pgmacs-run-buffer-sql
+    "gT" #'pgmacs--switch-to-database-buffer)
+
+  ;; Paginated buffer bindings (for large tables)
+  (evil-define-key* 'normal pgmacs-paginated-map
+    "]p" #'pgmacs--paginated-next
+    "[p" #'pgmacs--paginated-prev))
+#+end_src
+
+* Javascript/Typescript
+I don't write a lot of Javascript or Typescript, so I haven't invested a lot of
+time building a proper configuration for those modes. In what experience I have
+had, running code actions through =SPC-c-a= doesn't work as well as the language
+servers for Go or Rust, so I've enabled auto fixes to run on save to avoid
+running eslint through a shell or fixing those lint failures by hand.
+#+begin_src elisp
+;; Provides configuration for using 'eslint' with Emacs
+(use-package! lsp-eslint
+  :defer
+  :config
+  ;; Automatically fix trivial lint failures
+  (setq lsp-eslint-auto-fix-on-save t))
+#+end_src
+
+* Rust
+RLS has been deprecated as the primary language server for Rust and
+rust-analyzer is official language server going forward. I've set rust-analyzer
+as my language server choice and enabled procedural macro expansion and build
+script support.
+#+begin_src elisp
+;; Provides configuration for working with the Rust programming language
+(use-package! rustic
+  :defer
+  :config
+  ;; Use 'rust-analyser', and enable options that allow further completion
+  ;; support for crates that rely on macros and build scripts
+  (setq lsp-rust-server 'rust-analyzer
+        lsp-rust-analyzer-proc-macro-enable t
+        lsp-rust-analyzer-cargo-run-build-scripts t)
+  ;; For some reason this has been lowered to 2 which conflicts with rustfmt,
+  ;; override this back to 4 spaces
+  (setq rustic-indent-offset 4))
+#+end_src
+
+* Python
+I like using hard line wraps to keep my Python comments tidy, so let's use a
+hook to enable =python-docstring-mode= for any Python buffers. This minor mode
+lets me use =fill-paragraph= while keeping everything Pythonic, and enables syntax
+highlighting in docstrings.
+#+begin_src elisp
+;; Provides better Emacs support for Python docstrings
+(use-package! python-docstring-mode
+  :hook python-mode)
+
+;; Use ruff instead of black for formatting, apheleia already defines the
+;; formatter so we can just modify the mapping in the alist.
+(after! python
+  (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
+#+end_src
+
+* Go
+Out of the box, =go-mode= provides everything I need, but visualising coverage
+using the =go-coverage= command is kind of lacklustre. This is kind of a bad hack
+job but my Elisp isn't great. After loading in the =+go--run-tests= function, I've
+defined my own function for running it, then automatically calling =go-coverage=
+against the generated output, then binding that to a shortcut underneath the
+local leader key.
+#+begin_src elisp
+;; Provides configuration for working with the Go programming language
+(use-package! go-mode
+  :defer
+  :config
+  ;; Runs Go tests, and generate a coverage profile to 'cover.out'
+  ;;
+  ;; Note: this function does not currently clean up the produced coverage profile
+  ;; once you're done.
+  ;; (defun go-cover-buffer ()
+  ;;   (interactive)
+  ;;   (+go--run-tests "-coverprofile cover.out")
+  ;;   (go-coverage "cover.out"))
+  ;; Doom's config doesn't currently configure the Go Treesitter mode indent
+  ;; offset correctly. The formatter will pick this up anyway but set it
+  ;; correctly here so the cursor is positioned correctly on new lines.
+  (setq go-ts-mode-indent-offset 4))
+  ;; Make 'go-cover-buffer' available through the local leader key map
+  ;; (map! :map go-mode-map
+  ;;       :localleader
+  ;;       :prefix "t" ; t for tests
+  ;;       :desc "view coverage" "c" #'go-cover-buffer))
+#+end_src
+
+* PlantUML
+The standard file extension is =.plantuml= but I've got many files that use =.puml=
+instead. Add a mapping for this file extension to use =plantuml-mode= as the major
+mode for these files.
+#+begin_src elisp
+(add-to-list 'auto-mode-alist '("\\.puml\\'" . plantuml-mode))
+#+end_src

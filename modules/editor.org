@@ -1,0 +1,35 @@
+#+title: Editor Configuration
+
+* Evil
+I can use =undo-tree= as a linear system most of the time, which is what ends up
+happening. In other cases, =undo-tree= basically provides a free stash of previous
+code changes if I've been experimenting with some code, so is a nice escape
+hatch to have, so I've enabled it as my undo system.
+#+begin_src elisp
+;; Allows undoing and redoing as a tree of changes, instead of being limited to
+;; linear changes
+(evil-set-undo-system 'undo-tree)
+#+end_src
+
+* Projects
+When using =projectile=, I don't want to search some directories that are just
+noise, so I want to ignore them.
+#+begin_src elisp
+(use-package! projectile
+  :defer
+  :config
+  ;; When looking for Go project files, I don't care about vendored dependencies
+  (add-to-list 'projectile-globally-ignored-directories "*vendor"))
+#+end_src
+
+* Completions
+I'm trying out replacing =company-mode= with =corfu=. This is mainly because I've
+read largely positive things about this new completion package and I'm hoping
+it's a bit leaner and faster than =company-mode=.
+#+begin_src elisp
+(use-package! corfu
+  :defer
+  :config
+  ;; Automatically select the first valid completion candidate
+  (setq corfu-preselect 'prompt))
+#+end_src

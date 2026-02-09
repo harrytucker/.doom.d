@@ -1,0 +1,17 @@
+#+title: Workarounds
+
+* MacOS
+MacOS has a few things that can sometimes cause issues with Doom Emacs. Here's
+some configuration that only activates on MacOS installs to fix those.
+#+begin_src elisp
+;; MacOS only configuration
+(when (featurep :system 'macos)
+  ;; Mac UK keyboard layout puts the '#' symbol under Opt + 3 which
+  ;; conflicts with Doom's workspace shortcuts.
+  ;;
+  ;; Rebind this in insert mode only so that I can still use the hash
+  ;; symbol.
+  (map! :i "M-3" #'(lambda () (interactive) (insert "#")))
+  ;; BSD sed doesn't work with Man-mode, use the GNU variant.
+  (setq Man-sed-command "gsed"))
+#+end_src

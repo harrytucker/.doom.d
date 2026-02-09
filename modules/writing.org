@@ -1,0 +1,165 @@
+#+title: Writing Configuration
+
+* Org Mode
+Org Mode is probably the most popular markdown format for Emacs users, and has a
+bunch of functionality and plugins available for use with it. For example, you
+can use it to provide literate programming functionality, such as how this
+document is set up to tangle into a final =config.el= setup that Emacs actually
+ingests.
+
+For writing in Org, I've configured a few things:
++ Hiding in-line text markup
++ Automatically hard wrapping text at 80 characters
++ Using =pdf-tools= for viewing PDF output
++ Increasing the font size of the first and second heading levels
++ Some opinionated LaTeX config
+#+begin_src elisp
+;; Provides configuration for working with 'org-mode'
+(use-package! org
+  ;; Wrap text at 80 characters for better Git diffs and readability
+  :hook (org-mode . auto-fill-mode)
+  ;; Org is a large package, defer loading but also load during downtime to
+  ;; prevent hangs on first load
+  :defer-incrementally t
+  :config
+  (setq org-log-done 'time ; Record timestamps on task completion for org-agenda usage
+        org-agenda-start-with-log-mode t ; Start agenda in log mode with timestamps for completion displayed
+        org-hide-emphasis-markers t ; Hide emphasis markers that wrap text (i.e. bold, italics)
+        +org-capture-todo-file "Tasks.org" ; Capture tasks to ~/org/Tasks.org
+        org-archive-location "::* Archive") ; Archive sub-trees to an "Archive" top-level heading
+
+  ;; Use 'pdf-tools' as the default viewer for exported Org documents
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . pdf-tools))
+  ;; Enlarge top and second level heading fonts
+  (custom-set-faces!
+    '(org-level-1
+      :height 1.2
+      :inherit outline-1)
+    '(org-level-2
+      :height 1.1
+      :inherit outline-2))
+  ;; Collect agenda from Org and Org Roam
+  (setq org-agenda-files '("~/org"
+                           "~/org/roam"
+                           "~/org/roam/daily"))
+  ;; Enable export support for LaTeX and BibTeX formats
+  (require 'ox-latex)
+  (require 'ox-bibtex)
+
+
+  ;; Tectonic is a self-contained LaTeX engine, and downloads dependencies on the
+  ;; fly, so I can avoid using a massive install of texlive-full.
+  ;;
+  ;; It also handles re-runs automatically for tools like Bibtex.
+  (setq org-latex-pdf-process
+        ;; PDF process expects a list of commands here as pdflatex normally
+        ;; needs to be repeated.
+        ;;
+        ;; Since tectonic handles this automatically, we only need one item. The
+        ;; `,` marker is used to partially evaluate the list so that
+        ;; `doom-user-dir` is correctly concatenated using its value.
+        `(,(concat "tectonic --outdir=%o %f -Z search-path=" doom-user-dir "latex")))
+
+  ;; Better syntax highlighting in exported LaTeX
+  (setq org-latex-src-block-backend 'engraved)
+  ;; Enable additional packages for exported LaTeX, takes the form:
+  ;;    ("options" "package" SNIPPET-FLAG COMPILERS)
+  (setq org-latex-packages-alist '(("" "booktabs")
+                                   ("" "tabularx")
+                                   ("" "color")))
+  ;; Define 'mimore' LaTeX document class for use in exports
+  (add-to-list 'org-latex-classes
+               '("mimore"
+                 "\\documentclass{mimore}\n\[NO-DEFAULT-PACKAGES\]\n\[PACKAGES\]\n\[EXTRA\]"
+                 ("\\section{%s}" . "\\section\*{%s}")
+                 ("\\subsection{%s}" . "\\subsection\*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection\*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph\*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph\*{%s}")))
+  (setq org-latex-default-class "mimore"))
+#+end_src
+
+** Org-Tree-Slide
+If LaTeX beamer presentations aren't your thing, or you want to use literate
+programming to run code in live presentations; it's possible to hold
+presentations directly from Org Mode itself.
+
+I use the =org-tree-slide= package for this, which requires some basic
+configuration. For my use case, I tell =org-tree-slide= to skip all headings above
+the top level for slide generation, which effectively means I just treat top
+level headings as slides. At time of writing, there are three different default
+profiles available, so I've enabled the fancy one with all the animation bells
+and whistles.
+#+begin_src elisp
+;; Provides support for presenting directly from 'org-mode' buffers
+(use-package! org-tree-slide
+  :after org
+  :config
+  ;; Hide formatting characters, use top-level headings as slides
+  (setq org-tree-slide-skip-outline-level 2)
+  ;; Use the fancy presentation profile, shiny animations!
+  (org-tree-slide-presentation-profile))
+#+end_src
+
+** Org Roam & UI
+Org Roam can be used to extend Org Mode to become a personal wiki of sorts. I am
+still trying to incorporate it more into my workflow, so the configuration here
+is relatively sparse.
+#+begin_src elisp
+;; Provides configuration for 'org-roam', an Emacs knowledge graph
+(use-package! org-roam
+  :after org
+  :config
+  ;; Hide common link types from org-roam graph
+  (setq org-roam-graph-link-hidden-types
+        '("file"
+          "http"
+          "https")))
+#+end_src
+
+For inspecting a large Org Roam database, =org-roam-ui= is pretty good. I haven't
+enabled starting it automatically on launching org-roam just yet as I want to
+use roam more before I go that far. Most of the config here just follows the
+recommendations from [[https://github.com/org-roam/org-roam-ui][org-roam-ui's README]].
+#+begin_src elisp
+;; Provides 'websocket', a dependency of 'org-roam-ui'
+(use-package! websocket
+  :after org-roam)
+
+;; Provides 'org-roam-ui' a web frontend for 'org-roam'
+(use-package! org-roam-ui
+  :after org-roam
+  :config
+  ;; Sync UI theme with Emacs, follow current the buffer, update on save, and
+  ;; open browser on start
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+#+end_src
+
+** Calendar
+I really like having a full calendar view in addition to the view provided by
+=org-agenda=, which can be provided by =calfw=. By default, Doom's =calendar= module
+installs the package, but doesn't provide a key binding so you can define your
+own calendar function. For now, I'm just using the calendar from my =org-agenda=,
+so I just need to map that function to a key.
+#+begin_src elisp
+(map! :leader
+      :prefix ("o" . "open")
+      :desc "Open calendar" "c" #'cfw:open-org-calendar)
+#+end_src
+
+* Markdown
+You can use =grip-mode= to provide GitHub markdown previews, but by default you'll
+get rate limited by the GitHub API. To avoid this you'll need to authenticate
+with a personal access token.
+#+begin_src elisp
+;; You'll need to require the auth-source library. It's built into Emacs.
+(require 'auth-source)
+
+;; Fetch API credentials from ~/.authinfo or ~/.netrc
+(let ((credential (auth-source-user-and-password "api.github.com")))
+  (setq grip-github-user (car credential)
+        grip-github-password (cadr credential)))
+#+end_src

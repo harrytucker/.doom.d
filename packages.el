@@ -43,6 +43,10 @@
   (:host github
    :repo "editor-code-assistant/eca-emacs"
    :files ("*.el")))
+;; Agent Shell Stuff
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)
 
 ;; Miscellaneous
 (package! command-log-mode)

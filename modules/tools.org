@@ -1,0 +1,226 @@
+#+title: Tools Configuration
+
+* Kubernetes
+Define autoloads for commands from =kele=, and enable =evil-mode= bindings for use
+with the Kubernetes management interface.
+
+=kele= provides a comprehensive Kubernetes client for Emacs with transient-based
+menus. This configuration enables it and sets up evil bindings for its various
+buffer types.
+#+begin_src elisp
+;; Provides configuration for interacting with Kubernetes clusters from within
+;; Emacs
+(use-package! kele
+  :init
+  ;; Provide key map to access 'kele' from leader key
+  (map! :leader
+        :desc "Kubernetes" "k" #'kele-dispatch))
+  ;; 'kele-dispatch' requires 'kele-mode' to be enabled to watch Kubernetes
+  ;; resources
+  ;;(kele-mode))
+
+;; Kele evil-mode integration
+;; Kele uses magit-section-mode and vtable for its list buffers. Set up proper
+;; evil bindings for navigation and actions.
+(after! kele
+  ;; Set initial evil state to normal for kele list buffers
+  (evil-set-initial-state 'kele-list-mode 'normal)
+  (evil-set-initial-state 'kele-get-mode 'normal)
+
+  ;; List mode bindings (viewing resources like pods, deployments, etc.)
+  (map! :map kele-list-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'quit-window
+        :n "gr" #'kele-list-refresh
+        :n [return] #'kele-list-table-dwim
+        :n "d" #'kele-list-kill
+        :n [tab] #'vtable-next-column
+        :n [backtab] #'vtable-previous-column
+        :n "]]" #'magit-section-forward
+        :n "[[" #'magit-section-backward
+        :n "gj" #'magit-section-forward-sibling
+        :n "gk" #'magit-section-backward-sibling
+        :n "za" #'magit-section-toggle
+        :n "zc" #'magit-section-hide
+        :n "zo" #'magit-section-show)
+
+  ;; Get mode bindings (viewing individual resource YAML)
+  (map! :map kele-get-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'quit-window
+        :n "Q" #'kele--quit-and-kill
+        :n "gr" #'kele-refetch)
+
+  ;; Table navigation within list buffers
+  (map! :map kele-list-table-map
+        :n [return] #'kele-list-table-dwim
+        :n "d" #'kele-list-kill))
+#+end_src
+
+* AI Assistants
+/AI is all the rage these days./
+** gptel
+=gptel= provides an LLM client for Emacs that can be used to chat with LLMs.
+#+begin_src elisp
+(use-package! gptel
+  :config
+  ;; using claude opus 4.5 for my chosen default AI model
+  (setq gptel-model #'claude-opus-4.5
+        ;; gptel uses markdown-mode by default, use org-mode instead
+        gptel-default-mode #'org-mode
+        ;; include tool use results in the chat buffer
+        gptel-include-tool-results t
+        ;; configure github copilot backend
+        gptel-backend (gptel-make-gh-copilot "Copilot"))
+
+  ;; Install Macher presets for agentic use
+  (macher-install)
+  (macher-enable)
+
+  ;; add keybind for activating gptel-mode on an old org-buffer
+  (defun my/gptel-toggle-and-enable-solaire ()
+    (interactive)
+    (gptel-mode 'toggle)
+    (solaire-mode 'toggle))
+  (map! :leader
+        :prefix ("o" . "open")
+        (:prefix ("l" . "llm")
+         :desc "Toggle gptel-mode and enable solaire-mode" "t" #'my/gptel-toggle-and-enable-solaire))
+  ;; enable automatic scrolling of llm responses
+  (add-hook #'gptel-post-stream-hook #'gptel-auto-scroll))
+#+end_src
+
+** ECA (Editor Code Assistant)
+=eca-emacs= provides an agentic coding assistant that integrates with Emacs. The
+chat interface uses its own keymaps which don't play well with evil-mode out of
+the box, so we need to configure evil bindings.
+#+begin_src elisp
+;; ECA configuration
+;; Set default model to Claude Opus 4.5 via GitHub Copilot
+(setq eca-chat-custom-model "github-copilot/claude-opus-4.5")
+
+;; ECA evil-mode integration
+;; ECA uses markdown-mode based buffers with custom keymaps that don't work well
+;; with evil-mode. This configuration sets up proper evil bindings for the chat
+;; and MCP details buffers.
+(after! eca-chat
+  ;; Set initial evil state to insert for chat buffers (for typing prompts)
+  ;; but use normal mode for navigation
+  (evil-set-initial-state 'eca-chat-mode 'normal)
+
+  ;; Chat buffer bindings
+  (map! :map eca-chat-mode-map
+        ;; Normal mode - navigation and actions
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "gr" #'eca-chat-reset
+        :n "gc" #'eca-chat-clear
+        :n [return] #'eca-chat--key-pressed-return
+        :n [tab] #'eca-chat--key-pressed-tab
+
+        ;; Chat navigation
+        :n "[[" #'eca-chat-go-to-prev-user-message
+        :n "]]" #'eca-chat-go-to-next-user-message
+        :n "[e" #'eca-chat-go-to-prev-expandable-block
+        :n "]e" #'eca-chat-go-to-next-expandable-block
+        :n "za" #'eca-chat-toggle-expandable-block
+
+        ;; Tool call approval (crucial for agentic workflows)
+        :n "ga" #'eca-chat-tool-call-accept-all
+        :n "gA" #'eca-chat-tool-call-accept-next
+        :n "gs" #'eca-chat-tool-call-accept-all-and-remember
+        :n "gx" #'eca-chat-tool-call-reject-next
+
+        ;; Chat management
+        :n "gn" #'eca-chat-new
+        :n "gf" #'eca-chat-select
+        :n "gm" #'eca-chat-select-model
+        :n "gb" #'eca-chat-select-behavior
+        :n "gB" #'eca-chat-cycle-behavior
+        :n "gR" #'eca-chat-rename
+        :n "gh" #'eca-chat-timeline
+        :n "g," #'eca-mcp-details
+        :n "g." #'eca-transient-menu
+
+        ;; Prompt operations
+        :n "gp" #'eca-chat-repeat-prompt
+        :n "gd" #'eca-chat-clear-prompt
+        :n "gt" #'eca-chat-talk
+
+        ;; Insert mode - for typing in prompts
+        :i "S-<return>" #'eca-chat--key-pressed-newline
+        :i "C-<up>" #'eca-chat--key-pressed-previous-prompt-history
+        :i "C-<down>" #'eca-chat--key-pressed-next-prompt-history
+        :i [return] #'eca-chat--key-pressed-return
+        :i [tab] #'eca-chat--key-pressed-tab
+
+        ;; Visual mode - for selecting text
+        :v "y" #'evil-yank
+
+        ;; Leader key bindings for common operations
+        :localleader
+        :n "a" #'eca-chat-tool-call-accept-all
+        :n "A" #'eca-chat-tool-call-accept-next
+        :n "s" #'eca-chat-tool-call-accept-all-and-remember
+        :n "r" #'eca-chat-tool-call-reject-next
+        :n "n" #'eca-chat-new
+        :n "f" #'eca-chat-select
+        :n "m" #'eca-chat-select-model
+        :n "b" #'eca-chat-select-behavior
+        :n "B" #'eca-chat-cycle-behavior
+        :n "R" #'eca-chat-rename
+        :n "c" #'eca-chat-clear
+        :n "k" #'eca-chat-reset
+        :n "t" #'eca-chat-talk
+        :n "h" #'eca-chat-timeline
+        :n "," #'eca-mcp-details
+        :n "." #'eca-transient-menu))
+
+;; MCP details buffer bindings
+(after! eca-mcp
+  (evil-set-initial-state 'eca-mcp-details-mode 'normal)
+
+  (map! :map eca-mcp-details-mode-map
+        :n "j" #'evil-next-line
+        :n "k" #'evil-previous-line
+        :n "gg" #'beginning-of-buffer
+        :n "G" #'end-of-buffer
+        :n "q" #'bury-buffer
+        :n "gr" #'eca-mcp-details
+        :n [return] #'push-button
+        :n [tab] #'forward-button
+        :n [backtab] #'backward-button
+        :n "g," #'eca
+        :n "g." #'eca-transient-menu))
+#+end_src
+
+** Agent Shell
+#+begin_src elisp
+(use-package! agent-shell
+  :config
+  ;; Evil state-specific RET behavior: insert mode = newline, normal mode = send
+  (evil-define-key 'insert agent-shell-mode-map (kbd "RET") #'newline)
+  (evil-define-key 'normal agent-shell-mode-map (kbd "RET") #'comint-send-input)
+
+  ;; MCP server registrations
+  (setq agent-shell-mcp-servers
+        '(((name . "atlassian")
+           (type . "http")
+           (headers . [])
+           (url . "https://mcp.atlassian.com/v1/sse"))))
+
+  ;; Configure *agent-shell-diff* buffers to start in Emacs state
+  (add-hook 'diff-mode-hook
+	    (lambda ()
+	      (when (string-match-p "\\*agent-shell-diff\\*" (buffer-name))
+		(evil-emacs-state)))))
+#+end_src

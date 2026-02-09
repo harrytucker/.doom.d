@@ -1,0 +1,67 @@
+#+title: UI Configuration
+
+* Visuals
+** Theme & Font
+Dracula is my theme of choice, and JetBrains Mono my favourite font. By default,
+Treemacs uses a colour scheme based on the Atom text editor, so I set this to
+=doom-colors= match the rest of the editor.
+#+begin_src elisp
+;; Set themes for Doom and Treemacs, and select the JetBrains Mono font
+(setq doom-theme 'doom-dracula
+      doom-themes-treemacs-theme "doom-colors"
+      doom-font (font-spec
+                 :family "JetBrainsMono Nerd Font"
+                 :size 14))
+#+end_src
+** Splash Image
+#+begin_src elisp
+(defun random-element-of-list (items)
+  "Return a random element from a given list."
+  (let* ((size (length items))
+         (index (random size)))
+    (nth index items)))
+
+(defun splash-images ()
+  "Return a list of available splash images."
+  (let*
+      ((splash-directory (concat doom-user-dir "images/")))
+    (directory-files splash-directory 'full (rx ".png" eos))))
+
+;; Sets the splash image to a random PNG file from the splash image directory
+(setq fancy-splash-image (random-element-of-list (splash-images)))
+#+end_src
+** Modeline
+This provides no functionality whatsoever, but I like having an icon that
+displays the current major-mode in use.
+#+begin_src elisp
+;; Enables modeline icons with colour support
+(setq doom-modeline-major-mode-icon t
+      doom-modeline-major-mode-color-icon t)
+#+end_src
+** Editor
+Normally this is the first thing I set up for any given text editor. Pairing
+delimiters by colour makes a lot of sense, and I find it makes code easier to
+parse, so I've set this up globally across all programming modes.
+#+begin_src elisp
+;; Highlights scope with various colours, replaces rainbow-delimiters-mode
+(add-hook! 'prog-mode-hook #'prism-mode)
+(add-hook! '(python-mode-hook
+             python-ts-mode-hook
+             yaml-mode-hook
+             yaml-ts-mode-hook)
+           #'prism-whitespace-mode)
+
+;; Lower the delay for displaying potential key chords
+(setq which-key-idle-delay 0.2)
+
+;; Fancy, modern looking flycheck displays
+;; (use-package! flyover
+;;   :config
+;;   (add-hook 'flycheck-mode-hook #'flyover-mode))
+
+;; Enable precision scrolling globally
+(pixel-scroll-precision-mode)
+
+;; Automatically select help windows when they open
+(setq help-window-select t)
+#+end_src
